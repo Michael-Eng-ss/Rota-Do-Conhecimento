@@ -5,6 +5,7 @@ import DialogBox from './DialogBox';
 import GameButtons from './GameButtons';
 import MenuButton from './MenuButton';
 import SkipButton from './SkipButton';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 // Import assets
 import backgroundImage from '@/assets/backgrounds/casa-tropical.jpg';
@@ -14,6 +15,10 @@ import paiImage from '@/assets/characters/pai-clara.png';
 import claraAnimadaImage from '@/assets/characters/clara-animada.png';
 import claraDuvidaImage from '@/assets/characters/clara-duvida.png';
 import claraEspantoImage from '@/assets/characters/clara-espanto.png';
+
+interface VisualNovelGameProps {
+  onBack?: () => void;
+}
 
 const scenes: Scene[] = [
   {
@@ -68,11 +73,13 @@ const scenes: Scene[] = [
   },
 ];
 
-const VisualNovelGame = () => {
+const VisualNovelGame = ({ onBack }: VisualNovelGameProps) => {
   const [currentSceneIndex, setCurrentSceneIndex] = useState(0);
   const [prevCharacterIds, setPrevCharacterIds] = useState<string[]>([]);
 
   const currentScene = scenes[currentSceneIndex];
+  const isFirstScene = currentSceneIndex === 0;
+  const isLastScene = currentSceneIndex === scenes.length - 1;
 
   const handleAdvance = useCallback(() => {
     if (currentSceneIndex < scenes.length - 1) {
@@ -81,8 +88,25 @@ const VisualNovelGame = () => {
     }
   }, [currentSceneIndex, currentScene.characters]);
 
+  const handlePrevious = useCallback(() => {
+    if (currentSceneIndex > 0) {
+      setPrevCharacterIds(currentScene.characters.map(c => c.id));
+      setCurrentSceneIndex(prev => prev - 1);
+    }
+  }, [currentSceneIndex, currentScene.characters]);
+
   const handleSkip = useCallback(() => {
     // Skip to end or handle skip logic
+    setCurrentSceneIndex(scenes.length - 1);
+  }, []);
+
+  const handleGoToFirst = useCallback(() => {
+    setPrevCharacterIds([]);
+    setCurrentSceneIndex(0);
+  }, []);
+
+  const handleGoToLast = useCallback(() => {
+    setPrevCharacterIds([]);
     setCurrentSceneIndex(scenes.length - 1);
   }, []);
 
@@ -152,13 +176,42 @@ const VisualNovelGame = () => {
 
       {/* Top UI */}
       <div className="absolute top-4 right-4 flex gap-3 z-20">
+        {onBack && (
+          <button
+            onClick={onBack}
+            className="vn-skip-button"
+          >
+            Sair
+          </button>
+        )}
         <SkipButton onClick={handleSkip} />
         <MenuButton />
       </div>
 
       {/* Scene indicator (debug) */}
       <div className="absolute top-4 left-4 text-sm text-foreground/50 z-20">
-        Cutscene {currentScene.id}
+        Cutscene {currentScene.id} / {scenes.length}
+      </div>
+
+      {/* Navigation Arrows */}
+      <div className="absolute bottom-1/2 left-4 z-30">
+        <button
+          onClick={isFirstScene ? handleGoToLast : handlePrevious}
+          className="p-2 rounded-full bg-white/20 backdrop-blur-sm hover:bg-white/40 transition-all duration-200 hover:scale-110"
+          title={isFirstScene ? "Ir para última cena" : "Cena anterior"}
+        >
+          <ChevronLeft className="w-8 h-8 text-white" />
+        </button>
+      </div>
+      
+      <div className="absolute bottom-1/2 right-4 z-30">
+        <button
+          onClick={isLastScene ? handleGoToFirst : handleAdvance}
+          className="p-2 rounded-full bg-white/20 backdrop-blur-sm hover:bg-white/40 transition-all duration-200 hover:scale-110"
+          title={isLastScene ? "Ir para primeira cena" : "Próxima cena"}
+        >
+          <ChevronRight className="w-8 h-8 text-white" />
+        </button>
       </div>
 
       {/* Characters */}

@@ -1,7 +1,7 @@
-import VisualNovelGame from '@/components/VisualNovel/VisualNovelGame';
+import GameManager from '@/components/Game/GameManager';
 
 const Index = () => {
-  return <VisualNovelGame />;
+  return <GameManager />;
 };
 
 export default Index;
