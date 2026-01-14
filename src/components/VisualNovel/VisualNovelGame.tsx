@@ -7,8 +7,12 @@ import MenuButton from './MenuButton';
 import SkipButton from './SkipButton';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
-// Import assets
+// Import assets - backgrounds
 import backgroundImage from '@/assets/backgrounds/casa-tropical.jpg';
+import universidadeImage from '@/assets/backgrounds/universidade.jpg';
+import patioEscolaImage from '@/assets/backgrounds/patio-escola.png';
+
+// Import assets - characters
 import claraImage from '@/assets/characters/clara.png';
 import maeImage from '@/assets/characters/mae-clara.png';
 import paiImage from '@/assets/characters/pai-clara.png';
@@ -21,6 +25,7 @@ interface VisualNovelGameProps {
 }
 
 const scenes: Scene[] = [
+  // Cena 1 - Intro com botões
   {
     id: 1,
     background: backgroundImage,
@@ -31,6 +36,7 @@ const scenes: Scene[] = [
       skip: 'Pular',
     },
   },
+  // Cena 2 - Clara se apresenta
   {
     id: 2,
     background: backgroundImage,
@@ -40,6 +46,7 @@ const scenes: Scene[] = [
     speaker: 'Clara',
     dialogue: 'Olá, me chamo Clara, venho do interior, estudei por muitos anos e agora finalmente vou poder prestar o vestibular de medicina. Estou muito animada.',
   },
+  // Cena 3 - Mãe fala com Clara
   {
     id: 3,
     background: backgroundImage,
@@ -50,6 +57,7 @@ const scenes: Scene[] = [
     speaker: 'Mãe Da Clara',
     dialogue: 'Parabéns, minha filha, espero que tenha boa sorte no seu futuro e possa realizar todos os seus desejos. Que tenha muita sorte, seu futuro escolar vai ser ótimo.',
   },
+  // Cena 4 - Pai fala com Clara
   {
     id: 4,
     background: backgroundImage,
@@ -60,6 +68,7 @@ const scenes: Scene[] = [
     speaker: 'Pai Da Clara',
     dialogue: 'Parabéns, minha filha, espero que tenha boa sorte no seu futuro e possa realizar todos os seus desejos. Que tenha muita sorte, seu futuro escolar vai ser ótimo.',
   },
+  // Cena 5 - Família reunida
   {
     id: 5,
     background: backgroundImage,
@@ -70,6 +79,48 @@ const scenes: Scene[] = [
     ],
     speaker: 'Clara',
     dialogue: 'Irei dar meu melhor!',
+  },
+  // Cena 6 - Clara na universidade (animada)
+  {
+    id: 6,
+    background: universidadeImage,
+    characters: [
+      { id: 'clara-animada', name: 'Clara', image: claraAnimadaImage, position: 'center' },
+    ],
+    speaker: 'Clara',
+    dialogue: 'Hoje é o dia do meu vestibular, finalmente poderei mostrar o tanto que estudei esses dias.',
+  },
+  // Cena 7 - Clara no pátio da escola (confusa com dúvida)
+  {
+    id: 7,
+    background: patioEscolaImage,
+    characters: [
+      { id: 'clara-duvida', name: 'Clara', image: claraDuvidaImage, position: 'center' },
+    ],
+    speaker: 'Clara',
+    dialogue: 'Espera, por que está com esse clima tão estranho aqui dentro?',
+  },
+  // Cena 8 - Lívia aparece (Clara com dúvida)
+  {
+    id: 8,
+    background: patioEscolaImage,
+    characters: [
+      { id: 'livia', name: 'Lívia', image: claraImage, position: 'left' }, // Placeholder - substituir por sprite da Lívia
+      { id: 'clara-duvida', name: 'Clara', image: claraDuvidaImage, position: 'right' },
+    ],
+    speaker: 'Lívia',
+    dialogue: 'CLARA! AIII QUE BOM TE ENCONTRAR!!!',
+  },
+  // Cena 9 - Clara pergunta para Lívia (espanto)
+  {
+    id: 9,
+    background: patioEscolaImage,
+    characters: [
+      { id: 'livia', name: 'Lívia', image: claraImage, position: 'left' }, // Placeholder - substituir por sprite da Lívia
+      { id: 'clara-espanto', name: 'Clara', image: claraEspantoImage, position: 'right' },
+    ],
+    speaker: 'Clara',
+    dialogue: 'Lívia, o que houve com a escola?',
   },
 ];
 
