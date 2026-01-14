@@ -4,6 +4,7 @@ import UserMenuScreen from '@/components/Screens/UserMenuScreen';
 import RegisterScreen from '@/components/Screens/RegisterScreen';
 import ResetPasswordScreen from '@/components/Screens/ResetPasswordScreen';
 import DifficultyScreen from '@/components/Screens/DifficultyScreen';
+import RankingScreen from '@/components/Screens/RankingScreen';
 import VisualNovelGame from '@/components/VisualNovel/VisualNovelGame';
 
 type GameScreen = 
@@ -12,6 +13,7 @@ type GameScreen =
   | 'register' 
   | 'resetPassword' 
   | 'difficulty' 
+  | 'ranking'
   | 'game';
 
 const GameManager = () => {
@@ -38,9 +40,16 @@ const GameManager = () => {
         return (
           <UserMenuScreen
             onStart={() => setCurrentScreen('difficulty')}
-            onRanking={() => console.log('Ranking - a ser implementado')}
+            onRanking={() => setCurrentScreen('ranking')}
             onProfile={() => console.log('Perfil - a ser implementado')}
             onBack={() => setCurrentScreen('login')}
+          />
+        );
+      
+      case 'ranking':
+        return (
+          <RankingScreen
+            onBack={() => setCurrentScreen('menu')}
           />
         );
       
