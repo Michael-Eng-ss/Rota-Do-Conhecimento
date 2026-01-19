@@ -31,28 +31,28 @@ const QuestionCard = ({
   };
 
   return (
-    <div className="absolute inset-0 flex flex-col items-center justify-center z-30 pointer-events-none">
+    <div className="absolute inset-0 flex flex-col items-center justify-center z-30 pointer-events-none px-4">
       {/* Question Text Box */}
-      <div className="bg-white/95 backdrop-blur-sm rounded-2xl p-6 max-w-2xl mx-4 mb-6 shadow-xl border-2 border-blue-300 pointer-events-auto">
-        <div className="text-center text-gray-800 text-lg leading-relaxed font-medium">
+      <div className="bg-white/95 backdrop-blur-sm rounded-2xl p-6 md:p-8 max-w-3xl w-full mx-auto mb-4 shadow-2xl border-4 border-blue-400 pointer-events-auto">
+        <div className="text-center text-gray-800 text-base md:text-xl leading-relaxed font-medium">
           {questionText}
         </div>
       </div>
 
       {/* Options Container */}
-      <div className="bg-white/95 backdrop-blur-sm rounded-2xl p-4 max-w-2xl mx-4 shadow-xl border-2 border-blue-300 pointer-events-auto">
-        <div className="flex flex-col gap-2">
+      <div className="bg-white/95 backdrop-blur-sm rounded-2xl p-4 md:p-6 max-w-3xl w-full mx-auto shadow-2xl border-4 border-blue-400 pointer-events-auto">
+        <div className="flex flex-col gap-3">
           {options.map((option, index) => (
             <button
               key={index}
               onClick={() => setSelectedOption(index)}
-              className={`flex items-center gap-3 p-3 rounded-xl text-left transition-all duration-200 ${
+              className={`flex items-center gap-3 p-4 rounded-xl text-left transition-all duration-200 text-base md:text-lg ${
                 selectedOption === index
-                  ? 'bg-blue-500 text-white'
+                  ? 'bg-blue-500 text-white shadow-lg scale-[1.02]'
                   : 'bg-gray-100 hover:bg-gray-200 text-gray-800'
               }`}
             >
-              <span className="font-bold">{option.letter})</span>
+              <span className="font-bold text-lg">{option.letter})</span>
               <span className="flex-1">{option.text}</span>
             </button>
           ))}
@@ -63,13 +63,13 @@ const QuestionCard = ({
       <button
         onClick={handleConfirm}
         disabled={selectedOption === null}
-        className={`absolute right-4 bottom-32 md:bottom-40 p-4 rounded-full transition-all duration-300 shadow-lg pointer-events-auto ${
+        className={`mt-4 p-4 rounded-full transition-all duration-300 shadow-xl pointer-events-auto ${
           selectedOption !== null
             ? 'bg-green-500 hover:bg-green-600 text-white scale-100 hover:scale-110'
             : 'bg-gray-400 text-gray-200 cursor-not-allowed scale-90'
         }`}
       >
-        <CheckCircle className="w-10 h-10" />
+        <CheckCircle className="w-12 h-12" />
       </button>
     </div>
   );
