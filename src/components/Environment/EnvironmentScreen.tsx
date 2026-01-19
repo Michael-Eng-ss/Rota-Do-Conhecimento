@@ -8,7 +8,7 @@ import DialogBox from '@/components/VisualNovel/DialogBox';
 import CharacterSprite from '@/components/VisualNovel/CharacterSprite';
 
 // Import assets
-import patioEscolaImage from '@/assets/backgrounds/patio-escola.png';
+import auditorioImage from '@/assets/backgrounds/auditorio.png';
 import claraDuvidaImage from '@/assets/characters/clara-duvida.png';
 
 interface EnvironmentScreenProps {
@@ -35,7 +35,7 @@ const EnvironmentScreen = ({ environmentId, onBackToPatio, onProfile }: Environm
       {/* Background */}
       <div
         className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-        style={{ backgroundImage: `url(${patioEscolaImage})` }}
+        style={{ backgroundImage: `url(${auditorioImage})` }}
       />
 
       {/* Top UI - Esquerda: Perfil + Barra de Vida */}
