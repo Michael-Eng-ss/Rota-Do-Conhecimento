@@ -19,7 +19,11 @@ import paiImage from '@/assets/characters/pai-clara.png';
 import claraAnimadaImage from '@/assets/characters/clara-animada.png';
 import claraDuvidaImage from '@/assets/characters/clara-duvida.png';
 import claraEspantoImage from '@/assets/characters/clara-espanto.png';
+import claraEspanto2Image from '@/assets/characters/clara-espanto-2.png';
+import claraCelebrandoImage from '@/assets/characters/clara-celebrando.png';
+import claraGritoImage from '@/assets/characters/clara-grito.png';
 import liviaImage from '@/assets/characters/livia.png';
+import liviaTristeImage from '@/assets/characters/livia-triste.png';
 
 interface VisualNovelGameProps {
   onBack?: () => void;
@@ -122,6 +126,38 @@ const scenes: Scene[] = [
     ],
     speaker: 'Clara',
     dialogue: 'Lívia, o que houve com a escola?',
+  },
+  // Cena 10 - Lívia explica sobre a ansiedade
+  {
+    id: 10,
+    background: patioEscolaImage,
+    characters: [
+      { id: 'livia-triste', name: 'Lívia', image: liviaTristeImage, position: 'left' },
+      { id: 'clara-duvida', name: 'Clara', image: claraDuvidaImage, position: 'right' },
+    ],
+    speaker: 'Lívia',
+    dialogue: 'A escola foi tomada pela ansiedade do fracasso, os professores viraram monstros...',
+  },
+  // Cena 11 - Lívia avisa Clara
+  {
+    id: 11,
+    background: patioEscolaImage,
+    characters: [
+      { id: 'livia-triste', name: 'Lívia', image: liviaTristeImage, position: 'left' },
+      { id: 'clara-espanto-2', name: 'Clara', image: claraEspanto2Image, position: 'right' },
+    ],
+    speaker: 'Lívia',
+    dialogue: 'Os alunos que erram as questões que eles fazem acabam desaparecendo, estou com medo, Clara. Tome cuidado na sua jornada.',
+  },
+  // Cena 12 - Clara determinada
+  {
+    id: 12,
+    background: patioEscolaImage,
+    characters: [
+      { id: 'clara-grito', name: 'Clara', image: claraGritoImage, position: 'center' },
+    ],
+    speaker: 'Clara',
+    dialogue: 'Não vou deixar isso acontecer! Vou enfrentar esses monstros e salvar a escola!',
   },
 ];
 
