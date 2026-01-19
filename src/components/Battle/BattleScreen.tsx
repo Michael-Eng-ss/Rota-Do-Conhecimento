@@ -22,6 +22,10 @@ import profCienciasNormalImage from '@/assets/characters/prof-ciencias-normal.pn
 import profCienciasDestemidaImage from '@/assets/characters/prof-ciencias-destemida.png';
 import profCienciasGargalhandoImage from '@/assets/characters/prof-ciencias-gargalhando.png';
 import profCienciasTristeImage from '@/assets/characters/prof-ciencias-triste.png';
+import profCienciasPurificadaImage from '@/assets/characters/prof-ciencias-purificada.png';
+
+// Import Effects
+import efeitoVerdeImage from '@/assets/effects/efeito-verde.png';
 
 type BattlePhase = 'intro' | 'battle-start' | 'question' | 'victory' | 'defeat';
 
@@ -95,15 +99,19 @@ const BattleScreen = ({ environmentId, onBackToPatio, onProfile, onVictory }: Ba
 
   const getClaraSprite = () => {
     if (phase === 'victory') return claraFelizCienciaImage;
+    if (phase === 'battle-start') return claraFelizCienciaImage;
     return claraLaboratorioImage;
   };
 
   const getBossSprite = () => {
-    if (phase === 'victory' || phase === 'defeat') return profCienciasTristeImage;
+    if (phase === 'victory') return profCienciasPurificadaImage;
+    if (phase === 'defeat') return profCienciasTristeImage;
     if (bossHealth < 30) return profCienciasDestemidaImage;
     if (phase === 'intro') return profCienciasNormalImage;
     return profCienciasGargalhandoImage;
   };
+
+  const showGreenEffect = phase === 'victory';
 
   const getDialogue = () => {
     switch (phase) {
@@ -201,8 +209,8 @@ const BattleScreen = ({ environmentId, onBackToPatio, onProfile, onVictory }: Ba
         <BossHealthBar health={bossHealth} bossName="Professora" />
       </div>
 
-      {/* Bottom Left UI - Sound + Menu (moved down) */}
-      <div className="absolute bottom-40 md:bottom-48 left-4 flex flex-col gap-3 z-20">
+      {/* Left UI - Profile + Sound + Menu (stacked below profile) */}
+      <div className="absolute top-20 left-4 flex flex-col gap-2 z-20">
         <SoundButton isMuted={settings.isMuted} onToggle={toggleMute} />
         <EnvironmentMenu onBackToPatio={onBackToPatio} onHelp={handleHelp} />
       </div>
@@ -215,7 +223,7 @@ const BattleScreen = ({ environmentId, onBackToPatio, onProfile, onVictory }: Ba
       {/* Characters */}
       <div className="absolute inset-0 z-10 pointer-events-none">
         {/* Clara - Left */}
-        <div className="absolute bottom-20 left-4 md:left-12 w-48 md:w-64">
+        <div className="absolute bottom-20 left-4 md:left-12 w-56 md:w-72">
           <img 
             src={getClaraSprite()} 
             alt="Clara" 
@@ -224,11 +232,19 @@ const BattleScreen = ({ environmentId, onBackToPatio, onProfile, onVictory }: Ba
         </div>
         
         {/* Boss - Right */}
-        <div className="absolute bottom-20 right-4 md:right-12 w-48 md:w-64">
+        <div className="absolute bottom-20 right-4 md:right-12 w-56 md:w-72 relative">
+          {/* Green Effect behind boss when purified */}
+          {showGreenEffect && (
+            <img 
+              src={efeitoVerdeImage} 
+              alt="Efeito Verde" 
+              className="absolute inset-0 w-full h-full object-contain -z-10 opacity-80 scale-125 animate-pulse"
+            />
+          )}
           <img 
             src={getBossSprite()} 
             alt="Professora" 
-            className="w-full h-auto object-contain drop-shadow-lg"
+            className="w-full h-auto object-contain drop-shadow-lg relative z-10"
           />
         </div>
       </div>
