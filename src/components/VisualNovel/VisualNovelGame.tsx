@@ -27,6 +27,7 @@ import liviaTristeImage from '@/assets/characters/livia-triste.png';
 
 interface VisualNovelGameProps {
   onBack?: () => void;
+  onCutsceneEnd?: () => void;
 }
 
 const scenes: Scene[] = [
@@ -161,7 +162,7 @@ const scenes: Scene[] = [
   },
 ];
 
-const VisualNovelGame = ({ onBack }: VisualNovelGameProps) => {
+const VisualNovelGame = ({ onBack, onCutsceneEnd }: VisualNovelGameProps) => {
   const [currentSceneIndex, setCurrentSceneIndex] = useState(0);
   const [prevCharacterIds, setPrevCharacterIds] = useState<string[]>([]);
 
@@ -173,8 +174,11 @@ const VisualNovelGame = ({ onBack }: VisualNovelGameProps) => {
     if (currentSceneIndex < scenes.length - 1) {
       setPrevCharacterIds(currentScene.characters.map(c => c.id));
       setCurrentSceneIndex(prev => prev + 1);
+    } else if (isLastScene && onCutsceneEnd) {
+      // Na última cena (12), avança para o ambiente
+      onCutsceneEnd();
     }
-  }, [currentSceneIndex, currentScene.characters]);
+  }, [currentSceneIndex, currentScene.characters, isLastScene, onCutsceneEnd]);
 
   const handlePrevious = useCallback(() => {
     if (currentSceneIndex > 0) {
