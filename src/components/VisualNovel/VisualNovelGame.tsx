@@ -19,6 +19,7 @@ import paiImage from '@/assets/characters/pai-clara.png';
 import claraAnimadaImage from '@/assets/characters/clara-animada.png';
 import claraDuvidaImage from '@/assets/characters/clara-duvida.png';
 import claraEspantoImage from '@/assets/characters/clara-espanto.png';
+import liviaImage from '@/assets/characters/livia.png';
 
 interface VisualNovelGameProps {
   onBack?: () => void;
@@ -105,7 +106,7 @@ const scenes: Scene[] = [
     id: 8,
     background: patioEscolaImage,
     characters: [
-      { id: 'livia', name: 'Lívia', image: claraImage, position: 'left' }, // Placeholder - substituir por sprite da Lívia
+      { id: 'livia', name: 'Lívia', image: liviaImage, position: 'left' },
       { id: 'clara-duvida', name: 'Clara', image: claraDuvidaImage, position: 'right' },
     ],
     speaker: 'Lívia',
@@ -116,7 +117,7 @@ const scenes: Scene[] = [
     id: 9,
     background: patioEscolaImage,
     characters: [
-      { id: 'livia', name: 'Lívia', image: claraImage, position: 'left' }, // Placeholder - substituir por sprite da Lívia
+      { id: 'livia', name: 'Lívia', image: liviaImage, position: 'left' },
       { id: 'clara-espanto', name: 'Clara', image: claraEspantoImage, position: 'right' },
     ],
     speaker: 'Clara',
