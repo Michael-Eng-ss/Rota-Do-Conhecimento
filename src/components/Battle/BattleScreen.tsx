@@ -100,6 +100,7 @@ const BattleScreen = ({ environmentId, onBackToPatio, onProfile, onVictory }: Ba
   const getClaraSprite = () => {
     if (phase === 'victory') return claraFelizCienciaImage;
     if (phase === 'battle-start') return claraFelizCienciaImage;
+    if (phase === 'question') return claraFelizCienciaImage;
     return claraLaboratorioImage;
   };
 
@@ -107,11 +108,13 @@ const BattleScreen = ({ environmentId, onBackToPatio, onProfile, onVictory }: Ba
     if (phase === 'victory') return profCienciasPurificadaImage;
     if (phase === 'defeat') return profCienciasTristeImage;
     if (bossHealth < 30) return profCienciasDestemidaImage;
-    if (phase === 'intro') return profCienciasNormalImage;
+    // Primeira aparição: professora purificada com efeito verde
+    if (phase === 'intro') return profCienciasPurificadaImage;
     return profCienciasGargalhandoImage;
   };
 
-  const showGreenEffect = phase === 'victory';
+  // Efeito verde na primeira aparição (intro) e na vitória
+  const showGreenEffect = phase === 'intro' || phase === 'victory';
 
   const getDialogue = () => {
     switch (phase) {
@@ -198,10 +201,17 @@ const BattleScreen = ({ environmentId, onBackToPatio, onProfile, onVictory }: Ba
         style={{ backgroundImage: `url(${laboratorioImage})` }}
       />
 
-      {/* Top UI - Left: Profile + Health */}
-      <div className="absolute top-4 left-4 flex items-center gap-4 z-20">
-        <ProfileAvatar onProfileClick={onProfile} />
-        <HealthBar health={playerHealth} />
+      {/* Top UI - Left: Profile + Health + Sound + Menu */}
+      <div className="absolute top-4 left-4 z-20">
+        <div className="flex items-center gap-4">
+          <ProfileAvatar onProfileClick={onProfile} />
+          <HealthBar health={playerHealth} />
+        </div>
+        {/* Sound + Menu abaixo do perfil */}
+        <div className="flex gap-2 mt-2">
+          <SoundButton isMuted={settings.isMuted} onToggle={toggleMute} />
+          <EnvironmentMenu onBackToPatio={onBackToPatio} onHelp={handleHelp} />
+        </div>
       </div>
 
       {/* Top UI - Right: Boss Health */}
@@ -209,21 +219,15 @@ const BattleScreen = ({ environmentId, onBackToPatio, onProfile, onVictory }: Ba
         <BossHealthBar health={bossHealth} bossName="Professora" />
       </div>
 
-      {/* Left UI - Profile + Sound + Menu (stacked below profile) */}
-      <div className="absolute top-20 left-4 flex flex-col gap-2 z-20">
-        <SoundButton isMuted={settings.isMuted} onToggle={toggleMute} />
-        <EnvironmentMenu onBackToPatio={onBackToPatio} onHelp={handleHelp} />
-      </div>
-
       {/* Environment Indicator */}
-      <div className="absolute top-16 left-1/2 -translate-x-1/2 bg-black/50 text-white px-4 py-2 rounded-full text-sm z-20">
+      <div className="absolute top-20 left-1/2 -translate-x-1/2 bg-black/50 text-white px-4 py-2 rounded-full text-sm z-20">
         <span className="font-bold">Ciências</span> - Ambiente {environmentId} / 4
       </div>
 
       {/* Characters */}
       <div className="absolute inset-0 z-10 pointer-events-none">
         {/* Clara - Left */}
-        <div className="absolute bottom-20 left-4 md:left-12 w-56 md:w-72">
+        <div className="absolute bottom-24 left-4 md:left-16 w-64 md:w-80">
           <img 
             src={getClaraSprite()} 
             alt="Clara" 
@@ -232,13 +236,14 @@ const BattleScreen = ({ environmentId, onBackToPatio, onProfile, onVictory }: Ba
         </div>
         
         {/* Boss - Right */}
-        <div className="absolute bottom-20 right-4 md:right-12 w-56 md:w-72 relative">
-          {/* Green Effect behind boss when purified */}
+        <div className="absolute bottom-24 right-4 md:right-16 w-64 md:w-80 flex items-center justify-center">
+          {/* Green Effect behind boss */}
           {showGreenEffect && (
             <img 
               src={efeitoVerdeImage} 
               alt="Efeito Verde" 
-              className="absolute inset-0 w-full h-full object-contain -z-10 opacity-80 scale-125 animate-pulse"
+              className="absolute w-[120%] h-[120%] object-contain opacity-70 animate-pulse"
+              style={{ zIndex: -1 }}
             />
           )}
           <img 
