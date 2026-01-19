@@ -7,6 +7,7 @@ import DifficultyScreen from '@/components/Screens/DifficultyScreen';
 import RankingScreen from '@/components/Screens/RankingScreen';
 import VisualNovelGame from '@/components/VisualNovel/VisualNovelGame';
 import EnvironmentScreen from '@/components/Environment/EnvironmentScreen';
+import EnvironmentSelectionScreen from '@/components/Environment/EnvironmentSelectionScreen';
 
 type GameScreen = 
   | 'login' 
@@ -16,12 +17,14 @@ type GameScreen =
   | 'difficulty' 
   | 'ranking'
   | 'cutscene'
+  | 'environmentSelection'
   | 'environment';
 
 const GameManager = () => {
   const [currentScreen, setCurrentScreen] = useState<GameScreen>('login');
   const [selectedDifficulty, setSelectedDifficulty] = useState<'easy' | 'medium' | 'hard' | null>(null);
   const [currentEnvironment, setCurrentEnvironment] = useState<1 | 2 | 3 | 4>(1);
+  const [completedEnvironments, setCompletedEnvironments] = useState<number[]>([]);
 
   const handleSelectDifficulty = (difficulty: 'easy' | 'medium' | 'hard') => {
     setSelectedDifficulty(difficulty);
@@ -29,8 +32,12 @@ const GameManager = () => {
   };
 
   const handleCutsceneEnd = () => {
-    // Após a cutscene 12, vai para o ambiente 1
-    setCurrentEnvironment(1);
+    // Após a cutscene 12, vai para a tela de seleção de ambiente
+    setCurrentScreen('environmentSelection');
+  };
+
+  const handleSelectEnvironment = (envId: 1 | 2 | 3 | 4) => {
+    setCurrentEnvironment(envId);
     setCurrentScreen('environment');
   };
 
@@ -98,11 +105,20 @@ const GameManager = () => {
           />
         );
       
+      case 'environmentSelection':
+        return (
+          <EnvironmentSelectionScreen
+            onSelectEnvironment={handleSelectEnvironment}
+            onBack={() => setCurrentScreen('menu')}
+            completedEnvironments={completedEnvironments}
+          />
+        );
+      
       case 'environment':
         return (
           <EnvironmentScreen
             environmentId={currentEnvironment}
-            onBackToPatio={() => setCurrentScreen('cutscene')}
+            onBackToPatio={() => setCurrentScreen('environmentSelection')}
             onProfile={handleProfile}
           />
         );
