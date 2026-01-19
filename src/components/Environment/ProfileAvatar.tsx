@@ -8,8 +8,9 @@ const ProfileAvatar = ({ onProfileClick }: ProfileAvatarProps) => {
   return (
     <button
       onClick={onProfileClick}
-      className="w-12 h-12 rounded-full overflow-hidden border-2 border-white shadow-lg hover:scale-105 transition-transform"
+      className="w-16 h-16 rounded-full overflow-hidden border-3 border-white shadow-xl hover:scale-110 transition-transform ring-2 ring-blue-400/50"
       aria-label="Perfil"
+      title="Ver Perfil"
     >
       <img
         src={claraImage}
