@@ -1,11 +1,34 @@
-import { ArrowLeft, Trophy, Star, Target, CheckCircle, Lock } from 'lucide-react';
+import { useState } from 'react';
+import { ArrowLeft, Trophy, Star, Target, CheckCircle, Lock, Pencil, X, Check } from 'lucide-react';
+
+// Avatares disponíveis
 import claraImage from '@/assets/characters/clara.png';
+import claraAnimadaImage from '@/assets/characters/clara-animada.png';
+import claraCelebrandoImage from '@/assets/characters/clara-celebrando.png';
+import claraDuvidaImage from '@/assets/characters/clara-duvida.png';
+import claraEspantoImage from '@/assets/characters/clara-espanto.png';
+import claraMatematicaImage from '@/assets/characters/clara-matematica.png';
 
 // Backgrounds para preview dos ambientes
 import auditorioImage from '@/assets/backgrounds/auditorio.png';
 import bibliotecaImage from '@/assets/backgrounds/biblioteca.png';
 import laboratorioImage from '@/assets/backgrounds/laboratorio.png';
 import salaMatematicaImage from '@/assets/backgrounds/sala-matematica.png';
+
+interface AvatarOption {
+  id: string;
+  image: string;
+  label: string;
+}
+
+const avatarOptions: AvatarOption[] = [
+  { id: 'clara', image: claraImage, label: 'Clara' },
+  { id: 'clara-animada', image: claraAnimadaImage, label: 'Clara Animada' },
+  { id: 'clara-celebrando', image: claraCelebrandoImage, label: 'Clara Celebrando' },
+  { id: 'clara-duvida', image: claraDuvidaImage, label: 'Clara Pensativa' },
+  { id: 'clara-espanto', image: claraEspantoImage, label: 'Clara Surpresa' },
+  { id: 'clara-matematica', image: claraMatematicaImage, label: 'Clara Matemática' },
+];
 
 interface EnvironmentProgress {
   id: number;
@@ -20,16 +43,40 @@ interface EnvironmentProgress {
 interface ProfileScreenProps {
   onBack: () => void;
   playerName?: string;
+  playerAvatar?: string;
   totalScore?: number;
   completedEnvironments?: number[];
+  onUpdateProfile?: (name: string, avatarId: string) => void;
 }
 
 const ProfileScreen = ({ 
   onBack, 
   playerName = "Jogador",
+  playerAvatar = "clara",
   totalScore = 0,
-  completedEnvironments = []
+  completedEnvironments = [],
+  onUpdateProfile
 }: ProfileScreenProps) => {
+  const [isEditing, setIsEditing] = useState(false);
+  const [editName, setEditName] = useState(playerName);
+  const [editAvatar, setEditAvatar] = useState(playerAvatar);
+
+  const getCurrentAvatar = (avatarId: string) => {
+    return avatarOptions.find(a => a.id === avatarId)?.image || claraImage;
+  };
+
+  const handleSave = () => {
+    if (onUpdateProfile && editName.trim()) {
+      onUpdateProfile(editName.trim(), editAvatar);
+    }
+    setIsEditing(false);
+  };
+
+  const handleCancel = () => {
+    setEditName(playerName);
+    setEditAvatar(playerAvatar);
+    setIsEditing(false);
+  };
 
   const environments: EnvironmentProgress[] = [
     {
@@ -74,7 +121,6 @@ const ProfileScreen = ({
   const overallProgress = (totalCompleted / environments.length) * 100;
   const calculatedTotalScore = environments.reduce((acc, env) => acc + env.score, 0);
 
-  // Determinar medalha baseada no progresso
   const getMedal = () => {
     if (totalCompleted === 4) return { icon: '🏆', label: 'Mestre do Conhecimento', color: 'text-yellow-400' };
     if (totalCompleted >= 3) return { icon: '🥇', label: 'Especialista', color: 'text-yellow-500' };
@@ -98,76 +144,164 @@ const ProfileScreen = ({
             <span>Voltar</span>
           </button>
           <h1 className="text-xl font-bold text-white">Meu Perfil</h1>
-          <div className="w-20" /> {/* Spacer */}
+          <div className="w-20" />
         </div>
       </div>
 
       <div className="max-w-4xl mx-auto p-4 pb-8">
         {/* Card do Perfil */}
         <div className="bg-gradient-to-br from-blue-900/50 to-purple-900/50 rounded-2xl p-6 mb-6 border border-white/10">
-          <div className="flex flex-col md:flex-row items-center gap-6">
-            {/* Avatar */}
-            <div className="relative">
-              <div className="w-28 h-28 rounded-full overflow-hidden border-4 border-blue-400 shadow-xl shadow-blue-500/30">
-                <img
-                  src={claraImage}
-                  alt="Avatar do jogador"
-                  className="w-full h-full object-cover object-top"
+          {!isEditing ? (
+            /* Modo Visualização */
+            <>
+              <div className="flex flex-col md:flex-row items-center gap-6">
+                {/* Avatar */}
+                <div className="relative">
+                  <div className="w-28 h-28 rounded-full overflow-hidden border-4 border-blue-400 shadow-xl shadow-blue-500/30">
+                    <img
+                      src={getCurrentAvatar(playerAvatar)}
+                      alt="Avatar do jogador"
+                      className="w-full h-full object-cover object-top"
+                    />
+                  </div>
+                  <div className="absolute -bottom-2 -right-2 text-3xl">
+                    {medal.icon}
+                  </div>
+                </div>
+
+                {/* Informações */}
+                <div className="flex-1 text-center md:text-left">
+                  <div className="flex items-center justify-center md:justify-start gap-2 mb-1">
+                    <h2 className="text-2xl font-bold text-white">{playerName}</h2>
+                    <button
+                      onClick={() => setIsEditing(true)}
+                      className="p-1.5 rounded-full bg-white/10 hover:bg-white/20 transition-colors"
+                      title="Editar perfil"
+                    >
+                      <Pencil className="w-4 h-4 text-white/70" />
+                    </button>
+                  </div>
+                  <p className={`${medal.color} font-medium mb-4`}>{medal.label}</p>
+                  
+                  {/* Stats rápidas */}
+                  <div className="flex flex-wrap justify-center md:justify-start gap-4">
+                    <div className="flex items-center gap-2 bg-black/30 px-4 py-2 rounded-lg">
+                      <Trophy className="w-5 h-5 text-yellow-400" />
+                      <div>
+                        <p className="text-xs text-white/60">Pontuação</p>
+                        <p className="text-lg font-bold text-white">{calculatedTotalScore || totalScore}</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2 bg-black/30 px-4 py-2 rounded-lg">
+                      <Target className="w-5 h-5 text-green-400" />
+                      <div>
+                        <p className="text-xs text-white/60">Progresso</p>
+                        <p className="text-lg font-bold text-white">{totalCompleted}/4</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2 bg-black/30 px-4 py-2 rounded-lg">
+                      <Star className="w-5 h-5 text-purple-400" />
+                      <div>
+                        <p className="text-xs text-white/60">Média</p>
+                        <p className="text-lg font-bold text-white">
+                          {totalCompleted > 0 ? Math.round(calculatedTotalScore / totalCompleted) : 0}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Barra de progresso geral */}
+              <div className="mt-6">
+                <div className="flex justify-between text-sm text-white/70 mb-2">
+                  <span>Progresso Geral</span>
+                  <span>{Math.round(overallProgress)}%</span>
+                </div>
+                <div className="h-3 bg-black/40 rounded-full overflow-hidden">
+                  <div 
+                    className="h-full bg-gradient-to-r from-blue-500 to-purple-500 transition-all duration-500"
+                    style={{ width: `${overallProgress}%` }}
+                  />
+                </div>
+              </div>
+            </>
+          ) : (
+            /* Modo Edição */
+            <div className="space-y-6">
+              <div className="flex items-center justify-between">
+                <h3 className="text-lg font-bold text-white">Editar Perfil</h3>
+                <div className="flex gap-2">
+                  <button
+                    onClick={handleCancel}
+                    className="p-2 rounded-full bg-red-500/20 hover:bg-red-500/30 transition-colors"
+                    title="Cancelar"
+                  >
+                    <X className="w-5 h-5 text-red-400" />
+                  </button>
+                  <button
+                    onClick={handleSave}
+                    className="p-2 rounded-full bg-green-500/20 hover:bg-green-500/30 transition-colors"
+                    title="Salvar"
+                  >
+                    <Check className="w-5 h-5 text-green-400" />
+                  </button>
+                </div>
+              </div>
+
+              {/* Campo Nome */}
+              <div>
+                <label className="block text-sm text-white/70 mb-2">Nome do Jogador</label>
+                <input
+                  type="text"
+                  value={editName}
+                  onChange={(e) => setEditName(e.target.value)}
+                  className="w-full px-4 py-3 bg-black/30 border border-white/20 rounded-lg text-white placeholder-white/40 focus:outline-none focus:border-blue-400 transition-colors"
+                  placeholder="Digite seu nome..."
+                  maxLength={20}
                 />
+                <p className="text-xs text-white/50 mt-1">{editName.length}/20 caracteres</p>
               </div>
-              {/* Medalha */}
-              <div className="absolute -bottom-2 -right-2 text-3xl">
-                {medal.icon}
-              </div>
-            </div>
 
-            {/* Informações */}
-            <div className="flex-1 text-center md:text-left">
-              <h2 className="text-2xl font-bold text-white mb-1">{playerName}</h2>
-              <p className={`${medal.color} font-medium mb-4`}>{medal.label}</p>
-              
-              {/* Stats rápidas */}
-              <div className="flex flex-wrap justify-center md:justify-start gap-4">
-                <div className="flex items-center gap-2 bg-black/30 px-4 py-2 rounded-lg">
-                  <Trophy className="w-5 h-5 text-yellow-400" />
-                  <div>
-                    <p className="text-xs text-white/60">Pontuação</p>
-                    <p className="text-lg font-bold text-white">{calculatedTotalScore || totalScore}</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2 bg-black/30 px-4 py-2 rounded-lg">
-                  <Target className="w-5 h-5 text-green-400" />
-                  <div>
-                    <p className="text-xs text-white/60">Progresso</p>
-                    <p className="text-lg font-bold text-white">{totalCompleted}/4</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2 bg-black/30 px-4 py-2 rounded-lg">
-                  <Star className="w-5 h-5 text-purple-400" />
-                  <div>
-                    <p className="text-xs text-white/60">Média</p>
-                    <p className="text-lg font-bold text-white">
-                      {totalCompleted > 0 ? Math.round(calculatedTotalScore / totalCompleted) : 0}
-                    </p>
-                  </div>
+              {/* Seleção de Avatar */}
+              <div>
+                <label className="block text-sm text-white/70 mb-3">Escolha seu Avatar</label>
+                <div className="grid grid-cols-3 md:grid-cols-6 gap-3">
+                  {avatarOptions.map((avatar) => (
+                    <button
+                      key={avatar.id}
+                      onClick={() => setEditAvatar(avatar.id)}
+                      className={`
+                        relative rounded-xl overflow-hidden transition-all duration-200
+                        ${editAvatar === avatar.id 
+                          ? 'ring-4 ring-blue-400 scale-105' 
+                          : 'ring-2 ring-white/20 hover:ring-white/40'
+                        }
+                      `}
+                    >
+                      <div className="aspect-square">
+                        <img
+                          src={avatar.image}
+                          alt={avatar.label}
+                          className="w-full h-full object-cover object-top"
+                        />
+                      </div>
+                      {editAvatar === avatar.id && (
+                        <div className="absolute top-1 right-1 bg-blue-500 rounded-full p-0.5">
+                          <Check className="w-3 h-3 text-white" />
+                        </div>
+                      )}
+                      <div className="absolute bottom-0 inset-x-0 bg-black/70 py-1">
+                        <p className="text-[10px] text-white text-center truncate px-1">
+                          {avatar.label}
+                        </p>
+                      </div>
+                    </button>
+                  ))}
                 </div>
               </div>
             </div>
-          </div>
-
-          {/* Barra de progresso geral */}
-          <div className="mt-6">
-            <div className="flex justify-between text-sm text-white/70 mb-2">
-              <span>Progresso Geral</span>
-              <span>{Math.round(overallProgress)}%</span>
-            </div>
-            <div className="h-3 bg-black/40 rounded-full overflow-hidden">
-              <div 
-                className="h-full bg-gradient-to-r from-blue-500 to-purple-500 transition-all duration-500"
-                style={{ width: `${overallProgress}%` }}
-              />
-            </div>
-          </div>
+          )}
         </div>
 
         {/* Título da seção */}
@@ -189,7 +323,6 @@ const ProfileScreen = ({
                 }
               `}
             >
-              {/* Background blur */}
               <div 
                 className="absolute inset-0 opacity-20 bg-cover bg-center"
                 style={{ backgroundImage: `url(${env.background})` }}
@@ -219,7 +352,6 @@ const ProfileScreen = ({
                   </div>
                 </div>
 
-                {/* Barra de progresso do ambiente */}
                 <div className="h-2 bg-black/40 rounded-full overflow-hidden">
                   <div 
                     className={`h-full transition-all duration-500 ${
@@ -231,7 +363,6 @@ const ProfileScreen = ({
                   />
                 </div>
 
-                {/* Status */}
                 <p className={`text-xs mt-2 ${env.completed ? 'text-green-400' : 'text-white/50'}`}>
                   {env.completed ? '✓ Concluído' : 'Não iniciado'}
                 </p>

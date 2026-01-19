@@ -29,7 +29,13 @@ const GameManager = () => {
   const [currentEnvironment, setCurrentEnvironment] = useState<1 | 2 | 3 | 4>(1);
   const [completedEnvironments, setCompletedEnvironments] = useState<number[]>([]);
   const [playerName, setPlayerName] = useState<string>('Jogador');
+  const [playerAvatar, setPlayerAvatar] = useState<string>('clara');
   const [totalScore, setTotalScore] = useState<number>(0);
+
+  const handleUpdateProfile = (name: string, avatarId: string) => {
+    setPlayerName(name);
+    setPlayerAvatar(avatarId);
+  };
 
   const handleSelectDifficulty = (difficulty: 'easy' | 'medium' | 'hard') => {
     setSelectedDifficulty(difficulty);
@@ -83,8 +89,10 @@ const GameManager = () => {
           <ProfileScreen
             onBack={() => setCurrentScreen(previousScreen)}
             playerName={playerName}
+            playerAvatar={playerAvatar}
             totalScore={totalScore}
             completedEnvironments={completedEnvironments}
+            onUpdateProfile={handleUpdateProfile}
           />
         );
       
