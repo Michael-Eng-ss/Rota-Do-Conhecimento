@@ -31,10 +31,19 @@ const GameManager = () => {
   const [playerName, setPlayerName] = useState<string>('Jogador');
   const [playerAvatar, setPlayerAvatar] = useState<string>('clara');
   const [totalScore, setTotalScore] = useState<number>(0);
+  const [environmentScores, setEnvironmentScores] = useState<Record<number, number>>({});
 
   const handleUpdateProfile = (name: string, avatarId: string) => {
     setPlayerName(name);
     setPlayerAvatar(avatarId);
+  };
+
+  const handleEnvironmentComplete = (envId: number, score: number) => {
+    if (!completedEnvironments.includes(envId)) {
+      setCompletedEnvironments(prev => [...prev, envId]);
+    }
+    setEnvironmentScores(prev => ({ ...prev, [envId]: score }));
+    setTotalScore(prev => prev + score);
   };
 
   const handleSelectDifficulty = (difficulty: 'easy' | 'medium' | 'hard') => {
@@ -143,6 +152,7 @@ const GameManager = () => {
             environmentId={currentEnvironment}
             onBackToPatio={() => setCurrentScreen('environmentSelection')}
             onProfile={() => handleProfile('environment')}
+            onEnvironmentComplete={handleEnvironmentComplete}
           />
         );
       
