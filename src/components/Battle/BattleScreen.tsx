@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { useSoundSystem } from '@/hooks/useSoundSystem';
 import HealthBar from '@/components/Environment/HealthBar';
 import BossHealthBar from './BossHealthBar';
@@ -9,6 +9,7 @@ import TrueFalseCard from './TrueFalseCard';
 import VictoryScreen from './VictoryScreen';
 import DefeatScreen from './DefeatScreen';
 import DialogBox from '@/components/VisualNovel/DialogBox';
+import FeedbackOverlay from './FeedbackOverlay';
 
 // Import backgrounds
 import laboratorioImage from '@/assets/backgrounds/laboratorio.png';
@@ -18,7 +19,6 @@ import claraLaboratorioImage from '@/assets/characters/clara-laboratorio.png';
 import claraFelizCienciaImage from '@/assets/characters/clara-feliz-ciencia.png';
 
 // Import Boss sprites
-import profCienciasNormalImage from '@/assets/characters/prof-ciencias-normal.png';
 import profCienciasDestemidaImage from '@/assets/characters/prof-ciencias-destemida.png';
 import profCienciasGargalhandoImage from '@/assets/characters/prof-ciencias-gargalhando.png';
 import profCienciasTristeImage from '@/assets/characters/prof-ciencias-triste.png';
@@ -27,7 +27,9 @@ import profCienciasPurificadaImage from '@/assets/characters/prof-ciencias-purif
 // Import Effects
 import efeitoVerdeImage from '@/assets/effects/efeito-verde.png';
 
-type BattlePhase = 'intro' | 'battle-start' | 'question' | 'victory' | 'defeat';
+type BattlePhase = 'intro' | 'battle-start' | 'question' | 'feedback' | 'victory' | 'defeat';
+
+type FeedbackType = 'correct' | 'wrong' | null;
 
 interface TrueFalseQuestion {
   id: number;
@@ -77,6 +79,8 @@ const BattleScreen = ({ environmentId, onBackToPatio, onProfile, onVictory }: Ba
   const [bossHealth, setBossHealth] = useState(100);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [score, setScore] = useState(0);
+  const [feedback, setFeedback] = useState<FeedbackType>(null);
+  const [pendingResult, setPendingResult] = useState<{ isCorrect: boolean; newPlayerHealth: number; newBossHealth: number } | null>(null);
   const { settings, toggleMute } = useSoundSystem();
 
   const questions = staticQuestions;
@@ -91,7 +95,7 @@ const BattleScreen = ({ environmentId, onBackToPatio, onProfile, onVictory }: Ba
   const getClaraSprite = () => {
     if (phase === 'victory') return claraFelizCienciaImage;
     if (phase === 'battle-start') return claraFelizCienciaImage;
-    if (phase === 'question') return claraFelizCienciaImage;
+    if (phase === 'question' || phase === 'feedback') return claraFelizCienciaImage;
     return claraLaboratorioImage;
   };
 
@@ -132,21 +136,41 @@ const BattleScreen = ({ environmentId, onBackToPatio, onProfile, onVictory }: Ba
 
   const handleAnswerConfirm = (answer: boolean) => {
     const isCorrect = answer === currentQuestion.isTrue;
+    
+    // Calculate new health values
+    const newBossHealth = isCorrect ? Math.max(0, bossHealth - damagePerCorrectAnswer) : bossHealth;
+    const newPlayerHealth = isCorrect ? playerHealth : Math.max(0, playerHealth - damagePerWrongAnswer);
+    
+    // Store pending result and show feedback
+    setPendingResult({ isCorrect, newPlayerHealth, newBossHealth });
+    setFeedback(isCorrect ? 'correct' : 'wrong');
+    setPhase('feedback');
+  };
 
+  const handleFeedbackEnd = useCallback(() => {
+    if (!pendingResult) return;
+    
+    const { isCorrect, newPlayerHealth, newBossHealth } = pendingResult;
+    
+    // Apply health changes
     if (isCorrect) {
       setScore(prev => prev + 1);
-      setBossHealth(prev => Math.max(0, prev - damagePerCorrectAnswer));
+      setBossHealth(newBossHealth);
     } else {
-      setPlayerHealth(prev => Math.max(0, prev - damagePerWrongAnswer));
+      setPlayerHealth(newPlayerHealth);
     }
 
+    // Clear feedback
+    setFeedback(null);
+    setPendingResult(null);
+
     // Check for victory or defeat
-    if (isCorrect && bossHealth - damagePerCorrectAnswer <= 0) {
+    if (isCorrect && newBossHealth <= 0) {
       setPhase('victory');
       return;
     }
 
-    if (!isCorrect && playerHealth - damagePerWrongAnswer <= 0) {
+    if (!isCorrect && newPlayerHealth <= 0) {
       setPhase('defeat');
       return;
     }
@@ -154,17 +178,17 @@ const BattleScreen = ({ environmentId, onBackToPatio, onProfile, onVictory }: Ba
     // Next question or end
     if (currentQuestionIndex < questions.length - 1) {
       setCurrentQuestionIndex(prev => prev + 1);
+      setPhase('question');
     } else {
       // All questions answered
-      if (bossHealth > 0 && playerHealth > 0) {
-        if (score >= questions.length / 2) {
-          setPhase('victory');
-        } else {
-          setPhase('defeat');
-        }
+      const finalScore = isCorrect ? score + 1 : score;
+      if (finalScore >= questions.length / 2) {
+        setPhase('victory');
+      } else {
+        setPhase('defeat');
       }
     }
-  };
+  }, [pendingResult, currentQuestionIndex, questions.length, score, bossHealth, playerHealth, damagePerCorrectAnswer, damagePerWrongAnswer]);
 
   const handleRestart = () => {
     setPhase('intro');
@@ -172,6 +196,8 @@ const BattleScreen = ({ environmentId, onBackToPatio, onProfile, onVictory }: Ba
     setBossHealth(100);
     setCurrentQuestionIndex(0);
     setScore(0);
+    setFeedback(null);
+    setPendingResult(null);
   };
 
   const handleVictoryComplete = () => {
@@ -241,12 +267,21 @@ const BattleScreen = ({ environmentId, onBackToPatio, onProfile, onVictory }: Ba
       </div>
 
       {/* Question Phase - True/False */}
-      {phase === 'question' && currentQuestion && (
+      {(phase === 'question' || phase === 'feedback') && currentQuestion && (
         <TrueFalseCard
           questionNumber={currentQuestionIndex + 1}
           totalQuestions={questions.length}
           questionText={currentQuestion.text}
           onConfirm={handleAnswerConfirm}
+          disabled={phase === 'feedback'}
+        />
+      )}
+
+      {/* Feedback Overlay */}
+      {phase === 'feedback' && feedback && (
+        <FeedbackOverlay 
+          type={feedback} 
+          onAnimationEnd={handleFeedbackEnd}
         />
       )}
 
