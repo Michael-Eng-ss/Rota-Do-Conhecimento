@@ -6,6 +6,7 @@ interface TrueFalseCardProps {
   totalQuestions: number;
   questionText: string;
   onConfirm: (answer: boolean) => void;
+  disabled?: boolean;
 }
 
 const TrueFalseCard = ({
@@ -13,11 +14,12 @@ const TrueFalseCard = ({
   totalQuestions,
   questionText,
   onConfirm,
+  disabled = false,
 }: TrueFalseCardProps) => {
   const [selectedAnswer, setSelectedAnswer] = useState<boolean | null>(null);
 
   const handleConfirm = () => {
-    if (selectedAnswer !== null) {
+    if (selectedAnswer !== null && !disabled) {
       onConfirm(selectedAnswer);
       setSelectedAnswer(null);
     }
@@ -38,26 +40,28 @@ const TrueFalseCard = ({
       </div>
 
       {/* True/False Buttons */}
-      <div className="flex gap-6 pointer-events-auto mb-4">
+      <div className={`flex gap-6 pointer-events-auto mb-4 ${disabled ? 'opacity-50 pointer-events-none' : ''}`}>
         <button
-          onClick={() => setSelectedAnswer(true)}
+          onClick={() => !disabled && setSelectedAnswer(true)}
+          disabled={disabled}
           className={`flex flex-col items-center justify-center w-32 h-32 md:w-40 md:h-40 rounded-2xl border-4 transition-all duration-300 shadow-xl ${
             selectedAnswer === true
               ? 'bg-green-500 border-green-300 scale-110 text-white'
               : 'bg-green-600 border-green-400 hover:bg-green-500 hover:scale-105 text-white'
-          }`}
+          } ${disabled ? 'cursor-not-allowed' : ''}`}
         >
           <Check className="w-12 h-12 md:w-16 md:h-16 mb-2" />
           <span className="text-xl md:text-2xl font-bold">Verdadeiro</span>
         </button>
 
         <button
-          onClick={() => setSelectedAnswer(false)}
+          onClick={() => !disabled && setSelectedAnswer(false)}
+          disabled={disabled}
           className={`flex flex-col items-center justify-center w-32 h-32 md:w-40 md:h-40 rounded-2xl border-4 transition-all duration-300 shadow-xl ${
             selectedAnswer === false
               ? 'bg-red-500 border-red-300 scale-110 text-white'
               : 'bg-red-600 border-red-400 hover:bg-red-500 hover:scale-105 text-white'
-          }`}
+          } ${disabled ? 'cursor-not-allowed' : ''}`}
         >
           <X className="w-12 h-12 md:w-16 md:h-16 mb-2" />
           <span className="text-xl md:text-2xl font-bold">Falso</span>
@@ -67,9 +71,9 @@ const TrueFalseCard = ({
       {/* Confirm Button */}
       <button
         onClick={handleConfirm}
-        disabled={selectedAnswer === null}
+        disabled={selectedAnswer === null || disabled}
         className={`px-8 py-4 rounded-xl text-xl font-bold transition-all duration-300 shadow-xl pointer-events-auto ${
-          selectedAnswer !== null
+          selectedAnswer !== null && !disabled
             ? 'bg-blue-500 hover:bg-blue-600 text-white scale-100 hover:scale-105'
             : 'bg-gray-400 text-gray-200 cursor-not-allowed scale-90'
         }`}
