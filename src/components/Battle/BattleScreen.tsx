@@ -1,5 +1,6 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useSoundSystem } from '@/hooks/useSoundSystem';
+import { useSoundEffects } from '@/hooks/useSoundEffects';
 import HealthBar from '@/components/Environment/HealthBar';
 import BossHealthBar from './BossHealthBar';
 import SoundButton from '@/components/Environment/SoundButton';
@@ -82,6 +83,7 @@ const BattleScreen = ({ environmentId, onBackToPatio, onProfile, onVictory }: Ba
   const [feedback, setFeedback] = useState<FeedbackType>(null);
   const [pendingResult, setPendingResult] = useState<{ isCorrect: boolean; newPlayerHealth: number; newBossHealth: number } | null>(null);
   const { settings, toggleMute } = useSoundSystem();
+  const { playSound } = useSoundEffects();
 
   const questions = staticQuestions;
   const currentQuestion = questions[currentQuestionIndex];
@@ -137,6 +139,11 @@ const BattleScreen = ({ environmentId, onBackToPatio, onProfile, onVictory }: Ba
   const handleAnswerConfirm = (answer: boolean) => {
     const isCorrect = answer === currentQuestion.isTrue;
     
+    // Play sound effect based on answer (only if not muted)
+    if (!settings.isMuted) {
+      playSound(isCorrect ? 'correct' : 'wrong');
+    }
+    
     // Calculate new health values
     const newBossHealth = isCorrect ? Math.max(0, bossHealth - damagePerCorrectAnswer) : bossHealth;
     const newPlayerHealth = isCorrect ? playerHealth : Math.max(0, playerHealth - damagePerWrongAnswer);
@@ -188,7 +195,18 @@ const BattleScreen = ({ environmentId, onBackToPatio, onProfile, onVictory }: Ba
         setPhase('defeat');
       }
     }
-  }, [pendingResult, currentQuestionIndex, questions.length, score, bossHealth, playerHealth, damagePerCorrectAnswer, damagePerWrongAnswer]);
+  }, [pendingResult, currentQuestionIndex, questions.length, score]);
+
+  // Play victory/defeat sounds
+  useEffect(() => {
+    if (settings.isMuted) return;
+    
+    if (phase === 'victory') {
+      playSound('victory');
+    } else if (phase === 'defeat') {
+      playSound('defeat');
+    }
+  }, [phase, settings.isMuted, playSound]);
 
   const handleRestart = () => {
     setPhase('intro');
