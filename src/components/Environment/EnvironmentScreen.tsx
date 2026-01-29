@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useSoundSystem } from '@/hooks/useSoundSystem';
+import { environmentConfigs as envConfigsFromFile } from '@/config/environments';
 import HealthBar from './HealthBar';
 import SoundButton from './SoundButton';
 import EnvironmentMenu from './EnvironmentMenu';
@@ -20,42 +21,32 @@ import claraDuvidaMochilaImage from '@/assets/characters/clara-duvida-mochila.pn
 import claraLaboratorioImage from '@/assets/characters/clara-laboratorio.png';
 import claraMatematicaImage from '@/assets/characters/clara-matematica.png';
 
-interface EnvironmentConfig {
+interface EnvironmentVisualConfig {
   background: string;
   characterImage: string;
   dialogue: string;
-  subject: string;
-  hasBattle: boolean;
 }
 
-const environmentConfigs: Record<1 | 2 | 3 | 4, EnvironmentConfig> = {
+const environmentVisualConfigs: Record<1 | 2 | 3 | 4, EnvironmentVisualConfig> = {
   1: {
-    background: auditorioImage,
-    characterImage: claraDuvidaImage,
-    dialogue: "O que aconteceu com o pátio da escola? Nunca tinha visto ele assim, esse desastre deve ser por conta da corrupção.",
-    subject: "Português",
-    hasBattle: false,
-  },
-  2: {
-    background: bibliotecaImage,
-    characterImage: claraDuvidaMochilaImage,
-    dialogue: "Minha querida biblioteca, até ela está sendo afetada, como? Sei que irei conseguir, vou arrumar tudo.",
-    subject: "História",
-    hasBattle: false,
-  },
-  3: {
     background: laboratorioImage,
     characterImage: claraLaboratorioImage,
-    dialogue: "Oi, alguém? Sempre tive receio desse lugar, laboratório me dá calafrio.",
-    subject: "Ciências",
-    hasBattle: true,
+    dialogue: "Este laboratório está cheio de mistérios científicos! Biologia, Química e História me aguardam.",
+  },
+  2: {
+    background: auditorioImage,
+    characterImage: claraDuvidaImage,
+    dialogue: "O auditório das letras... Português, Língua Estrangeira e Literatura. Hora de mostrar meu conhecimento!",
+  },
+  3: {
+    background: bibliotecaImage,
+    characterImage: claraDuvidaMochilaImage,
+    dialogue: "A biblioteca dos números e do mundo... Matemática, Física e Geografia me esperam!",
   },
   4: {
     background: salaMatematicaImage,
     characterImage: claraMatematicaImage,
-    dialogue: "Meu lugar favorito, sempre fui muito apegado aqui, minha segunda casa. Sem estar aqui, me sinto meia vazia. Tive vários momentos especiais aqui, todos sabem como eu me dedico nessa parte. Não quero mesmo reprovar, então vamos lá.",
-    subject: "Matemática",
-    hasBattle: false,
+    dialogue: "O desafio final! Todas as matérias em um só combate... Preciso dar o meu melhor!",
   },
 };
 
@@ -72,7 +63,8 @@ const EnvironmentScreen = ({ environmentId, onBackToPatio, onProfile, onEnvironm
   const [dialogueRead, setDialogueRead] = useState(false);
   const { settings, toggleMute } = useSoundSystem();
 
-  const config = environmentConfigs[environmentId];
+  const visualConfig = environmentVisualConfigs[environmentId];
+  const envConfig = envConfigsFromFile[environmentId];
 
   const handleHelp = () => {
     console.log('Ajuda - a ser implementado');
@@ -81,9 +73,8 @@ const EnvironmentScreen = ({ environmentId, onBackToPatio, onProfile, onEnvironm
   const handleDialogueClick = () => {
     if (!dialogueRead) {
       setDialogueRead(true);
-      if (config.hasBattle) {
-        setShowBattle(true);
-      }
+      // Todos os ambientes têm batalha agora
+      setShowBattle(true);
     }
   };
 
@@ -91,8 +82,8 @@ const EnvironmentScreen = ({ environmentId, onBackToPatio, onProfile, onEnvironm
     onEnvironmentComplete?.(environmentId, score);
   };
 
-  // Show battle screen for environment 3
-  if (showBattle && environmentId === 3) {
+  // Show battle screen for all environments
+  if (showBattle) {
     return (
       <BattleScreen
         environmentId={environmentId}
@@ -108,7 +99,7 @@ const EnvironmentScreen = ({ environmentId, onBackToPatio, onProfile, onEnvironm
       {/* Background */}
       <div
         className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-        style={{ backgroundImage: `url(${config.background})` }}
+        style={{ backgroundImage: `url(${visualConfig.background})` }}
       />
 
       {/* Top UI - Left: Profile + Health */}
@@ -125,7 +116,8 @@ const EnvironmentScreen = ({ environmentId, onBackToPatio, onProfile, onEnvironm
 
       {/* Environment Indicator */}
       <div className="absolute top-4 left-1/2 -translate-x-1/2 bg-black/50 text-white px-4 py-2 rounded-full text-sm z-20">
-        <span className="font-bold">{config.subject}</span> - Ambiente {environmentId} / 4
+        <span className="font-bold">{envConfig.name}</span> - Ambiente {environmentId} / 4
+        {envConfig.isFinalBoss && <span className="ml-2 text-red-300">★ BOSS FINAL</span>}
       </div>
 
       {/* Character */}
@@ -134,7 +126,7 @@ const EnvironmentScreen = ({ environmentId, onBackToPatio, onProfile, onEnvironm
           character={{
             id: `clara-env-${environmentId}`,
             name: 'Clara',
-            image: config.characterImage,
+            image: visualConfig.characterImage,
             position: 'center',
           }}
           isNew={true}
@@ -148,7 +140,7 @@ const EnvironmentScreen = ({ environmentId, onBackToPatio, onProfile, onEnvironm
       >
         <DialogBox
           speaker="Clara"
-          dialogue={config.dialogue}
+          dialogue={visualConfig.dialogue}
         />
       </div>
     </div>
