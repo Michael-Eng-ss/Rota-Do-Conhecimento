@@ -266,18 +266,9 @@ const VisualNovelGame = ({ onBack, onCutsceneEnd }: VisualNovelGameProps) => {
         style={{ backgroundImage: `url(${currentScene.background})` }}
       />
 
-      {/* Top UI */}
+      {/* Top UI - Menu apenas */}
       <div className="absolute top-4 right-4 flex gap-3 z-20">
-        {onBack && (
-          <button
-            onClick={onBack}
-            className="vn-skip-button"
-          >
-            Sair
-          </button>
-        )}
-        <SkipButton onClick={handleSkip} />
-        <MenuButton />
+        <MenuButton onExit={onBack} />
       </div>
 
       {/* Scene indicator (debug) */}

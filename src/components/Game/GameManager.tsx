@@ -3,9 +3,9 @@ import LoginScreen from '@/components/Screens/LoginScreen';
 import UserMenuScreen from '@/components/Screens/UserMenuScreen';
 import RegisterScreen from '@/components/Screens/RegisterScreen';
 import ResetPasswordScreen from '@/components/Screens/ResetPasswordScreen';
-import DifficultyScreen from '@/components/Screens/DifficultyScreen';
 import RankingScreen from '@/components/Screens/RankingScreen';
 import ProfileScreen from '@/components/Screens/ProfileScreen';
+import QuestionAdminScreen from '@/components/Screens/QuestionAdminScreen';
 import VisualNovelGame from '@/components/VisualNovel/VisualNovelGame';
 import EnvironmentScreen from '@/components/Environment/EnvironmentScreen';
 import EnvironmentSelectionScreen from '@/components/Environment/EnvironmentSelectionScreen';
@@ -15,17 +15,16 @@ type GameScreen =
   | 'menu' 
   | 'register' 
   | 'resetPassword' 
-  | 'difficulty' 
   | 'ranking'
   | 'profile'
   | 'cutscene'
   | 'environmentSelection'
-  | 'environment';
+  | 'environment'
+  | 'questionAdmin';
 
 const GameManager = () => {
   const [currentScreen, setCurrentScreen] = useState<GameScreen>('login');
   const [previousScreen, setPreviousScreen] = useState<GameScreen>('menu');
-  const [selectedDifficulty, setSelectedDifficulty] = useState<'easy' | 'medium' | 'hard' | null>(null);
   const [currentEnvironment, setCurrentEnvironment] = useState<1 | 2 | 3 | 4>(1);
   const [completedEnvironments, setCompletedEnvironments] = useState<number[]>([]);
   const [playerName, setPlayerName] = useState<string>('Jogador');
@@ -46,8 +45,7 @@ const GameManager = () => {
     setTotalScore(prev => prev + score);
   };
 
-  const handleSelectDifficulty = (difficulty: 'easy' | 'medium' | 'hard') => {
-    setSelectedDifficulty(difficulty);
+  const handleStartGame = () => {
     setCurrentScreen('cutscene');
   };
 
@@ -79,10 +77,11 @@ const GameManager = () => {
       case 'menu':
         return (
           <UserMenuScreen
-            onStart={() => setCurrentScreen('difficulty')}
+            onStart={handleStartGame}
             onRanking={() => setCurrentScreen('ranking')}
             onProfile={() => handleProfile('menu')}
             onBack={() => setCurrentScreen('login')}
+            onQuestionAdmin={() => setCurrentScreen('questionAdmin')}
           />
         );
       
@@ -121,18 +120,10 @@ const GameManager = () => {
           />
         );
       
-      case 'difficulty':
-        return (
-          <DifficultyScreen
-            onSelectDifficulty={handleSelectDifficulty}
-            onBack={() => setCurrentScreen('menu')}
-          />
-        );
-      
       case 'cutscene':
         return (
           <VisualNovelGame
-            onBack={() => setCurrentScreen('difficulty')}
+            onBack={() => setCurrentScreen('menu')}
             onCutsceneEnd={handleCutsceneEnd}
           />
         );
@@ -153,6 +144,13 @@ const GameManager = () => {
             onBackToPatio={() => setCurrentScreen('environmentSelection')}
             onProfile={() => handleProfile('environment')}
             onEnvironmentComplete={handleEnvironmentComplete}
+          />
+        );
+      
+      case 'questionAdmin':
+        return (
+          <QuestionAdminScreen
+            onBack={() => setCurrentScreen('menu')}
           />
         );
       
