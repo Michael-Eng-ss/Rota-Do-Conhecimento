@@ -5,7 +5,7 @@ import BossHealthBar from './BossHealthBar';
 import SoundButton from '@/components/Environment/SoundButton';
 import EnvironmentMenu from '@/components/Environment/EnvironmentMenu';
 import ProfileAvatar from '@/components/Environment/ProfileAvatar';
-import QuestionCard from './QuestionCard';
+import TrueFalseCard from './TrueFalseCard';
 import VictoryScreen from './VictoryScreen';
 import DefeatScreen from './DefeatScreen';
 import DialogBox from '@/components/VisualNovel/DialogBox';
@@ -29,47 +29,38 @@ import efeitoVerdeImage from '@/assets/effects/efeito-verde.png';
 
 type BattlePhase = 'intro' | 'battle-start' | 'question' | 'victory' | 'defeat';
 
-interface StaticQuestion {
+interface TrueFalseQuestion {
   id: number;
   text: string;
-  options: { letter: string; text: string }[];
-  correctIndex: number;
+  isTrue: boolean;
 }
 
-// Perguntas estáticas (serão substituídas pelo backend)
-const staticQuestions: StaticQuestion[] = [
+// Perguntas Verdadeiro/Falso (serão substituídas pelo backend)
+const staticQuestions: TrueFalseQuestion[] = [
   {
     id: 1,
-    text: "A globalização intensificou as relações econômicas entre os países, ampliando o fluxo de mercadorias, capitais e informações. No entanto, esse processo ocorre de forma desigual, beneficiando mais intensamente algumas regiões do mundo.\nEssa desigualdade está principalmente relacionada:",
-    options: [
-      { letter: 'a', text: 'À distribuição homogênea dos recursos naturais entre os países.' },
-      { letter: 'b', text: 'Ao nível de desenvolvimento econômico e tecnológico das nações.' },
-      { letter: 'c', text: 'À eliminação completa das fronteiras políticas e culturais.' },
-      { letter: 'd', text: 'À redução das diferenças sociais entre países desenvolvidos e subdesenvolvidos.' },
-    ],
-    correctIndex: 1,
+    text: "A mitocôndria é responsável pela produção de energia (ATP) nas células.",
+    isTrue: true,
   },
   {
     id: 2,
-    text: "Qual é a função principal das mitocôndrias nas células?",
-    options: [
-      { letter: 'a', text: 'Síntese de proteínas.' },
-      { letter: 'b', text: 'Produção de energia (ATP).' },
-      { letter: 'c', text: 'Armazenamento de informação genética.' },
-      { letter: 'd', text: 'Digestão de substâncias.' },
-    ],
-    correctIndex: 1,
+    text: "O Sol gira em torno da Terra.",
+    isTrue: false,
   },
   {
     id: 3,
-    text: "O que é a fotossíntese?",
-    options: [
-      { letter: 'a', text: 'Processo de respiração celular.' },
-      { letter: 'b', text: 'Conversão de luz em energia química.' },
-      { letter: 'c', text: 'Divisão celular.' },
-      { letter: 'd', text: 'Transporte de nutrientes.' },
-    ],
-    correctIndex: 1,
+    text: "A fotossíntese é o processo de conversão de luz em energia química pelas plantas.",
+    isTrue: true,
+  },
+  {
+    id: 4,
+    text: "Os humanos têm 206 ossos no corpo adulto.",
+    isTrue: true,
+  },
+  {
+    id: 5,
+    text: "A água ferve a 50 graus Celsius ao nível do mar.",
+    isTrue: false,
   },
 ];
 
@@ -108,12 +99,10 @@ const BattleScreen = ({ environmentId, onBackToPatio, onProfile, onVictory }: Ba
     if (phase === 'victory') return profCienciasPurificadaImage;
     if (phase === 'defeat') return profCienciasTristeImage;
     if (bossHealth < 30) return profCienciasDestemidaImage;
-    // Primeira aparição: professora purificada com efeito verde
     if (phase === 'intro') return profCienciasPurificadaImage;
     return profCienciasGargalhandoImage;
   };
 
-  // Efeito verde na primeira aparição (intro) e na vitória
   const showGreenEffect = phase === 'intro' || phase === 'victory';
 
   const getDialogue = () => {
@@ -141,8 +130,8 @@ const BattleScreen = ({ environmentId, onBackToPatio, onProfile, onVictory }: Ba
     }
   };
 
-  const handleAnswerConfirm = (selectedIndex: number) => {
-    const isCorrect = selectedIndex === currentQuestion.correctIndex;
+  const handleAnswerConfirm = (answer: boolean) => {
+    const isCorrect = answer === currentQuestion.isTrue;
 
     if (isCorrect) {
       setScore(prev => prev + 1);
@@ -168,7 +157,6 @@ const BattleScreen = ({ environmentId, onBackToPatio, onProfile, onVictory }: Ba
     } else {
       // All questions answered
       if (bossHealth > 0 && playerHealth > 0) {
-        // Determine winner based on remaining health
         if (score >= questions.length / 2) {
           setPhase('victory');
         } else {
@@ -207,7 +195,6 @@ const BattleScreen = ({ environmentId, onBackToPatio, onProfile, onVictory }: Ba
           <ProfileAvatar onProfileClick={onProfile} />
           <HealthBar health={playerHealth} />
         </div>
-        {/* Sound + Menu abaixo do perfil */}
         <div className="flex gap-2 mt-2">
           <SoundButton isMuted={settings.isMuted} onToggle={toggleMute} />
           <EnvironmentMenu onBackToPatio={onBackToPatio} onHelp={handleHelp} />
@@ -237,7 +224,6 @@ const BattleScreen = ({ environmentId, onBackToPatio, onProfile, onVictory }: Ba
         
         {/* Boss - Right */}
         <div className="absolute bottom-24 right-4 md:right-16 w-64 md:w-80 flex items-center justify-center">
-          {/* Green Effect behind boss */}
           {showGreenEffect && (
             <img 
               src={efeitoVerdeImage} 
@@ -254,13 +240,12 @@ const BattleScreen = ({ environmentId, onBackToPatio, onProfile, onVictory }: Ba
         </div>
       </div>
 
-      {/* Question Phase */}
+      {/* Question Phase - True/False */}
       {phase === 'question' && currentQuestion && (
-        <QuestionCard
+        <TrueFalseCard
           questionNumber={currentQuestionIndex + 1}
           totalQuestions={questions.length}
           questionText={currentQuestion.text}
-          options={currentQuestion.options}
           onConfirm={handleAnswerConfirm}
         />
       )}
