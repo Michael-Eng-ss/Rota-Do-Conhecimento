@@ -161,8 +161,19 @@ const BattleScreen = ({ environmentId, onBackToPatio, onProfile, onVictory }: Ba
   };
 
   const getBossSprite = () => {
-    // Para Ambiente 2 (Auditório), usa os mesmos sprites por enquanto
-    // TODO: Adicionar sprites específicos do professor do Auditório
+    // Ambiente 2 (Auditório) - Professor de Física
+    if (environmentId === 2) {
+      if (phase === 'victory') return profAuditorioArrependidoImage;
+      if (phase === 'defeat') return profAuditorioBossGargalhandoImage;
+      if (bossTransformed || phase === 'intro-3' || phase === 'battle-start' || phase === 'question' || phase === 'feedback') {
+        if (bossHealth < 30) return profAuditorioBossTristeImage;
+        return profAuditorioBossImage; // Boss transformado
+      }
+      if (phase === 'intro-2') return profAuditorioPurificadoImage; // Braços cruzados
+      return profAuditorioNormalImage; // intro-1: Professor falando
+    }
+
+    // Ambiente 1 (Laboratório) - Professora de Ciências
     if (phase === 'victory') return profCienciasPurificadaImage;
     if (phase === 'defeat') return profCienciasGargalhandoImage;
     if (bossTransformed || phase === 'intro-3' || phase === 'battle-start' || phase === 'question' || phase === 'feedback') {
@@ -171,7 +182,9 @@ const BattleScreen = ({ environmentId, onBackToPatio, onProfile, onVictory }: Ba
     if (bossHealth < 30) return profCienciasDestemidaImage;
     return profCienciasPurificadaImage; // Professor normal
   };
-  const showGreenEffect = phase === 'intro-1' || phase === 'intro-2' || phase === 'victory';
+
+  // Efeito verde só para ambiente 1 (Ciências)
+  const showGreenEffect = environmentId === 1 && (phase === 'intro-1' || phase === 'intro-2' || phase === 'victory');
 
   // Diálogos por ambiente e fase
   const getDialogue = () => {
