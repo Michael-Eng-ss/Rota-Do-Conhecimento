@@ -24,7 +24,7 @@ const EnvironmentMenu = ({ onBackToPatio, onHelp }: EnvironmentMenuProps) => {
       </button>
 
       {isOpen && (
-        <div className="absolute top-12 right-0 bg-white rounded-xl shadow-xl overflow-hidden min-w-40 animate-in fade-in slide-in-from-top-2 duration-200">
+        <div className="absolute top-12 left-0 bg-white rounded-xl shadow-xl overflow-hidden min-w-40 animate-in fade-in slide-in-from-top-2 duration-200 z-50">
           <button
             onClick={() => {
               onBackToPatio();
