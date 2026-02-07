@@ -34,6 +34,15 @@ import profCienciasGargalhandoImage from '@/assets/characters/prof-ciencias-garg
 import profCienciasTristeImage from '@/assets/characters/prof-ciencias-triste.png';
 import profCienciasPurificadaImage from '@/assets/characters/prof-ciencias-purificada.png';
 
+// Import Boss sprites - Auditório (Ambiente 2)
+import profAuditorioNormalImage from '@/assets/characters/prof-auditorio-normal.png';
+import profAuditorioPurificadoImage from '@/assets/characters/prof-auditorio-purificado.png';
+import profAuditorioBossImage from '@/assets/characters/prof-auditorio-boss.png';
+import profAuditorioBossFelizImage from '@/assets/characters/prof-auditorio-boss-feliz.png';
+import profAuditorioBossGargalhandoImage from '@/assets/characters/prof-auditorio-boss-gargalhando.png';
+import profAuditorioBossTristeImage from '@/assets/characters/prof-auditorio-boss-triste.png';
+import profAuditorioArrependidoImage from '@/assets/characters/prof-auditorio-arrependido.png';
+
 // Import Effects
 import efeitoVerdeImage from '@/assets/effects/efeito-verde.png';
 
