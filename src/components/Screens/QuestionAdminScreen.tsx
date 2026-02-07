@@ -1,57 +1,42 @@
 import { useState } from 'react';
 import GameBackground from '@/components/Game/GameBackground';
 import GameButton from '@/components/Game/GameButton';
-import { Plus, Trash2, Edit, Check, X } from 'lucide-react';
-
-interface Question {
-  id: string;
-  text: string;
-  isTrue: boolean;
-  subject: string;
-  environment: number;
-}
+import QuestionForm from '@/components/Admin/QuestionForm';
+import QuestionList from '@/components/Admin/QuestionList';
+import { Question, getEnvironmentName, subjectsByEnvironment } from '@/types/questions';
+import { Plus, LogOut, Filter } from 'lucide-react';
 
 // Dados fictícios para demonstração
 const mockQuestions: Question[] = [
   {
     id: '1',
-    text: 'A mitocôndria é responsável pela produção de energia (ATP) nas células.',
-    isTrue: true,
-    subject: 'Ciências',
-    environment: 3,
+    environmentId: 1,
+    subject: 'Biologia',
+    title: 'Sobre a célula e suas organelas, analise as afirmações:',
+    statements: [
+      { id: 's1', text: 'A mitocôndria é responsável pela produção de energia (ATP) nas células.', isTrue: true },
+      { id: 's2', text: 'O núcleo contém o material genético da célula.', isTrue: true },
+      { id: 's3', text: 'O ribossomo é responsável pela fotossíntese.', isTrue: false },
+      { id: 's4', text: 'A membrana plasmática é impermeável a todas as substâncias.', isTrue: false },
+    ],
+    createdAt: new Date(),
+    updatedAt: new Date(),
   },
   {
     id: '2',
-    text: 'O Sol gira em torno da Terra.',
-    isTrue: false,
-    subject: 'Ciências',
-    environment: 3,
-  },
-  {
-    id: '3',
-    text: 'O Brasil foi descoberto em 1500 por Pedro Álvares Cabral.',
-    isTrue: true,
-    subject: 'História',
-    environment: 2,
-  },
-  {
-    id: '4',
-    text: 'A soma dos ângulos internos de um triângulo é 180 graus.',
-    isTrue: true,
+    environmentId: 3,
     subject: 'Matemática',
-    environment: 4,
-  },
-  {
-    id: '5',
-    text: 'Verbos são palavras que indicam ações, estados ou fenômenos.',
-    isTrue: true,
-    subject: 'Português',
-    environment: 1,
+    title: 'Sobre geometria plana, analise as afirmações:',
+    statements: [
+      { id: 's5', text: 'A soma dos ângulos internos de um triângulo é 180 graus.', isTrue: true },
+      { id: 's6', text: 'Um quadrado tem todos os lados iguais e ângulos retos.', isTrue: true },
+      { id: 's7', text: 'O perímetro de um círculo é calculado por πr².', isTrue: false },
+      { id: 's8', text: 'A diagonal de um quadrado divide-o em dois triângulos retângulos.', isTrue: true },
+    ],
+    createdAt: new Date(),
+    updatedAt: new Date(),
   },
 ];
-
-const subjects = ['Português', 'História', 'Ciências', 'Matemática'];
-const environments = [1, 2, 3, 4];
 
 interface QuestionAdminScreenProps {
   onBack: () => void;
@@ -59,190 +44,116 @@ interface QuestionAdminScreenProps {
 
 const QuestionAdminScreen = ({ onBack }: QuestionAdminScreenProps) => {
   const [questions, setQuestions] = useState<Question[]>(mockQuestions);
-  const [isAdding, setIsAdding] = useState(false);
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [newQuestion, setNewQuestion] = useState({
-    text: '',
-    isTrue: true,
-    subject: 'Ciências',
-    environment: 3,
-  });
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [editingQuestion, setEditingQuestion] = useState<Question | null>(null);
+  const [filterEnvironment, setFilterEnvironment] = useState<1 | 2 | 3 | 4 | 'all'>('all');
 
-  const handleAddQuestion = () => {
-    if (!newQuestion.text.trim()) return;
-    
-    const question: Question = {
-      id: Date.now().toString(),
-      ...newQuestion,
-    };
-    
-    setQuestions(prev => [...prev, question]);
-    setNewQuestion({ text: '', isTrue: true, subject: 'Ciências', environment: 3 });
-    setIsAdding(false);
+  const handleSaveQuestion = (questionData: Omit<Question, 'id' | 'createdAt' | 'updatedAt'>) => {
+    if (editingQuestion) {
+      // Editar existente
+      setQuestions(prev => prev.map(q => 
+        q.id === editingQuestion.id 
+          ? { ...q, ...questionData, updatedAt: new Date() } 
+          : q
+      ));
+    } else {
+      // Criar nova
+      const newQuestion: Question = {
+        id: `q_${Date.now()}`,
+        ...questionData,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+      setQuestions(prev => [...prev, newQuestion]);
+    }
+    setIsFormOpen(false);
+    setEditingQuestion(null);
+  };
+
+  const handleEditQuestion = (question: Question) => {
+    setEditingQuestion(question);
+    setIsFormOpen(true);
   };
 
   const handleDeleteQuestion = (id: string) => {
-    setQuestions(prev => prev.filter(q => q.id !== id));
+    if (confirm('Tem certeza que deseja excluir esta questão?')) {
+      setQuestions(prev => prev.filter(q => q.id !== id));
+    }
   };
 
-  const handleUpdateQuestion = (id: string, updates: Partial<Question>) => {
-    setQuestions(prev => prev.map(q => q.id === id ? { ...q, ...updates } : q));
-    setEditingId(null);
-  };
+  const filteredQuestions = filterEnvironment === 'all' 
+    ? questions 
+    : questions.filter(q => q.environmentId === filterEnvironment);
 
   return (
     <GameBackground>
       <div className="flex flex-col min-h-screen px-4 py-6">
         {/* Header */}
-        <div className="flex items-center justify-between mb-6">
-          <h1 className="text-2xl md:text-3xl font-bold text-white drop-shadow-lg">
-            Cadastro de Perguntas
-          </h1>
-          <GameButton onClick={onBack} variant="primary" className="w-32">
-            Voltar
+        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-6">
+          <div>
+            <h1 className="text-2xl md:text-3xl font-bold text-white drop-shadow-lg">
+              Gerenciamento de Questões
+            </h1>
+            <p className="text-white/70 mt-1">
+              {questions.length} questões cadastradas
+            </p>
+          </div>
+          <GameButton onClick={onBack} variant="primary" className="flex items-center gap-2">
+            <LogOut className="w-4 h-4" />
+            Sair do Admin
           </GameButton>
         </div>
 
-        {/* Add Button */}
-        <div className="mb-4">
+        {/* Actions Bar */}
+        <div className="flex flex-col md:flex-row gap-4 mb-6">
           <GameButton 
-            onClick={() => setIsAdding(true)} 
+            onClick={() => {
+              setEditingQuestion(null);
+              setIsFormOpen(true);
+            }} 
             variant="secondary" 
             className="flex items-center gap-2"
           >
             <Plus className="w-5 h-5" />
-            Nova Pergunta
+            Nova Questão
           </GameButton>
+
+          {/* Filtro por ambiente */}
+          <div className="flex items-center gap-2 bg-white/20 backdrop-blur-sm rounded-lg px-4 py-2">
+            <Filter className="w-4 h-4 text-white" />
+            <select
+              value={filterEnvironment}
+              onChange={(e) => setFilterEnvironment(e.target.value === 'all' ? 'all' : Number(e.target.value) as 1 | 2 | 3 | 4)}
+              className="bg-transparent text-white border-none outline-none"
+            >
+              <option value="all" className="text-gray-800">Todos os Ambientes</option>
+              {([1, 2, 3, 4] as const).map(id => (
+                <option key={id} value={id} className="text-gray-800">
+                  {id} - {getEnvironmentName(id)}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
 
-        {/* Add Form */}
-        {isAdding && (
-          <div className="bg-white/95 backdrop-blur-sm rounded-xl p-4 mb-4 shadow-xl border-2 border-blue-400">
-            <h3 className="text-lg font-bold text-gray-800 mb-3">Nova Pergunta (Verdadeiro ou Falso)</h3>
-            
-            <textarea
-              value={newQuestion.text}
-              onChange={(e) => setNewQuestion(prev => ({ ...prev, text: e.target.value }))}
-              placeholder="Digite a afirmação..."
-              className="w-full p-3 border-2 border-gray-300 rounded-lg mb-3 text-gray-800 min-h-[100px]"
-            />
-            
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-3">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Resposta:</label>
-                <select
-                  value={newQuestion.isTrue ? 'true' : 'false'}
-                  onChange={(e) => setNewQuestion(prev => ({ ...prev, isTrue: e.target.value === 'true' }))}
-                  className="w-full p-2 border-2 border-gray-300 rounded-lg text-gray-800"
-                >
-                  <option value="true">Verdadeiro</option>
-                  <option value="false">Falso</option>
-                </select>
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Matéria:</label>
-                <select
-                  value={newQuestion.subject}
-                  onChange={(e) => setNewQuestion(prev => ({ ...prev, subject: e.target.value }))}
-                  className="w-full p-2 border-2 border-gray-300 rounded-lg text-gray-800"
-                >
-                  {subjects.map(s => (
-                    <option key={s} value={s}>{s}</option>
-                  ))}
-                </select>
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Ambiente:</label>
-                <select
-                  value={newQuestion.environment}
-                  onChange={(e) => setNewQuestion(prev => ({ ...prev, environment: Number(e.target.value) }))}
-                  className="w-full p-2 border-2 border-gray-300 rounded-lg text-gray-800"
-                >
-                  {environments.map(e => (
-                    <option key={e} value={e}>Ambiente {e}</option>
-                  ))}
-                </select>
-              </div>
-            </div>
-            
-            <div className="flex gap-2">
-              <button
-                onClick={handleAddQuestion}
-                className="flex items-center gap-2 px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg transition-colors"
-              >
-                <Check className="w-4 h-4" />
-                Salvar
-              </button>
-              <button
-                onClick={() => setIsAdding(false)}
-                className="flex items-center gap-2 px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors"
-              >
-                <X className="w-4 h-4" />
-                Cancelar
-              </button>
-            </div>
-          </div>
-        )}
-
-        {/* Questions List */}
+        {/* Form ou Lista */}
         <div className="flex-1 overflow-auto">
-          <div className="bg-white/95 backdrop-blur-sm rounded-xl shadow-xl border-2 border-blue-400 overflow-hidden">
-            <table className="w-full">
-              <thead className="bg-blue-500 text-white">
-                <tr>
-                  <th className="p-3 text-left">Pergunta</th>
-                  <th className="p-3 text-center w-28">Resposta</th>
-                  <th className="p-3 text-center w-28">Matéria</th>
-                  <th className="p-3 text-center w-24">Ambiente</th>
-                  <th className="p-3 text-center w-24">Ações</th>
-                </tr>
-              </thead>
-              <tbody>
-                {questions.map((q, index) => (
-                  <tr key={q.id} className={index % 2 === 0 ? 'bg-gray-50' : 'bg-white'}>
-                    <td className="p-3 text-gray-800">
-                      {editingId === q.id ? (
-                        <textarea
-                          defaultValue={q.text}
-                          onBlur={(e) => handleUpdateQuestion(q.id, { text: e.target.value })}
-                          className="w-full p-2 border rounded text-gray-800"
-                        />
-                      ) : (
-                        q.text
-                      )}
-                    </td>
-                    <td className="p-3 text-center">
-                      <span className={`px-2 py-1 rounded-full text-sm font-bold ${
-                        q.isTrue ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                      }`}>
-                        {q.isTrue ? 'V' : 'F'}
-                      </span>
-                    </td>
-                    <td className="p-3 text-center text-gray-700">{q.subject}</td>
-                    <td className="p-3 text-center text-gray-700">{q.environment}</td>
-                    <td className="p-3 text-center">
-                      <div className="flex justify-center gap-2">
-                        <button
-                          onClick={() => setEditingId(q.id)}
-                          className="p-1 text-blue-500 hover:text-blue-700"
-                        >
-                          <Edit className="w-4 h-4" />
-                        </button>
-                        <button
-                          onClick={() => handleDeleteQuestion(q.id)}
-                          className="p-1 text-red-500 hover:text-red-700"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          {isFormOpen ? (
+            <QuestionForm
+              initialData={editingQuestion}
+              onSave={handleSaveQuestion}
+              onCancel={() => {
+                setIsFormOpen(false);
+                setEditingQuestion(null);
+              }}
+            />
+          ) : (
+            <QuestionList
+              questions={filteredQuestions}
+              onEdit={handleEditQuestion}
+              onDelete={handleDeleteQuestion}
+            />
+          )}
         </div>
       </div>
     </GameBackground>
