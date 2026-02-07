@@ -52,17 +52,19 @@ const QuestionList = ({ questions, onEdit, onDelete }: QuestionListProps) => {
             </div>
           </div>
 
-          {/* Título */}
+          {/* Texto Base */}
           <div className="px-4 py-3 border-b border-gray-200">
-            <h3 className="text-gray-800 font-medium">{question.title}</h3>
+            <p className="text-gray-800 text-sm whitespace-pre-wrap line-clamp-3">{question.baseText}</p>
           </div>
 
           {/* Afirmações */}
           <div className="p-4 space-y-2">
-            {question.statements.map((statement, index) => (
+            {question.statements.map((statement, index) => {
+              const letter = String.fromCharCode(65 + index); // A, B, C, D
+              return (
               <div key={statement.id} className="flex items-start gap-3">
                 <span className="flex-shrink-0 w-6 h-6 flex items-center justify-center bg-gray-100 text-gray-600 font-bold rounded text-sm">
-                  {index + 1}
+                  {letter}
                 </span>
                 <p className="flex-1 text-gray-700 text-sm">{statement.text}</p>
                 <span className={`flex-shrink-0 w-6 h-6 flex items-center justify-center rounded font-bold text-sm ${
@@ -73,7 +75,8 @@ const QuestionList = ({ questions, onEdit, onDelete }: QuestionListProps) => {
                   {statement.isTrue ? 'V' : 'F'}
                 </span>
               </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       ))}

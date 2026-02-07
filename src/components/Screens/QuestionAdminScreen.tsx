@@ -12,7 +12,7 @@ const mockQuestions: Question[] = [
     id: '1',
     environmentId: 1,
     subject: 'Biologia',
-    title: 'Sobre a célula e suas organelas, analise as afirmações:',
+    baseText: 'Sobre a célula e suas organelas, analise as afirmações abaixo de acordo com seus conhecimentos sobre biologia celular:',
     statements: [
       { id: 's1', text: 'A mitocôndria é responsável pela produção de energia (ATP) nas células.', isTrue: true },
       { id: 's2', text: 'O núcleo contém o material genético da célula.', isTrue: true },
@@ -26,7 +26,7 @@ const mockQuestions: Question[] = [
     id: '2',
     environmentId: 3,
     subject: 'Matemática',
-    title: 'Sobre geometria plana, analise as afirmações:',
+    baseText: 'Sobre geometria plana, analise as afirmações abaixo considerando as propriedades das figuras geométricas:',
     statements: [
       { id: 's5', text: 'A soma dos ângulos internos de um triângulo é 180 graus.', isTrue: true },
       { id: 's6', text: 'Um quadrado tem todos os lados iguais e ângulos retos.', isTrue: true },

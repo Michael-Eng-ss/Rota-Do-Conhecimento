@@ -21,13 +21,13 @@ export interface Statement {
   isTrue: boolean;
 }
 
-// Uma questão completa com 4 afirmações
+// Uma questão completa com texto base e 4 afirmações
 export interface Question {
   id: string;
   environmentId: 1 | 2 | 3 | 4;
   subject: string;
-  title: string; // Título/contexto da questão
-  statements: Statement[]; // 4 afirmações
+  baseText: string; // Texto base/enunciado da questão (notícia, contexto, etc.)
+  statements: Statement[]; // 4 afirmações (A, B, C, D)
   createdAt: Date;
   updatedAt: Date;
 }

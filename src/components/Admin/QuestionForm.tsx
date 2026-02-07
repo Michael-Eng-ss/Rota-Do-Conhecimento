@@ -17,7 +17,7 @@ const emptyStatement = (): Omit<Statement, 'id'> => ({
 const QuestionForm = ({ initialData, onSave, onCancel }: QuestionFormProps) => {
   const [environmentId, setEnvironmentId] = useState<1 | 2 | 3 | 4>(initialData?.environmentId || 1);
   const [subject, setSubject] = useState(initialData?.subject || subjectsByEnvironment[1][0]);
-  const [title, setTitle] = useState(initialData?.title || '');
+  const [baseText, setBaseText] = useState(initialData?.baseText || '');
   const [statements, setStatements] = useState<Omit<Statement, 'id'>[]>(
     initialData?.statements.map(s => ({ text: s.text, isTrue: s.isTrue })) || 
     [emptyStatement(), emptyStatement(), emptyStatement(), emptyStatement()]
@@ -39,8 +39,8 @@ const QuestionForm = ({ initialData, onSave, onCancel }: QuestionFormProps) => {
 
   const handleSubmit = () => {
     // Validar
-    if (!title.trim()) {
-      alert('Digite o título/contexto da questão');
+    if (!baseText.trim()) {
+      alert('Digite o texto base/enunciado da questão');
       return;
     }
 
@@ -53,7 +53,7 @@ const QuestionForm = ({ initialData, onSave, onCancel }: QuestionFormProps) => {
     onSave({
       environmentId,
       subject,
-      title: title.trim(),
+      baseText: baseText.trim(),
       statements: statements.map((s, i) => ({
         id: initialData?.statements[i]?.id || `stmt_${Date.now()}_${i}`,
         text: s.text.trim(),
@@ -103,36 +103,38 @@ const QuestionForm = ({ initialData, onSave, onCancel }: QuestionFormProps) => {
         </div>
       </div>
 
-      {/* Título/Contexto */}
+      {/* Texto Base/Enunciado */}
       <div className="mb-4">
         <label className="block text-sm font-medium text-gray-700 mb-1">
-          Título/Contexto da Questão *
+          Texto Base/Enunciado da Questão *
         </label>
         <textarea
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          placeholder="Ex: Sobre a célula e suas organelas, analise as afirmações:"
-          className="w-full p-3 border-2 border-gray-300 rounded-lg text-gray-800 min-h-[80px]"
+          value={baseText}
+          onChange={(e) => setBaseText(e.target.value)}
+          placeholder="Cole aqui o texto base da questão (notícia, contexto, situação-problema...)&#10;&#10;Ex: O presidente Luiz Inácio Lula da Silva assina nesta sexta-feira contratos de financiamento do BNDES..."
+          className="w-full p-3 border-2 border-gray-300 rounded-lg text-gray-800 min-h-[150px]"
         />
       </div>
 
-      {/* 4 Afirmações */}
+      {/* 4 Afirmações (A, B, C, D) */}
       <div className="mb-4">
         <label className="block text-sm font-medium text-gray-700 mb-2">
-          Afirmações (marque V para Verdadeiro ou F para Falso) *
+          Assinale V (verdadeiro) ou F (falso) para as alternativas de acordo com o texto: *
         </label>
         
         <div className="space-y-3">
-          {statements.map((statement, index) => (
+          {statements.map((statement, index) => {
+            const letter = String.fromCharCode(65 + index); // A, B, C, D
+            return (
             <div key={index} className="flex gap-2 items-start">
               <span className="flex-shrink-0 w-8 h-10 flex items-center justify-center bg-blue-100 text-blue-800 font-bold rounded">
-                {index + 1}
+                {letter}
               </span>
               
               <textarea
                 value={statement.text}
                 onChange={(e) => handleStatementChange(index, 'text', e.target.value)}
-                placeholder={`Afirmação ${index + 1}...`}
+                placeholder={`Afirmação ${letter}...`}
                 className="flex-1 p-2 border-2 border-gray-300 rounded-lg text-gray-800 min-h-[60px]"
               />
               
@@ -161,7 +163,8 @@ const QuestionForm = ({ initialData, onSave, onCancel }: QuestionFormProps) => {
                 </button>
               </div>
             </div>
-          ))}
+            );
+          })}
         </div>
       </div>
 

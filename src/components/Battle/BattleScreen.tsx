@@ -51,10 +51,17 @@ type BattlePhase = 'intro-1' | 'intro-2' | 'intro-3' | 'battle-start' | 'questio
 
 type FeedbackType = 'correct' | 'wrong' | null;
 
-interface TrueFalseQuestion {
-  id: number;
+// Nova estrutura de questão com texto base e 4 afirmações
+interface Statement {
+  id: string;
   text: string;
   isTrue: boolean;
+}
+
+interface BattleQuestion {
+  id: string;
+  baseText: string;
+  statements: Statement[];
   subject: string;
 }
 
@@ -74,40 +81,103 @@ const claraSpriteByEnv: Record<1 | 2 | 3 | 4, { normal: string; happy: string }>
   4: { normal: claraMatematicaImage, happy: claraFelizCienciaImage },
 };
 
-// Perguntas por ambiente (serão substituídas pelo backend)
-const questionsByEnvironment: Record<1 | 2 | 3 | 4, TrueFalseQuestion[]> = {
+// Questões por ambiente - Novo formato com texto base e 4 afirmações V/F
+const questionsByEnvironment: Record<1 | 2 | 3 | 4, BattleQuestion[]> = {
   1: [ // Laboratório: Biologia, Química, História
-    { id: 1, text: "A mitocôndria é responsável pela produção de energia (ATP) nas células.", isTrue: true, subject: "Biologia" },
-    { id: 2, text: "O oxigênio é um gás nobre.", isTrue: false, subject: "Química" },
-    { id: 3, text: "A fotossíntese ocorre nas mitocôndrias.", isTrue: false, subject: "Biologia" },
-    { id: 4, text: "A Revolução Francesa ocorreu em 1789.", isTrue: true, subject: "História" },
-    { id: 5, text: "O átomo é a menor partícula da matéria.", isTrue: false, subject: "Química" },
+    {
+      id: 'q1_1',
+      baseText: 'Sobre a célula e suas organelas, considere os conhecimentos de biologia celular para analisar as seguintes afirmações:',
+      subject: 'Biologia',
+      statements: [
+        { id: 's1', text: 'A mitocôndria é responsável pela produção de energia (ATP) nas células.', isTrue: true },
+        { id: 's2', text: 'O núcleo contém o material genético da célula.', isTrue: true },
+        { id: 's3', text: 'O ribossomo é responsável pela fotossíntese.', isTrue: false },
+        { id: 's4', text: 'A membrana plasmática é impermeável a todas as substâncias.', isTrue: false },
+      ],
+    },
+    {
+      id: 'q1_2',
+      baseText: 'Considerando os elementos químicos e suas propriedades, analise as afirmações sobre a tabela periódica:',
+      subject: 'Química',
+      statements: [
+        { id: 's5', text: 'O oxigênio é classificado como um gás nobre.', isTrue: false },
+        { id: 's6', text: 'O átomo é a menor partícula que mantém as propriedades de um elemento.', isTrue: true },
+        { id: 's7', text: 'A água (H₂O) é composta por dois átomos de hidrogênio e um de oxigênio.', isTrue: true },
+        { id: 's8', text: 'Todos os metais são sólidos à temperatura ambiente.', isTrue: false },
+      ],
+    },
   ],
   2: [ // Auditório: Português, L. Estrangeira, Literatura
-    { id: 1, text: "Substantivo é uma classe de palavra que nomeia seres.", isTrue: true, subject: "Português" },
-    { id: 2, text: "'The' é um artigo definido em inglês.", isTrue: true, subject: "L. Estrangeira" },
-    { id: 3, text: "Machado de Assis escreveu 'Dom Casmurro'.", isTrue: true, subject: "Literatura" },
-    { id: 4, text: "Verbos são palavras que indicam qualidade.", isTrue: false, subject: "Português" },
-    { id: 5, text: "O Modernismo brasileiro começou em 1822.", isTrue: false, subject: "Literatura" },
+    {
+      id: 'q2_1',
+      baseText: 'Sobre as classes gramaticais da língua portuguesa, analise as afirmações a seguir:',
+      subject: 'Português',
+      statements: [
+        { id: 's9', text: 'Substantivo é uma classe de palavra que nomeia seres, lugares e objetos.', isTrue: true },
+        { id: 's10', text: 'Verbos são palavras que indicam qualidade ou característica.', isTrue: false },
+        { id: 's11', text: 'Adjetivos podem modificar substantivos.', isTrue: true },
+        { id: 's12', text: 'Advérbios modificam apenas verbos.', isTrue: false },
+      ],
+    },
+    {
+      id: 'q2_2',
+      baseText: 'Sobre a literatura brasileira e seus principais autores, considere as seguintes afirmações:',
+      subject: 'Literatura',
+      statements: [
+        { id: 's13', text: 'Machado de Assis escreveu "Dom Casmurro".', isTrue: true },
+        { id: 's14', text: 'O Modernismo brasileiro começou em 1822.', isTrue: false },
+        { id: 's15', text: 'A Semana de Arte Moderna ocorreu em São Paulo em 1922.', isTrue: true },
+        { id: 's16', text: 'Carlos Drummond de Andrade foi um poeta modernista.', isTrue: true },
+      ],
+    },
   ],
   3: [ // Biblioteca: Matemática, Física, Geografia
-    { id: 1, text: "A soma dos ângulos internos de um triângulo é 180°.", isTrue: true, subject: "Matemática" },
-    { id: 2, text: "A gravidade na Terra é aproximadamente 9,8 m/s².", isTrue: true, subject: "Física" },
-    { id: 3, text: "O Brasil possui 26 estados.", isTrue: false, subject: "Geografia" },
-    { id: 4, text: "Pi (π) é igual a exatamente 3,14.", isTrue: false, subject: "Matemática" },
-    { id: 5, text: "O Amazonas é o maior rio do mundo em volume de água.", isTrue: true, subject: "Geografia" },
+    {
+      id: 'q3_1',
+      baseText: 'Sobre geometria plana e suas propriedades, analise as afirmações:',
+      subject: 'Matemática',
+      statements: [
+        { id: 's17', text: 'A soma dos ângulos internos de um triângulo é 180°.', isTrue: true },
+        { id: 's18', text: 'Pi (π) é igual a exatamente 3,14.', isTrue: false },
+        { id: 's19', text: 'Um quadrado tem todos os lados iguais e ângulos retos.', isTrue: true },
+        { id: 's20', text: 'A área de um círculo é calculada por 2πr.', isTrue: false },
+      ],
+    },
+    {
+      id: 'q3_2',
+      baseText: 'Sobre geografia do Brasil e do mundo, considere as afirmações:',
+      subject: 'Geografia',
+      statements: [
+        { id: 's21', text: 'O Brasil possui 26 estados e 1 Distrito Federal.', isTrue: true },
+        { id: 's22', text: 'O Amazonas é o maior rio do mundo em volume de água.', isTrue: true },
+        { id: 's23', text: 'O Monte Everest fica na América do Sul.', isTrue: false },
+        { id: 's24', text: 'O Brasil faz fronteira com todos os países da América do Sul.', isTrue: false },
+      ],
+    },
   ],
   4: [ // Boss Final: TODAS as matérias
-    { id: 1, text: "O DNA contém as informações genéticas dos seres vivos.", isTrue: true, subject: "Biologia" },
-    { id: 2, text: "A tabela periódica possui 118 elementos.", isTrue: true, subject: "Química" },
-    { id: 3, text: "O Império Romano durou mais de 1000 anos.", isTrue: true, subject: "História" },
-    { id: 4, text: "Adjetivos são palavras que modificam verbos.", isTrue: false, subject: "Português" },
-    { id: 5, text: "'Goodbye' significa 'bom dia' em inglês.", isTrue: false, subject: "L. Estrangeira" },
-    { id: 6, text: "Fernando Pessoa criou heterônimos como Alberto Caeiro.", isTrue: true, subject: "Literatura" },
-    { id: 7, text: "A raiz quadrada de 144 é 12.", isTrue: true, subject: "Matemática" },
-    { id: 8, text: "A velocidade da luz no vácuo é infinita.", isTrue: false, subject: "Física" },
-    { id: 9, text: "O Monte Everest é a montanha mais alta do mundo.", isTrue: true, subject: "Geografia" },
-    { id: 10, text: "As células vegetais possuem parede celular.", isTrue: true, subject: "Biologia" },
+    {
+      id: 'q4_1',
+      baseText: 'Esta é a prova final! Reúna todos os seus conhecimentos para analisar as afirmações sobre ciências:',
+      subject: 'Multidisciplinar',
+      statements: [
+        { id: 's25', text: 'O DNA contém as informações genéticas dos seres vivos.', isTrue: true },
+        { id: 's26', text: 'A tabela periódica possui 118 elementos químicos conhecidos.', isTrue: true },
+        { id: 's27', text: 'A velocidade da luz no vácuo é infinita.', isTrue: false },
+        { id: 's28', text: 'A gravidade na Terra é aproximadamente 9,8 m/s².', isTrue: true },
+      ],
+    },
+    {
+      id: 'q4_2',
+      baseText: 'Analise as afirmações sobre história, literatura e gramática:',
+      subject: 'Multidisciplinar',
+      statements: [
+        { id: 's29', text: 'A Revolução Francesa ocorreu em 1789.', isTrue: true },
+        { id: 's30', text: 'Fernando Pessoa criou heterônimos como Alberto Caeiro.', isTrue: true },
+        { id: 's31', text: '"Goodbye" significa "bom dia" em inglês.', isTrue: false },
+        { id: 's32', text: 'Adjetivos são palavras que modificam verbos.', isTrue: false },
+      ],
+    },
   ],
 };
 
@@ -256,22 +326,38 @@ const BattleScreen = ({ environmentId, onBackToPatio, onProfile, onVictory }: Ba
     }
   };
 
-  const handleAnswerConfirm = (answer: boolean) => {
-    const isCorrect = answer === currentQuestion.isTrue;
+  const handleAnswerConfirm = (answers: Record<string, boolean>) => {
+    // Calcular quantas afirmações foram acertadas
+    const correctCount = currentQuestion.statements.filter(
+      s => answers[s.id] === s.isTrue
+    ).length;
+    const totalStatements = currentQuestion.statements.length;
+    const allCorrect = correctCount === totalStatements;
+    const noneCorrect = correctCount === 0;
     
     // Play sound effect based on answer (only if not muted)
     if (!settings.isMuted) {
-      playSound(isCorrect ? 'correct' : 'wrong');
+      playSound(allCorrect ? 'correct' : 'wrong');
     }
     
-    // Calculate new health values and damage dealt
-    const damageDealt = isCorrect ? damagePerCorrectAnswer : 0;
-    const newBossHealth = isCorrect ? Math.max(0, bossHealth - damagePerCorrectAnswer) : bossHealth;
-    const newPlayerHealth = isCorrect ? playerHealth : Math.max(0, playerHealth - damagePerWrongAnswer);
+    // Calcular dano proporcional ao número de acertos (cada afirmação vale 1/4 do dano)
+    const damagePerStatement = damagePerCorrectAnswer / totalStatements;
+    const damageDealt = Math.ceil(damagePerStatement * correctCount);
+    
+    // Se acertou menos da metade, jogador perde vida proporcional
+    const playerDamage = correctCount < totalStatements / 2 
+      ? Math.ceil(damagePerWrongAnswer * (1 - correctCount / totalStatements))
+      : 0;
+    
+    const newBossHealth = Math.max(0, bossHealth - damageDealt);
+    const newPlayerHealth = Math.max(0, playerHealth - playerDamage);
+    
+    // Determinar tipo de feedback
+    const feedbackType: 'correct' | 'wrong' = allCorrect ? 'correct' : 'wrong';
     
     // Store pending result and show feedback
-    setPendingResult({ isCorrect, newPlayerHealth, newBossHealth, damageDealt });
-    setFeedback(isCorrect ? 'correct' : 'wrong');
+    setPendingResult({ isCorrect: allCorrect, newPlayerHealth, newBossHealth, damageDealt });
+    setFeedback(feedbackType);
     setPhase('feedback');
   };
 
@@ -415,12 +501,13 @@ const BattleScreen = ({ environmentId, onBackToPatio, onProfile, onVictory }: Ba
         </div>
       </div>
 
-      {/* Question Phase - True/False */}
+      {/* Question Phase - True/False com 4 afirmações */}
       {(phase === 'question' || phase === 'feedback') && currentQuestion && (
         <TrueFalseCard
           questionNumber={currentQuestionIndex + 1}
           totalQuestions={questions.length}
-          questionText={currentQuestion.text}
+          baseText={currentQuestion.baseText}
+          statements={currentQuestion.statements}
           onConfirm={handleAnswerConfirm}
           disabled={phase === 'feedback'}
         />
