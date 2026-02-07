@@ -34,6 +34,15 @@ import profCienciasGargalhandoImage from '@/assets/characters/prof-ciencias-garg
 import profCienciasTristeImage from '@/assets/characters/prof-ciencias-triste.png';
 import profCienciasPurificadaImage from '@/assets/characters/prof-ciencias-purificada.png';
 
+// Import Boss sprites - Auditório (Ambiente 2)
+import profAuditorioNormalImage from '@/assets/characters/prof-auditorio-normal.png';
+import profAuditorioPurificadoImage from '@/assets/characters/prof-auditorio-purificado.png';
+import profAuditorioBossImage from '@/assets/characters/prof-auditorio-boss.png';
+import profAuditorioBossFelizImage from '@/assets/characters/prof-auditorio-boss-feliz.png';
+import profAuditorioBossGargalhandoImage from '@/assets/characters/prof-auditorio-boss-gargalhando.png';
+import profAuditorioBossTristeImage from '@/assets/characters/prof-auditorio-boss-triste.png';
+import profAuditorioArrependidoImage from '@/assets/characters/prof-auditorio-arrependido.png';
+
 // Import Effects
 import efeitoVerdeImage from '@/assets/effects/efeito-verde.png';
 
@@ -132,7 +141,7 @@ const BattleScreen = ({ environmentId, onBackToPatio, onProfile, onVictory }: Ba
   // Nome do chefão por ambiente
   const bossNameByEnv: Record<1 | 2 | 3 | 4, string> = {
     1: 'Professora de Ciências',
-    2: 'Professor de Letras',
+    2: 'Professor de Física',
     3: 'Professor de Exatas',
     4: 'Diretor Supremo',
   };
@@ -152,8 +161,19 @@ const BattleScreen = ({ environmentId, onBackToPatio, onProfile, onVictory }: Ba
   };
 
   const getBossSprite = () => {
-    // Para Ambiente 2 (Auditório), usa os mesmos sprites por enquanto
-    // TODO: Adicionar sprites específicos do professor do Auditório
+    // Ambiente 2 (Auditório) - Professor de Física
+    if (environmentId === 2) {
+      if (phase === 'victory') return profAuditorioArrependidoImage;
+      if (phase === 'defeat') return profAuditorioBossGargalhandoImage;
+      if (bossTransformed || phase === 'intro-3' || phase === 'battle-start' || phase === 'question' || phase === 'feedback') {
+        if (bossHealth < 30) return profAuditorioBossTristeImage;
+        return profAuditorioBossImage; // Boss transformado
+      }
+      if (phase === 'intro-2') return profAuditorioPurificadoImage; // Braços cruzados
+      return profAuditorioNormalImage; // intro-1: Professor falando
+    }
+
+    // Ambiente 1 (Laboratório) - Professora de Ciências
     if (phase === 'victory') return profCienciasPurificadaImage;
     if (phase === 'defeat') return profCienciasGargalhandoImage;
     if (bossTransformed || phase === 'intro-3' || phase === 'battle-start' || phase === 'question' || phase === 'feedback') {
@@ -162,7 +182,9 @@ const BattleScreen = ({ environmentId, onBackToPatio, onProfile, onVictory }: Ba
     if (bossHealth < 30) return profCienciasDestemidaImage;
     return profCienciasPurificadaImage; // Professor normal
   };
-  const showGreenEffect = phase === 'intro-1' || phase === 'intro-2' || phase === 'victory';
+
+  // Efeito verde só para ambiente 1 (Ciências)
+  const showGreenEffect = environmentId === 1 && (phase === 'intro-1' || phase === 'intro-2' || phase === 'victory');
 
   // Diálogos por ambiente e fase
   const getDialogue = () => {
