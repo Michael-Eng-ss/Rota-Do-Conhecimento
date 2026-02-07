@@ -23,9 +23,12 @@ import salaMatematicaImage from '@/assets/backgrounds/sala-matematica.png';
 import claraLaboratorioImage from '@/assets/characters/clara-laboratorio.png';
 import claraFelizCienciaImage from '@/assets/characters/clara-feliz-ciencia.png';
 import claraDuvidaImage from '@/assets/characters/clara-duvida.png';
+import claraAnimadaImage from '@/assets/characters/clara-animada.png';
+import claraCelebrandoImage from '@/assets/characters/clara-celebrando.png';
+import claraGritoImage from '@/assets/characters/clara-grito.png';
 import claraMatematicaImage from '@/assets/characters/clara-matematica.png';
 
-// Import Boss sprites
+// Import Boss sprites - Laboratório (Ambiente 1)
 import profCienciasDestemidaImage from '@/assets/characters/prof-ciencias-destemida.png';
 import profCienciasGargalhandoImage from '@/assets/characters/prof-ciencias-gargalhando.png';
 import profCienciasTristeImage from '@/assets/characters/prof-ciencias-triste.png';
@@ -34,7 +37,8 @@ import profCienciasPurificadaImage from '@/assets/characters/prof-ciencias-purif
 // Import Effects
 import efeitoVerdeImage from '@/assets/effects/efeito-verde.png';
 
-type BattlePhase = 'intro' | 'battle-start' | 'question' | 'feedback' | 'victory' | 'defeat';
+// Fases da batalha expandidas para suportar múltiplos diálogos
+type BattlePhase = 'intro-1' | 'intro-2' | 'intro-3' | 'battle-start' | 'question' | 'feedback' | 'victory' | 'defeat';
 
 type FeedbackType = 'correct' | 'wrong' | null;
 
@@ -109,7 +113,7 @@ const BattleScreen = ({ environmentId, onBackToPatio, onProfile, onVictory }: Ba
   const envConfig = environmentConfigs[environmentId];
   const questions = questionsByEnvironment[environmentId];
   
-  const [phase, setPhase] = useState<BattlePhase>('intro');
+  const [phase, setPhase] = useState<BattlePhase>('intro-1');
   const [playerHealth, setPlayerHealth] = useState(100);
   const [bossHealth, setBossHealth] = useState(envConfig.maxHealth);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
@@ -117,6 +121,7 @@ const BattleScreen = ({ environmentId, onBackToPatio, onProfile, onVictory }: Ba
   const [totalDamageDealt, setTotalDamageDealt] = useState(0);
   const [feedback, setFeedback] = useState<FeedbackType>(null);
   const [pendingResult, setPendingResult] = useState<{ isCorrect: boolean; newPlayerHealth: number; newBossHealth: number; damageDealt: number } | null>(null);
+  const [bossTransformed, setBossTransformed] = useState(false);
   const { settings, toggleMute } = useSoundSystem();
   const { playSound } = useSoundEffects();
 
@@ -137,28 +142,74 @@ const BattleScreen = ({ environmentId, onBackToPatio, onProfile, onVictory }: Ba
   };
 
   const getClaraSprite = () => {
-    if (phase === 'victory') return claraFelizCienciaImage;
-    if (phase === 'battle-start') return claraFelizCienciaImage;
-    if (phase === 'question' || phase === 'feedback') return claraFelizCienciaImage;
-    return claraLaboratorioImage;
+    if (phase === 'defeat') return claraGritoImage;
+    if (phase === 'victory') return claraCelebrandoImage;
+    if (phase === 'battle-start') return claraAnimadaImage;
+    if (phase === 'question' || phase === 'feedback') return claraAnimadaImage;
+    if (phase === 'intro-2') return claraAnimadaImage; // Clara determinada
+    if (phase === 'intro-3') return claraAnimadaImage; // Clara enfrentando boss transformado
+    return claraDuvidaImage; // intro-1: Clara surpresa
   };
 
   const getBossSprite = () => {
+    // Para Ambiente 2 (Auditório), usa os mesmos sprites por enquanto
+    // TODO: Adicionar sprites específicos do professor do Auditório
     if (phase === 'victory') return profCienciasPurificadaImage;
-    if (phase === 'defeat') return profCienciasTristeImage;
+    if (phase === 'defeat') return profCienciasGargalhandoImage;
+    if (bossTransformed || phase === 'intro-3' || phase === 'battle-start' || phase === 'question' || phase === 'feedback') {
+      return profCienciasDestemidaImage; // Boss transformado
+    }
     if (bossHealth < 30) return profCienciasDestemidaImage;
-    if (phase === 'intro') return profCienciasPurificadaImage;
-    return profCienciasGargalhandoImage;
+    return profCienciasPurificadaImage; // Professor normal
   };
+  const showGreenEffect = phase === 'intro-1' || phase === 'intro-2' || phase === 'victory';
 
-  const showGreenEffect = phase === 'intro' || phase === 'victory';
-
+  // Diálogos por ambiente e fase
   const getDialogue = () => {
+    // Diálogos específicos do Auditório (Ambiente 2)
+    if (environmentId === 2) {
+      switch (phase) {
+        case 'intro-1':
+          return {
+            speaker: 'Professor',
+            text: 'Olá, Clara, veio aqui para testar minhas perguntas e conseguir salvar a escola?',
+          };
+        case 'intro-2':
+          return {
+            speaker: 'Clara',
+            text: 'Sim, vou salvar todo mundo.',
+          };
+        case 'intro-3':
+          return {
+            speaker: 'Professor',
+            text: 'Veremos, Clara.',
+          };
+        case 'battle-start':
+          return {
+            speaker: 'Clara',
+            text: 'Vamos lá! Estou pronta para responder!',
+          };
+        default:
+          return null;
+      }
+    }
+
+    // Diálogos padrão para outros ambientes
     switch (phase) {
-      case 'intro':
+      case 'intro-1':
         return {
           speaker: 'Professora',
-          text: 'Você aqui, senhorita. Então, veio passar nos meus desafios, espero que tenha estudado bem, porque já vamos começar. Espero que esteja preparada. HAHA',
+          text: 'Você aqui, senhorita. Então, veio passar nos meus desafios?',
+        };
+      case 'intro-2':
+        return {
+          speaker: 'Professora',
+          text: 'Espero que tenha estudado bem, porque já vamos começar. Espero que esteja preparada. HAHA',
+        };
+      case 'intro-3':
+        return {
+          speaker: 'Clara',
+          text: 'Pode vir! Estou preparada para qualquer desafio!',
         };
       case 'battle-start':
         return {
@@ -171,7 +222,12 @@ const BattleScreen = ({ environmentId, onBackToPatio, onProfile, onVictory }: Ba
   };
 
   const handleDialogueClick = () => {
-    if (phase === 'intro') {
+    if (phase === 'intro-1') {
+      setPhase('intro-2');
+    } else if (phase === 'intro-2') {
+      setPhase('intro-3');
+      setBossTransformed(true);
+    } else if (phase === 'intro-3') {
       setPhase('battle-start');
     } else if (phase === 'battle-start') {
       setPhase('question');
@@ -256,7 +312,7 @@ const BattleScreen = ({ environmentId, onBackToPatio, onProfile, onVictory }: Ba
   }, [phase, settings.isMuted, playSound]);
 
   const handleRestart = () => {
-    setPhase('intro');
+    setPhase('intro-1');
     setPlayerHealth(100);
     setBossHealth(envConfig.maxHealth);
     setCurrentQuestionIndex(0);
@@ -264,6 +320,7 @@ const BattleScreen = ({ environmentId, onBackToPatio, onProfile, onVictory }: Ba
     setTotalDamageDealt(0);
     setFeedback(null);
     setPendingResult(null);
+    setBossTransformed(false);
   };
 
   const handleVictoryComplete = () => {
@@ -278,7 +335,7 @@ const BattleScreen = ({ environmentId, onBackToPatio, onProfile, onVictory }: Ba
       {/* Background */}
       <div
         className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-        style={{ backgroundImage: `url(${laboratorioImage})` }}
+        style={{ backgroundImage: `url(${backgroundByEnv[environmentId]})` }}
       />
 
       {/* Top UI - Left: Profile + Health + Sound + Menu */}
@@ -356,7 +413,7 @@ const BattleScreen = ({ environmentId, onBackToPatio, onProfile, onVictory }: Ba
       )}
 
       {/* Dialogue Phase */}
-      {(phase === 'intro' || phase === 'battle-start') && dialogue && (
+      {(phase === 'intro-1' || phase === 'intro-2' || phase === 'intro-3' || phase === 'battle-start') && dialogue && (
         <div 
           className="absolute bottom-0 left-0 right-0 p-4 md:p-8 z-20 cursor-pointer"
           onClick={handleDialogueClick}
