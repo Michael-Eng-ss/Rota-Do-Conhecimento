@@ -43,6 +43,11 @@ import profAuditorioBossGargalhandoImage from '@/assets/characters/prof-auditori
 import profAuditorioBossTristeImage from '@/assets/characters/prof-auditorio-boss-triste.png';
 import profAuditorioArrependidoImage from '@/assets/characters/prof-auditorio-arrependido.png';
 
+// Import Boss sprites - Biblioteca (Ambiente 3)
+import profBibliotecaNormalImage from '@/assets/characters/prof-biblioteca-normal.png';
+import profBibliotecaArrependidaImage from '@/assets/characters/prof-biblioteca-arrependida.png';
+import profBibliotecaBossGargalhandoImage from '@/assets/characters/prof-biblioteca-boss-gargalhando.png';
+
 // Import Effects
 import efeitoVerdeImage from '@/assets/effects/efeito-verde.png';
 
@@ -212,7 +217,7 @@ const BattleScreen = ({ environmentId, onBackToPatio, onProfile, onVictory }: Ba
   const bossNameByEnv: Record<1 | 2 | 3 | 4, string> = {
     1: 'Professora de Ciências',
     2: 'Professor de Física',
-    3: 'Professor de Exatas',
+    3: 'Professora de Humanas',
     4: 'Diretor Supremo',
   };
 
@@ -231,6 +236,17 @@ const BattleScreen = ({ environmentId, onBackToPatio, onProfile, onVictory }: Ba
   };
 
   const getBossSprite = () => {
+    // Ambiente 3 (Biblioteca) - Professora de Humanas
+    if (environmentId === 3) {
+      if (phase === 'victory') return profBibliotecaArrependidaImage;
+      if (phase === 'defeat') return profBibliotecaBossGargalhandoImage;
+      // Boss transformado usa o sprite gargalhando durante a batalha (não temos sprite boss normal)
+      if (bossTransformed || phase === 'intro-3' || phase === 'battle-start' || phase === 'question' || phase === 'feedback') {
+        return profBibliotecaBossGargalhandoImage; // Boss transformado
+      }
+      return profBibliotecaNormalImage; // Professora normal falando
+    }
+
     // Ambiente 2 (Auditório) - Professor de Física
     if (environmentId === 2) {
       if (phase === 'victory') return profAuditorioArrependidoImage;
@@ -243,7 +259,7 @@ const BattleScreen = ({ environmentId, onBackToPatio, onProfile, onVictory }: Ba
       return profAuditorioNormalImage; // intro-1: Professor falando
     }
 
-    // Ambiente 1 (Laboratório) - Professora de Ciências
+    // Ambiente 1 (Laboratório) - Professora de Ciências (padrão)
     if (phase === 'victory') return profCienciasPurificadaImage;
     if (phase === 'defeat') return profCienciasGargalhandoImage;
     if (bossTransformed || phase === 'intro-3' || phase === 'battle-start' || phase === 'question' || phase === 'feedback') {
@@ -258,6 +274,34 @@ const BattleScreen = ({ environmentId, onBackToPatio, onProfile, onVictory }: Ba
 
   // Diálogos por ambiente e fase
   const getDialogue = () => {
+    // Diálogos específicos da Biblioteca (Ambiente 3)
+    if (environmentId === 3) {
+      switch (phase) {
+        case 'intro-1':
+          return {
+            speaker: 'Clara',
+            text: 'Professora, ainda bem que você está aqui. Senti muito sua falta.',
+          };
+        case 'intro-2':
+          return {
+            speaker: 'Professora',
+            text: 'Clara, fico feliz de ver você bem, só que vim propor os desafios para você. Espero muito que você vença.',
+          };
+        case 'intro-3':
+          return {
+            speaker: 'Professora',
+            text: 'Vamos, Clara, chegou o momento.',
+          };
+        case 'battle-start':
+          return {
+            speaker: 'Clara',
+            text: 'Minha querida biblioteca... Sei que irei conseguir, vou arrumar tudo!',
+          };
+        default:
+          return null;
+      }
+    }
+
     // Diálogos específicos do Auditório (Ambiente 2)
     if (environmentId === 2) {
       switch (phase) {
@@ -286,7 +330,7 @@ const BattleScreen = ({ environmentId, onBackToPatio, onProfile, onVictory }: Ba
       }
     }
 
-    // Diálogos padrão para outros ambientes
+    // Diálogos padrão para Ambiente 1 (Laboratório) e outros
     switch (phase) {
       case 'intro-1':
         return {
