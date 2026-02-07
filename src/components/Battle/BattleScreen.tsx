@@ -141,7 +141,7 @@ const BattleScreen = ({ environmentId, onBackToPatio, onProfile, onVictory }: Ba
   // Nome do chefão por ambiente
   const bossNameByEnv: Record<1 | 2 | 3 | 4, string> = {
     1: 'Professora de Ciências',
-    2: 'Professor de Letras',
+    2: 'Professor de Física',
     3: 'Professor de Exatas',
     4: 'Diretor Supremo',
   };
