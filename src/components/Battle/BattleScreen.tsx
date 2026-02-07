@@ -7,6 +7,7 @@ import BossHealthBar from './BossHealthBar';
 import SoundButton from '@/components/Environment/SoundButton';
 import EnvironmentMenu from '@/components/Environment/EnvironmentMenu';
 import ProfileAvatar from '@/components/Environment/ProfileAvatar';
+import ProfileAvatar from '@/components/Environment/ProfileAvatar';
 import TrueFalseCard from './TrueFalseCard';
 import VictoryScreen from './VictoryScreen';
 import DefeatScreen from './DefeatScreen';
@@ -27,6 +28,14 @@ import claraAnimadaImage from '@/assets/characters/clara-animada.png';
 import claraCelebrandoImage from '@/assets/characters/clara-celebrando.png';
 import claraGritoImage from '@/assets/characters/clara-grito.png';
 import claraMatematicaImage from '@/assets/characters/clara-matematica.png';
+import claraMatematicaConfianteImage from '@/assets/characters/clara-matematica-confiante.png';
+import claraMatematicaTristeImage from '@/assets/characters/clara-matematica-triste.png';
+import claraFelizCiencia2Image from '@/assets/characters/clara-feliz-ciencia-2.png';
+import claraSorrindoImage from '@/assets/characters/clara-sorrindo.png';
+import claraOuvindoImage from '@/assets/characters/clara-ouvindo.png';
+import claraChorandoImage from '@/assets/characters/clara-chorando.png';
+import claraLabAssustadaImage from '@/assets/characters/clara-lab-assustada.png';
+import claraDuvidaDialogoImage from '@/assets/characters/clara-duvida-dialogo.png';
 
 // Import Boss sprites - Laboratório (Ambiente 1)
 import profCienciasDestemidaImage from '@/assets/characters/prof-ciencias-destemida.png';
@@ -216,6 +225,7 @@ const BattleScreen = ({ environmentId, onBackToPatio, onProfile, onVictory }: Ba
   const [score, setScore] = useState(0);
   const [totalDamageDealt, setTotalDamageDealt] = useState(0);
   const [feedback, setFeedback] = useState<FeedbackType>(null);
+  const [lastFeedback, setLastFeedback] = useState<FeedbackType>(null);
   const [pendingResult, setPendingResult] = useState<{ isCorrect: boolean; newPlayerHealth: number; newBossHealth: number; damageDealt: number } | null>(null);
   const [bossTransformed, setBossTransformed] = useState(false);
   const { settings, toggleMute } = useSoundSystem();
@@ -238,11 +248,36 @@ const BattleScreen = ({ environmentId, onBackToPatio, onProfile, onVictory }: Ba
   };
 
   const getClaraSprite = () => {
+    // Ambiente 4 (Sala de Matemática) - Clara com Compasso e Lápis
+    if (environmentId === 4) {
+      if (phase === 'defeat') return claraChorandoImage;
+      if (phase === 'victory') return claraCelebrandoImage;
+      if (phase === 'intro-1') return claraOuvindoImage; // Ouvindo a professora
+      if (phase === 'intro-2') return claraMatematicaImage; // Segurando materiais
+      if (phase === 'intro-3') return claraMatematicaConfianteImage; // Confiante com materiais
+      if (phase === 'battle-start') return claraMatematicaConfianteImage;
+      if (phase === 'question' || phase === 'feedback') {
+        if (lastFeedback === 'wrong') return claraMatematicaTristeImage; // Errou questão
+        return claraMatematicaConfianteImage;
+      }
+      return claraMatematicaImage;
+    }
+
+    // Ambiente 1 (Laboratório)
+    if (environmentId === 1) {
+      if (phase === 'victory') return claraFelizCiencia2Image;
+      if (phase === 'intro-1') return claraLabAssustadaImage;
+    }
+
+    // Padrão para outros ambientes
     if (phase === 'defeat') return claraGritoImage;
     if (phase === 'victory') return claraCelebrandoImage;
     if (phase === 'battle-start') return claraAnimadaImage;
-    if (phase === 'question' || phase === 'feedback') return claraAnimadaImage;
-    if (phase === 'intro-2') return claraAnimadaImage; // Clara determinada
+    if (phase === 'question' || phase === 'feedback') {
+        if (lastFeedback === 'wrong') return claraDuvidaDialogoImage; // Errou questão
+        return claraAnimadaImage;
+    }
+    if (phase === 'intro-2') return claraSorrindoImage; // Clara determinada/feliz
     if (phase === 'intro-3') return claraAnimadaImage; // Clara enfrentando boss transformado
     return claraDuvidaImage; // intro-1: Clara surpresa
   };
