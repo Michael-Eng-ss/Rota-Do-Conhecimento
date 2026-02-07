@@ -51,6 +51,15 @@ import profBibliotecaBossSeriaImage from '@/assets/characters/prof-biblioteca-bo
 import profBibliotecaBossGargalhandoImage from '@/assets/characters/prof-biblioteca-boss-gargalhando.png';
 import profBibliotecaBossTristeImage from '@/assets/characters/prof-biblioteca-boss-triste.png';
 
+// Import Boss sprites - Sala de Matemática (Ambiente 4 - Boss Final)
+import profMatematicaNormalImage from '@/assets/characters/prof-matematica-normal.png';
+import profMatematicaPurificadaTristeImage from '@/assets/characters/prof-matematica-purificada-triste.png';
+import profMatematicaPurificadaFelizImage from '@/assets/characters/prof-matematica-purificada-feliz.png';
+import profMatematicaBossImage from '@/assets/characters/prof-matematica-boss.png';
+import profMatematicaBossSorrindoImage from '@/assets/characters/prof-matematica-boss-sorrindo.png';
+import profMatematicaBossGargalhandoImage from '@/assets/characters/prof-matematica-boss-gargalhando.png';
+import profMatematicaBossTristeImage from '@/assets/characters/prof-matematica-boss-triste.png';
+
 // Import Effects
 import efeitoVerdeImage from '@/assets/effects/efeito-verde.png';
 
@@ -238,7 +247,26 @@ const BattleScreen = ({ environmentId, onBackToPatio, onProfile, onVictory }: Ba
     return claraDuvidaImage; // intro-1: Clara surpresa
   };
 
+
   const getBossSprite = () => {
+    // Ambiente 4 (Sala de Matemática) - Boss Final
+    if (environmentId === 4) {
+      if (phase === 'victory') return profMatematicaPurificadaFelizImage;
+      if (phase === 'defeat') return profMatematicaBossGargalhandoImage;
+      
+      // Boss transformado
+      if (bossTransformed || phase === 'battle-start' || phase === 'question' || phase === 'feedback') {
+        if (bossHealth < 30) return profMatematicaBossTristeImage;
+        if (phase === 'question' || phase === 'feedback') return profMatematicaBossImage; // Séria
+        return profMatematicaBossSorrindoImage; // Confiante/Sorrindo
+      }
+
+      // Fases de Intro (Professora "Normal")
+      if (phase === 'intro-2') return profMatematicaPurificadaTristeImage; // Emocionada
+      if (phase === 'intro-3') return profMatematicaNormalImage; // Ouvindo Clara
+      return profMatematicaNormalImage; // intro-1
+    }
+
     // Ambiente 3 (Biblioteca) - Professora de Humanas
     if (environmentId === 3) {
       if (phase === 'victory') return profBibliotecaPurificadaImage;
@@ -329,6 +357,34 @@ const BattleScreen = ({ environmentId, onBackToPatio, onProfile, onVictory }: Ba
           return {
             speaker: 'Clara',
             text: 'Vamos lá! Estou pronta para responder!',
+          };
+        default:
+          return null;
+      }
+    }
+
+    // Diálogos específicos da Sala de Matemática (Ambiente 4)
+    if (environmentId === 4) {
+      switch (phase) {
+        case 'intro-1':
+          return {
+            speaker: 'Clara',
+            text: 'Professora! Você está aqui, estava muito preocupada com você, sabe tanto que gosto de você, como você está?',
+          };
+        case 'intro-2':
+          return {
+            speaker: 'Professora',
+            text: 'Estou bem, Clara, só que hoje eu não poderei relevar erros. Espero muito de você agora. Lembra de quando estudei com você até tarde? Agora é a hora!',
+          };
+        case 'intro-3':
+          return {
+            speaker: 'Clara',
+            text: 'Senhora, lembra quando me deu esse lápis e esse compasso? Hoje não irei decepcioná-la, pode ter certeza.',
+          };
+        case 'battle-start':
+          return {
+            speaker: 'Professora',
+            text: 'Agora é o momento!',
           };
         default:
           return null;
