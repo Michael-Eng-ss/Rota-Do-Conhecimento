@@ -44,9 +44,12 @@ import profAuditorioBossTristeImage from '@/assets/characters/prof-auditorio-bos
 import profAuditorioArrependidoImage from '@/assets/characters/prof-auditorio-arrependido.png';
 
 // Import Boss sprites - Biblioteca (Ambiente 3)
-import profBibliotecaNormalImage from '@/assets/characters/prof-biblioteca-normal.png';
-import profBibliotecaArrependidaImage from '@/assets/characters/prof-biblioteca-arrependida.png';
+import profBibliotecaDialogoImage from '@/assets/characters/prof-biblioteca-dialogo.png';
+import profBibliotecaPurificadaImage from '@/assets/characters/prof-biblioteca-purificada.png';
+import profBibliotecaBossImage from '@/assets/characters/prof-biblioteca-boss.png';
+import profBibliotecaBossSeriaImage from '@/assets/characters/prof-biblioteca-boss-seria.png';
 import profBibliotecaBossGargalhandoImage from '@/assets/characters/prof-biblioteca-boss-gargalhando.png';
+import profBibliotecaBossTristeImage from '@/assets/characters/prof-biblioteca-boss-triste.png';
 
 // Import Effects
 import efeitoVerdeImage from '@/assets/effects/efeito-verde.png';
@@ -238,13 +241,15 @@ const BattleScreen = ({ environmentId, onBackToPatio, onProfile, onVictory }: Ba
   const getBossSprite = () => {
     // Ambiente 3 (Biblioteca) - Professora de Humanas
     if (environmentId === 3) {
-      if (phase === 'victory') return profBibliotecaArrependidaImage;
+      if (phase === 'victory') return profBibliotecaPurificadaImage;
       if (phase === 'defeat') return profBibliotecaBossGargalhandoImage;
-      // Boss transformado usa o sprite gargalhando durante a batalha (não temos sprite boss normal)
+      // Boss transformado
       if (bossTransformed || phase === 'intro-3' || phase === 'battle-start' || phase === 'question' || phase === 'feedback') {
-        return profBibliotecaBossGargalhandoImage; // Boss transformado
+        if (bossHealth < 30) return profBibliotecaBossTristeImage; // Quando Clara está vencendo
+        if (phase === 'question' || phase === 'feedback') return profBibliotecaBossSeriaImage; // Séria durante questões
+        return profBibliotecaBossImage; // Boss transformado com sorriso maligno
       }
-      return profBibliotecaNormalImage; // Professora normal falando
+      return profBibliotecaDialogoImage; // Professora normal falando (diálogo)
     }
 
     // Ambiente 2 (Auditório) - Professor de Física
