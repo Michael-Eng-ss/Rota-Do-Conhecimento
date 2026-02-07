@@ -7,7 +7,6 @@ import BossHealthBar from './BossHealthBar';
 import SoundButton from '@/components/Environment/SoundButton';
 import EnvironmentMenu from '@/components/Environment/EnvironmentMenu';
 import ProfileAvatar from '@/components/Environment/ProfileAvatar';
-import ProfileAvatar from '@/components/Environment/ProfileAvatar';
 import TrueFalseCard from './TrueFalseCard';
 import VictoryScreen from './VictoryScreen';
 import DefeatScreen from './DefeatScreen';
