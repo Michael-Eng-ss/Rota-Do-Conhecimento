@@ -5,6 +5,7 @@ import RegisterScreen from '@/components/Screens/RegisterScreen';
 import ResetPasswordScreen from '@/components/Screens/ResetPasswordScreen';
 import RankingScreen from '@/components/Screens/RankingScreen';
 import ProfileScreen from '@/components/Screens/ProfileScreen';
+import AdminLoginScreen from '@/components/Screens/AdminLoginScreen';
 import QuestionAdminScreen from '@/components/Screens/QuestionAdminScreen';
 import VisualNovelGame from '@/components/VisualNovel/VisualNovelGame';
 import EnvironmentScreen from '@/components/Environment/EnvironmentScreen';
@@ -20,6 +21,7 @@ type GameScreen =
   | 'cutscene'
   | 'environmentSelection'
   | 'environment'
+  | 'adminLogin'
   | 'questionAdmin';
 
 const GameManager = () => {
@@ -71,6 +73,7 @@ const GameManager = () => {
             onLogin={() => setCurrentScreen('menu')}
             onRegister={() => setCurrentScreen('register')}
             onForgotPassword={() => setCurrentScreen('resetPassword')}
+            onAdminLogin={() => setCurrentScreen('adminLogin')}
           />
         );
       
@@ -81,7 +84,6 @@ const GameManager = () => {
             onRanking={() => setCurrentScreen('ranking')}
             onProfile={() => handleProfile('menu')}
             onBack={() => setCurrentScreen('login')}
-            onQuestionAdmin={() => setCurrentScreen('questionAdmin')}
           />
         );
       
@@ -147,10 +149,18 @@ const GameManager = () => {
           />
         );
       
+      case 'adminLogin':
+        return (
+          <AdminLoginScreen
+            onLogin={() => setCurrentScreen('questionAdmin')}
+            onBack={() => setCurrentScreen('login')}
+          />
+        );
+      
       case 'questionAdmin':
         return (
           <QuestionAdminScreen
-            onBack={() => setCurrentScreen('menu')}
+            onBack={() => setCurrentScreen('adminLogin')}
           />
         );
       

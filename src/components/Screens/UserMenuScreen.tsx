@@ -7,10 +7,9 @@ interface UserMenuScreenProps {
   onRanking: () => void;
   onProfile: () => void;
   onBack: () => void;
-  onQuestionAdmin?: () => void;
 }
 
-const UserMenuScreen = ({ onStart, onRanking, onProfile, onBack, onQuestionAdmin }: UserMenuScreenProps) => {
+const UserMenuScreen = ({ onStart, onRanking, onProfile, onBack }: UserMenuScreenProps) => {
   return (
     <GameBackground>
       <div className="flex flex-col items-center justify-start min-h-screen pt-8 md:pt-12 px-4">
@@ -28,12 +27,6 @@ const UserMenuScreen = ({ onStart, onRanking, onProfile, onBack, onQuestionAdmin
           <GameButton onClick={onProfile} className="w-48">
             Perfil
           </GameButton>
-          
-          {onQuestionAdmin && (
-            <GameButton onClick={onQuestionAdmin} className="w-48">
-              Perguntas
-            </GameButton>
-          )}
           
           <GameButton onClick={onBack} variant="secondary" className="w-48">
             Voltar
