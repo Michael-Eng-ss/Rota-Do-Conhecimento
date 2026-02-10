@@ -72,7 +72,7 @@ import profMatematicaBossTristeImage from '@/assets/characters/prof-matematica-b
 import efeitoVerdeImage from '@/assets/effects/efeito-verde.png';
 
 // Fases da batalha expandidas para suportar múltiplos diálogos
-type BattlePhase = 'intro-1' | 'intro-2' | 'intro-3' | 'battle-start' | 'question' | 'feedback' | 'victory' | 'defeat';
+type BattlePhase = 'intro-1' | 'intro-2' | 'intro-3' | 'battle-start' | 'question' | 'feedback' | 'review' | 'victory' | 'defeat';
 
 type FeedbackType = 'correct' | 'wrong' | null;
 
@@ -226,6 +226,7 @@ const BattleScreen = ({ environmentId, onBackToPatio, onProfile, onVictory }: Ba
   const [feedback, setFeedback] = useState<FeedbackType>(null);
   const [lastFeedback, setLastFeedback] = useState<FeedbackType>(null);
   const [pendingResult, setPendingResult] = useState<{ isCorrect: boolean; newPlayerHealth: number; newBossHealth: number; damageDealt: number } | null>(null);
+  const [reviewResults, setReviewResults] = useState<{ statementId: string; userAnswer: boolean; correctAnswer: boolean; isCorrect: boolean }[]>([]);
   const [bossTransformed, setBossTransformed] = useState(false);
   const { settings, toggleMute } = useSoundSystem();
   const { playSound } = useSoundEffects();
@@ -255,7 +256,7 @@ const BattleScreen = ({ environmentId, onBackToPatio, onProfile, onVictory }: Ba
       if (phase === 'intro-2') return claraMatematicaImage; // Segurando materiais
       if (phase === 'intro-3') return claraMatematicaConfianteImage; // Confiante com materiais
       if (phase === 'battle-start') return claraMatematicaConfianteImage;
-      if (phase === 'question' || phase === 'feedback') {
+      if (phase === 'question' || phase === 'feedback' || phase === 'review') {
         if (lastFeedback === 'wrong') return claraMatematicaTristeImage; // Errou questão
         return claraMatematicaConfianteImage;
       }
@@ -272,7 +273,7 @@ const BattleScreen = ({ environmentId, onBackToPatio, onProfile, onVictory }: Ba
     if (phase === 'defeat') return claraGritoImage;
     if (phase === 'victory') return claraCelebrandoImage;
     if (phase === 'battle-start') return claraAnimadaImage;
-    if (phase === 'question' || phase === 'feedback') {
+    if (phase === 'question' || phase === 'feedback' || phase === 'review') {
         if (lastFeedback === 'wrong') return claraDuvidaDialogoImage; // Errou questão
         return claraAnimadaImage;
     }
@@ -289,10 +290,10 @@ const BattleScreen = ({ environmentId, onBackToPatio, onProfile, onVictory }: Ba
       if (phase === 'defeat') return profMatematicaBossGargalhandoImage;
       
       // Boss transformado
-      if (bossTransformed || phase === 'battle-start' || phase === 'question' || phase === 'feedback') {
+      if (bossTransformed || phase === 'battle-start' || phase === 'question' || phase === 'feedback' || phase === 'review') {
         if (bossHealth < 30) return profMatematicaBossTristeImage;
-        if (phase === 'question' || phase === 'feedback') return profMatematicaBossImage; // Séria
-        return profMatematicaBossSorrindoImage; // Confiante/Sorrindo
+        if (phase === 'question' || phase === 'feedback' || phase === 'review') return profMatematicaBossImage;
+        return profMatematicaBossSorrindoImage;
       }
 
       // Fases de Intro (Professora "Normal")
@@ -306,10 +307,10 @@ const BattleScreen = ({ environmentId, onBackToPatio, onProfile, onVictory }: Ba
       if (phase === 'victory') return profBibliotecaPurificadaImage;
       if (phase === 'defeat') return profBibliotecaBossGargalhandoImage;
       // Boss transformado
-      if (bossTransformed || phase === 'intro-3' || phase === 'battle-start' || phase === 'question' || phase === 'feedback') {
-        if (bossHealth < 30) return profBibliotecaBossTristeImage; // Quando Clara está vencendo
-        if (phase === 'question' || phase === 'feedback') return profBibliotecaBossSeriaImage; // Séria durante questões
-        return profBibliotecaBossImage; // Boss transformado com sorriso maligno
+      if (bossTransformed || phase === 'intro-3' || phase === 'battle-start' || phase === 'question' || phase === 'feedback' || phase === 'review') {
+        if (bossHealth < 30) return profBibliotecaBossTristeImage;
+        if (phase === 'question' || phase === 'feedback' || phase === 'review') return profBibliotecaBossSeriaImage;
+        return profBibliotecaBossImage;
       }
       return profBibliotecaDialogoImage; // Professora normal falando (diálogo)
     }
@@ -318,7 +319,7 @@ const BattleScreen = ({ environmentId, onBackToPatio, onProfile, onVictory }: Ba
     if (environmentId === 2) {
       if (phase === 'victory') return profAuditorioArrependidoImage;
       if (phase === 'defeat') return profAuditorioBossGargalhandoImage;
-      if (bossTransformed || phase === 'intro-3' || phase === 'battle-start' || phase === 'question' || phase === 'feedback') {
+      if (bossTransformed || phase === 'intro-3' || phase === 'battle-start' || phase === 'question' || phase === 'feedback' || phase === 'review') {
         if (bossHealth < 30) return profAuditorioBossTristeImage;
         return profAuditorioBossImage; // Boss transformado
       }
@@ -329,7 +330,7 @@ const BattleScreen = ({ environmentId, onBackToPatio, onProfile, onVictory }: Ba
     // Ambiente 1 (Laboratório) - Professora de Ciências (padrão)
     if (phase === 'victory') return profCienciasPurificadaImage;
     if (phase === 'defeat') return profCienciasGargalhandoImage;
-    if (bossTransformed || phase === 'intro-3' || phase === 'battle-start' || phase === 'question' || phase === 'feedback') {
+    if (bossTransformed || phase === 'intro-3' || phase === 'battle-start' || phase === 'question' || phase === 'feedback' || phase === 'review') {
       return profCienciasDestemidaImage; // Boss transformado
     }
     if (bossHealth < 30) return profCienciasDestemidaImage;
@@ -494,6 +495,15 @@ const BattleScreen = ({ environmentId, onBackToPatio, onProfile, onVictory }: Ba
     // Determinar tipo de feedback
     const feedbackType: 'correct' | 'wrong' = allCorrect ? 'correct' : 'wrong';
     
+    // Store review results for display
+    const results = currentQuestion.statements.map(s => ({
+      statementId: s.id,
+      userAnswer: answers[s.id] ?? false,
+      correctAnswer: s.isTrue,
+      isCorrect: answers[s.id] === s.isTrue,
+    }));
+    setReviewResults(results);
+
     // Store pending result and show feedback
     setPendingResult({ isCorrect: allCorrect, newPlayerHealth, newBossHealth, damageDealt });
     setFeedback(feedbackType);
@@ -514,17 +524,28 @@ const BattleScreen = ({ environmentId, onBackToPatio, onProfile, onVictory }: Ba
       setPlayerHealth(newPlayerHealth);
     }
 
-    // Clear feedback
+    // Clear feedback overlay, go to review phase
     setFeedback(null);
-    setPendingResult(null);
+    setLastFeedback(isCorrect ? 'correct' : 'wrong');
+    setPhase('review');
+  }, [pendingResult]);
 
-    // Check for player defeat (vida do jogador zerou)
+  const handleReviewContinue = useCallback(() => {
+    if (!pendingResult) return;
+    
+    const { isCorrect, newPlayerHealth, newBossHealth, damageDealt } = pendingResult;
+
+    // Clear pending
+    setPendingResult(null);
+    setReviewResults([]);
+
+    // Check for player defeat
     if (!isCorrect && newPlayerHealth <= 0) {
       setPhase('defeat');
       return;
     }
 
-    // Check for victory (boss derrotado)
+    // Check for victory
     if (isCorrect && newBossHealth <= 0) {
       setPhase('victory');
       return;
@@ -535,7 +556,6 @@ const BattleScreen = ({ environmentId, onBackToPatio, onProfile, onVictory }: Ba
       setCurrentQuestionIndex(prev => prev + 1);
       setPhase('question');
     } else {
-      // Todas as perguntas respondidas - verificar se atingiu 80%
       const finalDamage = isCorrect ? totalDamageDealt + damageDealt : totalDamageDealt;
       const damagePercentage = finalDamage / envConfig.maxHealth;
       
@@ -568,6 +588,7 @@ const BattleScreen = ({ environmentId, onBackToPatio, onProfile, onVictory }: Ba
     setFeedback(null);
     setPendingResult(null);
     setBossTransformed(false);
+    setReviewResults([]);
   };
 
   const handleVictoryComplete = () => {
@@ -649,6 +670,21 @@ const BattleScreen = ({ environmentId, onBackToPatio, onProfile, onVictory }: Ba
           statements={currentQuestion.statements}
           onConfirm={handleAnswerConfirm}
           disabled={phase === 'feedback'}
+        />
+      )}
+
+      {/* Review Phase - Show correct/incorrect per statement */}
+      {phase === 'review' && currentQuestion && (
+        <TrueFalseCard
+          questionNumber={currentQuestionIndex + 1}
+          totalQuestions={questions.length}
+          baseText={currentQuestion.baseText}
+          statements={currentQuestion.statements}
+          onConfirm={handleAnswerConfirm}
+          disabled={true}
+          reviewMode={true}
+          reviewResults={reviewResults}
+          onContinue={handleReviewContinue}
         />
       )}
 
