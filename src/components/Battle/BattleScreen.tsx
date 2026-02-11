@@ -1,5 +1,6 @@
 import { useState, useCallback, useEffect } from 'react';
 import { useSoundSystem } from '@/hooks/useSoundSystem';
+import { useQuestions } from '@/hooks/useQuestions';
 import { useSoundEffects } from '@/hooks/useSoundEffects';
 import { environmentConfigs, MIN_PASS_PERCENTAGE, getDamagePercentage } from '@/config/environments';
 import HealthBar from '@/components/Environment/HealthBar';
@@ -105,107 +106,6 @@ const claraSpriteByEnv: Record<1 | 2 | 3 | 4, { normal: string; happy: string }>
   3: { normal: claraDuvidaImage, happy: claraFelizCienciaImage },
   4: { normal: claraMatematicaImage, happy: claraFelizCienciaImage },
 };
-
-// Questões por ambiente - Novo formato com texto base e 4 afirmações V/F
-const questionsByEnvironment: Record<1 | 2 | 3 | 4, BattleQuestion[]> = {
-  1: [ // Laboratório: Biologia, Química, História
-    {
-      id: 'q1_1',
-      baseText: 'Sobre a célula e suas organelas, considere os conhecimentos de biologia celular para analisar as seguintes afirmações:',
-      subject: 'Biologia',
-      statements: [
-        { id: 's1', text: 'A mitocôndria é responsável pela produção de energia (ATP) nas células.', isTrue: true },
-        { id: 's2', text: 'O núcleo contém o material genético da célula.', isTrue: true },
-        { id: 's3', text: 'O ribossomo é responsável pela fotossíntese.', isTrue: false },
-        { id: 's4', text: 'A membrana plasmática é impermeável a todas as substâncias.', isTrue: false },
-      ],
-    },
-    {
-      id: 'q1_2',
-      baseText: 'Considerando os elementos químicos e suas propriedades, analise as afirmações sobre a tabela periódica:',
-      subject: 'Química',
-      statements: [
-        { id: 's5', text: 'O oxigênio é classificado como um gás nobre.', isTrue: false },
-        { id: 's6', text: 'O átomo é a menor partícula que mantém as propriedades de um elemento.', isTrue: true },
-        { id: 's7', text: 'A água (H₂O) é composta por dois átomos de hidrogênio e um de oxigênio.', isTrue: true },
-        { id: 's8', text: 'Todos os metais são sólidos à temperatura ambiente.', isTrue: false },
-      ],
-    },
-  ],
-  2: [ // Auditório: Português, L. Estrangeira, Literatura
-    {
-      id: 'q2_1',
-      baseText: 'Sobre as classes gramaticais da língua portuguesa, analise as afirmações a seguir:',
-      subject: 'Português',
-      statements: [
-        { id: 's9', text: 'Substantivo é uma classe de palavra que nomeia seres, lugares e objetos.', isTrue: true },
-        { id: 's10', text: 'Verbos são palavras que indicam qualidade ou característica.', isTrue: false },
-        { id: 's11', text: 'Adjetivos podem modificar substantivos.', isTrue: true },
-        { id: 's12', text: 'Advérbios modificam apenas verbos.', isTrue: false },
-      ],
-    },
-    {
-      id: 'q2_2',
-      baseText: 'Sobre a literatura brasileira e seus principais autores, considere as seguintes afirmações:',
-      subject: 'Literatura',
-      statements: [
-        { id: 's13', text: 'Machado de Assis escreveu "Dom Casmurro".', isTrue: true },
-        { id: 's14', text: 'O Modernismo brasileiro começou em 1822.', isTrue: false },
-        { id: 's15', text: 'A Semana de Arte Moderna ocorreu em São Paulo em 1922.', isTrue: true },
-        { id: 's16', text: 'Carlos Drummond de Andrade foi um poeta modernista.', isTrue: true },
-      ],
-    },
-  ],
-  3: [ // Biblioteca: Matemática, Física, Geografia
-    {
-      id: 'q3_1',
-      baseText: 'Sobre geometria plana e suas propriedades, analise as afirmações:',
-      subject: 'Matemática',
-      statements: [
-        { id: 's17', text: 'A soma dos ângulos internos de um triângulo é 180°.', isTrue: true },
-        { id: 's18', text: 'Pi (π) é igual a exatamente 3,14.', isTrue: false },
-        { id: 's19', text: 'Um quadrado tem todos os lados iguais e ângulos retos.', isTrue: true },
-        { id: 's20', text: 'A área de um círculo é calculada por 2πr.', isTrue: false },
-      ],
-    },
-    {
-      id: 'q3_2',
-      baseText: 'Sobre geografia do Brasil e do mundo, considere as afirmações:',
-      subject: 'Geografia',
-      statements: [
-        { id: 's21', text: 'O Brasil possui 26 estados e 1 Distrito Federal.', isTrue: true },
-        { id: 's22', text: 'O Amazonas é o maior rio do mundo em volume de água.', isTrue: true },
-        { id: 's23', text: 'O Monte Everest fica na América do Sul.', isTrue: false },
-        { id: 's24', text: 'O Brasil faz fronteira com todos os países da América do Sul.', isTrue: false },
-      ],
-    },
-  ],
-  4: [ // Boss Final: TODAS as matérias
-    {
-      id: 'q4_1',
-      baseText: 'Esta é a prova final! Reúna todos os seus conhecimentos para analisar as afirmações sobre ciências:',
-      subject: 'Multidisciplinar',
-      statements: [
-        { id: 's25', text: 'O DNA contém as informações genéticas dos seres vivos.', isTrue: true },
-        { id: 's26', text: 'A tabela periódica possui 118 elementos químicos conhecidos.', isTrue: true },
-        { id: 's27', text: 'A velocidade da luz no vácuo é infinita.', isTrue: false },
-        { id: 's28', text: 'A gravidade na Terra é aproximadamente 9,8 m/s².', isTrue: true },
-      ],
-    },
-    {
-      id: 'q4_2',
-      baseText: 'Analise as afirmações sobre história, literatura e gramática:',
-      subject: 'Multidisciplinar',
-      statements: [
-        { id: 's29', text: 'A Revolução Francesa ocorreu em 1789.', isTrue: true },
-        { id: 's30', text: 'Fernando Pessoa criou heterônimos como Alberto Caeiro.', isTrue: true },
-        { id: 's31', text: '"Goodbye" significa "bom dia" em inglês.', isTrue: false },
-        { id: 's32', text: 'Adjetivos são palavras que modificam verbos.', isTrue: false },
-      ],
-    },
-  ],
-};
-
 interface BattleScreenProps {
   environmentId: 1 | 2 | 3 | 4;
   onBackToPatio: () => void;
@@ -215,7 +115,9 @@ interface BattleScreenProps {
 
 const BattleScreen = ({ environmentId, onBackToPatio, onProfile, onVictory }: BattleScreenProps) => {
   const envConfig = environmentConfigs[environmentId];
-  const questions = questionsByEnvironment[environmentId];
+  const { fetchBattleQuestions } = useQuestions();
+  const [questions, setQuestions] = useState<BattleQuestion[]>([]);
+  const [questionsLoaded, setQuestionsLoaded] = useState(false);
   
   const [phase, setPhase] = useState<BattlePhase>('intro-1');
   const [playerHealth, setPlayerHealth] = useState(100);
@@ -231,9 +133,19 @@ const BattleScreen = ({ environmentId, onBackToPatio, onProfile, onVictory }: Ba
   const { settings, toggleMute } = useSoundSystem();
   const { playSound } = useSoundEffects();
 
+  // Load questions from database
+  useEffect(() => {
+    const loadQuestions = async () => {
+      const fetched = await fetchBattleQuestions(environmentId);
+      setQuestions(fetched);
+      setQuestionsLoaded(true);
+    };
+    loadQuestions();
+  }, [environmentId, fetchBattleQuestions]);
+
   const currentQuestion = questions[currentQuestionIndex];
-  const damagePerWrongAnswer = Math.ceil(100 / questions.length);
-  const damagePerCorrectAnswer = Math.ceil(envConfig.maxHealth / questions.length);
+  const damagePerWrongAnswer = questions.length > 0 ? Math.ceil(100 / questions.length) : 50;
+  const damagePerCorrectAnswer = questions.length > 0 ? Math.ceil(envConfig.maxHealth / questions.length) : 50;
   
   // Nome do chefão por ambiente
   const bossNameByEnv: Record<1 | 2 | 3 | 4, string> = {
