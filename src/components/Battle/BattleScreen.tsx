@@ -385,27 +385,29 @@ const BattleScreen = ({ environmentId, onBackToPatio, onProfile, onVictory }: Ba
     ).length;
     const totalStatements = currentQuestion.statements.length;
     const allCorrect = correctCount === totalStatements;
-    const noneCorrect = correctCount === 0;
+    const correctRatio = correctCount / totalStatements; // 0, 0.25, 0.5, 0.75, 1
     
     // Play sound effect based on answer (only if not muted)
     if (!settings.isMuted) {
-      playSound(allCorrect ? 'correct' : 'wrong');
+      playSound(correctRatio >= 0.5 ? 'correct' : 'wrong');
     }
     
-    // Calcular dano proporcional ao número de acertos (cada afirmação vale 1/4 do dano)
+    // === DANO NO BOSS (proporcional aos acertos) ===
+    // Cada afirmação correta causa 1/4 do dano da rodada
     const damagePerStatement = damagePerCorrectAnswer / totalStatements;
-    const damageDealt = Math.ceil(damagePerStatement * correctCount);
+    const damageDealt = Math.round(damagePerStatement * correctCount);
     
-    // Se acertou menos da metade, jogador perde vida proporcional
-    const playerDamage = correctCount < totalStatements / 2 
-      ? Math.ceil(damagePerWrongAnswer * (1 - correctCount / totalStatements))
-      : 0;
+    // === DANO NA CLARA (proporcional aos erros) ===
+    // Cada afirmação errada causa 1/4 do dano de erro da rodada
+    const wrongCount = totalStatements - correctCount;
+    const playerDamagePerError = damagePerWrongAnswer / totalStatements;
+    const playerDamage = Math.round(playerDamagePerError * wrongCount);
     
     const newBossHealth = Math.max(0, bossHealth - damageDealt);
     const newPlayerHealth = Math.max(0, playerHealth - playerDamage);
     
-    // Determinar tipo de feedback
-    const feedbackType: 'correct' | 'wrong' = allCorrect ? 'correct' : 'wrong';
+    // Determinar tipo de feedback (positivo se acertou pelo menos metade)
+    const feedbackType: 'correct' | 'wrong' = correctRatio >= 0.5 ? 'correct' : 'wrong';
     
     // Store review results for display
     const results = currentQuestion.statements.map(s => ({
@@ -417,7 +419,7 @@ const BattleScreen = ({ environmentId, onBackToPatio, onProfile, onVictory }: Ba
     setReviewResults(results);
 
     // Store pending result and show feedback
-    setPendingResult({ isCorrect: allCorrect, newPlayerHealth, newBossHealth, damageDealt });
+    setPendingResult({ isCorrect: correctRatio >= 0.5, newPlayerHealth, newBossHealth, damageDealt });
     setFeedback(feedbackType);
     setPhase('feedback');
   };
@@ -425,52 +427,46 @@ const BattleScreen = ({ environmentId, onBackToPatio, onProfile, onVictory }: Ba
   const handleFeedbackEnd = useCallback(() => {
     if (!pendingResult) return;
     
-    const { isCorrect, newPlayerHealth, newBossHealth, damageDealt } = pendingResult;
+    const { newPlayerHealth, newBossHealth, damageDealt } = pendingResult;
     
-    // Apply health changes
-    if (isCorrect) {
-      setScore(prev => prev + 1);
-      setBossHealth(newBossHealth);
-      setTotalDamageDealt(prev => prev + damageDealt);
-    } else {
-      setPlayerHealth(newPlayerHealth);
-    }
+    // ALWAYS apply health changes (both boss and player take damage every round)
+    setScore(prev => prev + (pendingResult.isCorrect ? 1 : 0));
+    setBossHealth(newBossHealth);
+    setPlayerHealth(newPlayerHealth);
+    setTotalDamageDealt(prev => prev + damageDealt);
 
     // Clear feedback overlay, go to review phase
     setFeedback(null);
-    setLastFeedback(isCorrect ? 'correct' : 'wrong');
+    setLastFeedback(pendingResult.isCorrect ? 'correct' : 'wrong');
     setPhase('review');
   }, [pendingResult]);
 
   const handleReviewContinue = useCallback(() => {
     if (!pendingResult) return;
     
-    const { isCorrect, newPlayerHealth, newBossHealth, damageDealt } = pendingResult;
+    const { newPlayerHealth, newBossHealth, damageDealt } = pendingResult;
 
     // Clear pending
     setPendingResult(null);
     setReviewResults([]);
 
-    // Check for player defeat
-    if (!isCorrect && newPlayerHealth <= 0) {
+    // Check for player defeat (Clara's health reached 0)
+    if (newPlayerHealth <= 0) {
       setPhase('defeat');
       return;
     }
 
-    // Check for victory
-    if (isCorrect && newBossHealth <= 0) {
-      setPhase('victory');
-      return;
-    }
-
-    // Next question or end
+    // Next question or final evaluation
     if (currentQuestionIndex < questions.length - 1) {
       setCurrentQuestionIndex(prev => prev + 1);
       setPhase('question');
     } else {
-      const finalDamage = isCorrect ? totalDamageDealt + damageDealt : totalDamageDealt;
+      // === VERIFICAÇÃO FINAL DOS 80% ===
+      // Calcular dano total causado ao boss (incluindo esta rodada)
+      const finalDamage = totalDamageDealt + damageDealt;
       const damagePercentage = finalDamage / envConfig.maxHealth;
       
+      // O jogador PRECISA ter causado pelo menos 80% de dano para vencer
       if (damagePercentage >= MIN_PASS_PERCENTAGE) {
         setPhase('victory');
       } else {
