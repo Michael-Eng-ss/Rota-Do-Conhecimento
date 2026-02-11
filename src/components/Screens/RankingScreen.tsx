@@ -1,8 +1,11 @@
+import { useState, useEffect } from 'react';
 import { ArrowLeft, Trophy, Medal, Award } from 'lucide-react';
 import GameBackground from '../Game/GameBackground';
 import GameHeader from '../Game/GameHeader';
 import GameButton from '../Game/GameButton';
 import GameFormCard from '../Game/GameFormCard';
+import { supabase } from '@/integrations/supabase/client';
+import { environmentConfigs } from '@/config/environments';
 
 interface RankingScreenProps {
   onBack: () => void;
@@ -12,21 +15,37 @@ interface PlayerRank {
   position: number;
   name: string;
   score: number;
-  difficulty: 'Fácil' | 'Médio' | 'Difícil';
+  completedCount: number;
+  avatarId: string;
 }
 
-const mockRanking: PlayerRank[] = [
-  { position: 1, name: 'Clara Silva', score: 9850, difficulty: 'Difícil' },
-  { position: 2, name: 'João Pedro', score: 8720, difficulty: 'Difícil' },
-  { position: 3, name: 'Maria Santos', score: 7650, difficulty: 'Médio' },
-  { position: 4, name: 'Lucas Oliveira', score: 6890, difficulty: 'Médio' },
-  { position: 5, name: 'Ana Costa', score: 5430, difficulty: 'Fácil' },
-  { position: 6, name: 'Pedro Lima', score: 4920, difficulty: 'Fácil' },
-  { position: 7, name: 'Julia Ferreira', score: 4210, difficulty: 'Médio' },
-  { position: 8, name: 'Rafael Souza', score: 3890, difficulty: 'Fácil' },
-];
-
 const RankingScreen = ({ onBack }: RankingScreenProps) => {
+  const [ranking, setRanking] = useState<PlayerRank[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchRanking = async () => {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('display_name, total_score, completed_environments, avatar_id')
+        .order('total_score', { ascending: false })
+        .limit(20);
+
+      if (!error && data) {
+        setRanking(data.map((p, i) => ({
+          position: i + 1,
+          name: p.display_name,
+          score: p.total_score,
+          completedCount: (p.completed_environments || []).length,
+          avatarId: p.avatar_id,
+        })));
+      }
+      setLoading(false);
+    };
+    fetchRanking();
+  }, []);
+
   const getPositionIcon = (position: number) => {
     switch (position) {
       case 1:
@@ -40,17 +59,11 @@ const RankingScreen = ({ onBack }: RankingScreenProps) => {
     }
   };
 
-  const getDifficultyColor = (difficulty: string) => {
-    switch (difficulty) {
-      case 'Fácil':
-        return 'bg-green-500/80';
-      case 'Médio':
-        return 'bg-yellow-500/80';
-      case 'Difícil':
-        return 'bg-red-500/80';
-      default:
-        return 'bg-gray-500/80';
-    }
+  const getProgressLabel = (count: number) => {
+    if (count === 4) return { text: 'Completo', color: 'bg-green-500/80' };
+    if (count >= 2) return { text: `${count}/4 ambientes`, color: 'bg-yellow-500/80' };
+    if (count === 1) return { text: '1/4 ambiente', color: 'bg-blue-500/80' };
+    return { text: 'Iniciante', color: 'bg-gray-500/80' };
   };
 
   const getRowBackground = (position: number) => {
@@ -72,28 +85,41 @@ const RankingScreen = ({ onBack }: RankingScreenProps) => {
         <GameHeader />
         
         <GameFormCard title="🏆 Ranking" variant="blue">
-          <div className="space-y-3 max-h-[400px] overflow-y-auto pr-2 scrollbar-thin">
-            {mockRanking.map((player) => (
-              <div
-                key={player.position}
-                className={`flex items-center gap-3 p-3 rounded-xl border ${getRowBackground(player.position)} transition-all hover:scale-[1.02]`}
-              >
-                <div className="flex-shrink-0">
-                  {getPositionIcon(player.position)}
-                </div>
-                
-                <div className="flex-1 min-w-0">
-                  <p className="font-semibold text-white truncate">{player.name}</p>
-                  <div className="flex items-center gap-2">
-                    <span className="text-white/80 text-sm">{player.score.toLocaleString()} pts</span>
-                    <span className={`text-xs px-2 py-0.5 rounded-full text-white ${getDifficultyColor(player.difficulty)}`}>
-                      {player.difficulty}
-                    </span>
+          {loading ? (
+            <div className="text-center py-8">
+              <p className="text-white/70 animate-pulse">Carregando ranking...</p>
+            </div>
+          ) : ranking.length === 0 ? (
+            <div className="text-center py-8">
+              <p className="text-white/70">Nenhum jogador no ranking ainda.</p>
+            </div>
+          ) : (
+            <div className="space-y-3 max-h-[400px] overflow-y-auto pr-2 scrollbar-thin">
+              {ranking.map((player) => {
+                const progress = getProgressLabel(player.completedCount);
+                return (
+                  <div
+                    key={player.position}
+                    className={`flex items-center gap-3 p-3 rounded-xl border ${getRowBackground(player.position)} transition-all hover:scale-[1.02]`}
+                  >
+                    <div className="flex-shrink-0">
+                      {getPositionIcon(player.position)}
+                    </div>
+                    
+                    <div className="flex-1 min-w-0">
+                      <p className="font-semibold text-white truncate">{player.name}</p>
+                      <div className="flex items-center gap-2">
+                        <span className="text-white/80 text-sm">{player.score.toLocaleString()} pts</span>
+                        <span className={`text-xs px-2 py-0.5 rounded-full text-white ${progress.color}`}>
+                          {progress.text}
+                        </span>
+                      </div>
+                    </div>
                   </div>
-                </div>
-              </div>
-            ))}
-          </div>
+                );
+              })}
+            </div>
+          )}
 
           <div className="mt-6 pt-4 border-t border-white/20">
             <GameButton 

@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
+import { supabase } from '@/integrations/supabase/client';
 import LoginScreen from '@/components/Screens/LoginScreen';
 import UserMenuScreen from '@/components/Screens/UserMenuScreen';
 import RegisterScreen from '@/components/Screens/RegisterScreen';
@@ -36,17 +37,50 @@ const GameManager = () => {
   const [totalScore, setTotalScore] = useState<number>(0);
   const [environmentScores, setEnvironmentScores] = useState<Record<number, number>>({});
 
+  // Load profile from DB when user logs in
+  useEffect(() => {
+    if (!user) return;
+    const loadProfile = async () => {
+      const { data } = await supabase
+        .from('profiles')
+        .select('display_name, avatar_id, total_score, completed_environments')
+        .eq('user_id', user.id)
+        .maybeSingle();
+      if (data) {
+        setPlayerName(data.display_name);
+        setPlayerAvatar(data.avatar_id);
+        setTotalScore(data.total_score);
+        setCompletedEnvironments(data.completed_environments || []);
+      }
+    };
+    loadProfile();
+  }, [user]);
+
   const handleUpdateProfile = (name: string, avatarId: string) => {
     setPlayerName(name);
     setPlayerAvatar(avatarId);
   };
 
-  const handleEnvironmentComplete = (envId: number, score: number) => {
-    if (!completedEnvironments.includes(envId)) {
-      setCompletedEnvironments(prev => [...prev, envId]);
-    }
+  const handleEnvironmentComplete = async (envId: number, score: number) => {
+    const newCompleted = completedEnvironments.includes(envId)
+      ? completedEnvironments
+      : [...completedEnvironments, envId];
+    const newScore = totalScore + score;
+
+    setCompletedEnvironments(newCompleted);
     setEnvironmentScores(prev => ({ ...prev, [envId]: score }));
-    setTotalScore(prev => prev + score);
+    setTotalScore(newScore);
+
+    // Persist to database
+    if (user) {
+      await supabase
+        .from('profiles')
+        .update({
+          total_score: newScore,
+          completed_environments: newCompleted,
+        })
+        .eq('user_id', user.id);
+    }
   };
 
   const handleStartGame = () => {
