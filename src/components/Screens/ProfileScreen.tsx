@@ -1,5 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { ArrowLeft, Trophy, Star, Target, CheckCircle, Lock, Pencil, X, Check } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { environmentConfigs } from '@/config/environments';
+import { useToast } from '@/hooks/use-toast';
 
 // Avatares disponíveis
 import claraImage from '@/assets/characters/clara.png';
@@ -33,12 +36,19 @@ const avatarOptions: AvatarOption[] = [
 interface EnvironmentProgress {
   id: number;
   name: string;
-  subject: string;
+  subjects: string;
   background: string;
   completed: boolean;
   score: number;
   maxScore: number;
 }
+
+const environmentBackgrounds: Record<number, string> = {
+  1: laboratorioImage,
+  2: auditorioImage,
+  3: bibliotecaImage,
+  4: salaMatematicaImage,
+};
 
 interface ProfileScreenProps {
   onBack: () => void;
@@ -60,66 +70,92 @@ const ProfileScreen = ({
   const [isEditing, setIsEditing] = useState(false);
   const [editName, setEditName] = useState(playerName);
   const [editAvatar, setEditAvatar] = useState(playerAvatar);
+  const [dbProfile, setDbProfile] = useState<{
+    display_name: string;
+    avatar_id: string;
+    total_score: number;
+    completed_environments: number[];
+  } | null>(null);
+  const { toast } = useToast();
+
+  // Load profile from database
+  useEffect(() => {
+    const loadProfile = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { data } = await supabase
+        .from('profiles')
+        .select('display_name, avatar_id, total_score, completed_environments')
+        .eq('user_id', user.id)
+        .maybeSingle();
+
+      if (data) {
+        setDbProfile(data);
+        setEditName(data.display_name);
+        setEditAvatar(data.avatar_id);
+      }
+    };
+    loadProfile();
+  }, []);
+
+  const effectiveName = dbProfile?.display_name || playerName;
+  const effectiveAvatar = dbProfile?.avatar_id || playerAvatar;
+  const effectiveScore = dbProfile?.total_score || totalScore;
+  const effectiveCompleted = dbProfile?.completed_environments || completedEnvironments;
 
   const getCurrentAvatar = (avatarId: string) => {
     return avatarOptions.find(a => a.id === avatarId)?.image || claraImage;
   };
 
-  const handleSave = () => {
-    if (onUpdateProfile && editName.trim()) {
+  const handleSave = async () => {
+    if (!editName.trim()) return;
+
+    // Update in database
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user) {
+      const { error } = await supabase
+        .from('profiles')
+        .update({ display_name: editName.trim(), avatar_id: editAvatar })
+        .eq('user_id', user.id);
+
+      if (error) {
+        toast({ title: 'Erro ao salvar perfil', description: error.message, variant: 'destructive' });
+        return;
+      }
+
+      setDbProfile(prev => prev ? { ...prev, display_name: editName.trim(), avatar_id: editAvatar } : prev);
+    }
+
+    if (onUpdateProfile) {
       onUpdateProfile(editName.trim(), editAvatar);
     }
     setIsEditing(false);
+    toast({ title: 'Perfil atualizado!' });
   };
 
   const handleCancel = () => {
-    setEditName(playerName);
-    setEditAvatar(playerAvatar);
+    setEditName(effectiveName);
+    setEditAvatar(effectiveAvatar);
     setIsEditing(false);
   };
 
-  const environments: EnvironmentProgress[] = [
-    {
-      id: 1,
-      name: 'Auditório',
-      subject: 'Português',
-      background: auditorioImage,
-      completed: completedEnvironments.includes(1),
-      score: completedEnvironments.includes(1) ? 850 : 0,
-      maxScore: 1000,
-    },
-    {
-      id: 2,
-      name: 'Biblioteca',
-      subject: 'História',
-      background: bibliotecaImage,
-      completed: completedEnvironments.includes(2),
-      score: completedEnvironments.includes(2) ? 920 : 0,
-      maxScore: 1000,
-    },
-    {
-      id: 3,
-      name: 'Laboratório',
-      subject: 'Ciências',
-      background: laboratorioImage,
-      completed: completedEnvironments.includes(3),
-      score: completedEnvironments.includes(3) ? 780 : 0,
-      maxScore: 1000,
-    },
-    {
-      id: 4,
-      name: 'Sala de Matemática',
-      subject: 'Matemática',
-      background: salaMatematicaImage,
-      completed: completedEnvironments.includes(4),
-      score: completedEnvironments.includes(4) ? 900 : 0,
-      maxScore: 1000,
-    },
-  ];
+  // Build environment progress from config (correct mapping)
+  const environments: EnvironmentProgress[] = ([1, 2, 3, 4] as const).map(id => {
+    const config = environmentConfigs[id];
+    return {
+      id,
+      name: config.name,
+      subjects: config.subjects.join(', '),
+      background: environmentBackgrounds[id],
+      completed: effectiveCompleted.includes(id),
+      score: effectiveCompleted.includes(id) ? Math.round(effectiveScore / Math.max(effectiveCompleted.length, 1)) : 0,
+      maxScore: config.maxHealth,
+    };
+  });
 
   const totalCompleted = environments.filter(e => e.completed).length;
   const overallProgress = (totalCompleted / environments.length) * 100;
-  const calculatedTotalScore = environments.reduce((acc, env) => acc + env.score, 0);
 
   const getMedal = () => {
     if (totalCompleted === 4) return { icon: '🏆', label: 'Mestre do Conhecimento', color: 'text-yellow-400' };
@@ -152,14 +188,13 @@ const ProfileScreen = ({
         {/* Card do Perfil */}
         <div className="bg-gradient-to-br from-blue-900/50 to-purple-900/50 rounded-2xl p-6 mb-6 border border-white/10">
           {!isEditing ? (
-            /* Modo Visualização */
             <>
               <div className="flex flex-col md:flex-row items-center gap-6">
                 {/* Avatar */}
                 <div className="relative">
                   <div className="w-28 h-28 rounded-full overflow-hidden border-4 border-blue-400 shadow-xl shadow-blue-500/30">
                     <img
-                      src={getCurrentAvatar(playerAvatar)}
+                      src={getCurrentAvatar(effectiveAvatar)}
                       alt="Avatar do jogador"
                       className="w-full h-full object-cover object-top"
                     />
@@ -172,7 +207,7 @@ const ProfileScreen = ({
                 {/* Informações */}
                 <div className="flex-1 text-center md:text-left">
                   <div className="flex items-center justify-center md:justify-start gap-2 mb-1">
-                    <h2 className="text-2xl font-bold text-white">{playerName}</h2>
+                    <h2 className="text-2xl font-bold text-white">{effectiveName}</h2>
                     <button
                       onClick={() => setIsEditing(true)}
                       className="p-1.5 rounded-full bg-white/10 hover:bg-white/20 transition-colors"
@@ -189,7 +224,7 @@ const ProfileScreen = ({
                       <Trophy className="w-5 h-5 text-yellow-400" />
                       <div>
                         <p className="text-xs text-white/60">Pontuação</p>
-                        <p className="text-lg font-bold text-white">{calculatedTotalScore || totalScore}</p>
+                        <p className="text-lg font-bold text-white">{effectiveScore}</p>
                       </div>
                     </div>
                     <div className="flex items-center gap-2 bg-black/30 px-4 py-2 rounded-lg">
@@ -202,9 +237,9 @@ const ProfileScreen = ({
                     <div className="flex items-center gap-2 bg-black/30 px-4 py-2 rounded-lg">
                       <Star className="w-5 h-5 text-purple-400" />
                       <div>
-                        <p className="text-xs text-white/60">Média</p>
+                        <p className="text-xs text-white/60">Ambientes</p>
                         <p className="text-lg font-bold text-white">
-                          {totalCompleted > 0 ? Math.round(calculatedTotalScore / totalCompleted) : 0}
+                          {effectiveCompleted.map(id => environmentConfigs[id as 1|2|3|4]?.name?.[0] || '?').join(', ') || '-'}
                         </p>
                       </div>
                     </div>
@@ -343,7 +378,7 @@ const ProfileScreen = ({
                       )}
                     </div>
                     <h4 className="text-lg font-bold text-white mt-1">{env.name}</h4>
-                    <p className="text-sm text-yellow-300">{env.subject}</p>
+                    <p className="text-sm text-yellow-300">{env.subjects}</p>
                   </div>
                   
                   <div className="text-right">
@@ -359,7 +394,7 @@ const ProfileScreen = ({
                         ? 'bg-gradient-to-r from-green-500 to-emerald-400' 
                         : 'bg-gray-600'
                     }`}
-                    style={{ width: `${(env.score / env.maxScore) * 100}%` }}
+                    style={{ width: `${env.maxScore > 0 ? (env.score / env.maxScore) * 100 : 0}%` }}
                   />
                 </div>
 
@@ -371,7 +406,7 @@ const ProfileScreen = ({
           ))}
         </div>
 
-        {/* Estatísticas adicionais */}
+        {/* Estatísticas */}
         <div className="mt-6 bg-white/5 rounded-xl p-4 border border-white/10">
           <h3 className="text-lg font-bold text-white mb-3 flex items-center gap-2">
             <Star className="w-5 h-5 text-yellow-400" />
@@ -387,14 +422,14 @@ const ProfileScreen = ({
               <p className="text-xs text-white/60">Ambientes Restantes</p>
             </div>
             <div>
-              <p className="text-2xl font-bold text-purple-400">{calculatedTotalScore}</p>
+              <p className="text-2xl font-bold text-purple-400">{effectiveScore}</p>
               <p className="text-xs text-white/60">Pontos Totais</p>
             </div>
             <div>
               <p className="text-2xl font-bold text-yellow-400">
-                {totalCompleted > 0 ? Math.round((calculatedTotalScore / (totalCompleted * 1000)) * 100) : 0}%
+                {Math.round(overallProgress)}%
               </p>
-              <p className="text-xs text-white/60">Taxa de Acerto</p>
+              <p className="text-xs text-white/60">Progresso</p>
             </div>
           </div>
         </div>
