@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useAuth } from '@/hooks/useAuth';
 import LoginScreen from '@/components/Screens/LoginScreen';
 import UserMenuScreen from '@/components/Screens/UserMenuScreen';
 import RegisterScreen from '@/components/Screens/RegisterScreen';
@@ -25,6 +26,7 @@ type GameScreen =
   | 'questionAdmin';
 
 const GameManager = () => {
+  const { user, isAdmin, signIn, signUp, signOut, resetPassword, checkAdminRole } = useAuth();
   const [currentScreen, setCurrentScreen] = useState<GameScreen>('login');
   const [previousScreen, setPreviousScreen] = useState<GameScreen>('menu');
   const [currentEnvironment, setCurrentEnvironment] = useState<1 | 2 | 3 | 4>(1);
@@ -65,6 +67,11 @@ const GameManager = () => {
     setCurrentScreen('profile');
   };
 
+  const handleLogout = async () => {
+    await signOut();
+    setCurrentScreen('login');
+  };
+
   const renderScreen = () => {
     switch (currentScreen) {
       case 'login':
@@ -74,6 +81,7 @@ const GameManager = () => {
             onRegister={() => setCurrentScreen('register')}
             onForgotPassword={() => setCurrentScreen('resetPassword')}
             onAdminLogin={() => setCurrentScreen('adminLogin')}
+            signIn={signIn}
           />
         );
       
@@ -83,7 +91,7 @@ const GameManager = () => {
             onStart={handleStartGame}
             onRanking={() => setCurrentScreen('ranking')}
             onProfile={() => handleProfile('menu')}
-            onBack={() => setCurrentScreen('login')}
+            onBack={handleLogout}
           />
         );
       
@@ -111,6 +119,7 @@ const GameManager = () => {
           <RegisterScreen
             onRegister={() => setCurrentScreen('login')}
             onBackToLogin={() => setCurrentScreen('login')}
+            signUp={signUp}
           />
         );
       
@@ -154,13 +163,18 @@ const GameManager = () => {
           <AdminLoginScreen
             onLogin={() => setCurrentScreen('questionAdmin')}
             onBack={() => setCurrentScreen('login')}
+            signIn={signIn}
+            checkAdminRole={checkAdminRole}
           />
         );
       
       case 'questionAdmin':
         return (
           <QuestionAdminScreen
-            onBack={() => setCurrentScreen('adminLogin')}
+            onBack={() => {
+              handleLogout();
+              setCurrentScreen('login');
+            }}
           />
         );
       

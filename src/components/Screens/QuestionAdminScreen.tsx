@@ -1,73 +1,78 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import GameBackground from '@/components/Game/GameBackground';
 import GameButton from '@/components/Game/GameButton';
 import QuestionForm from '@/components/Admin/QuestionForm';
 import QuestionList from '@/components/Admin/QuestionList';
-import { Question, getEnvironmentName, subjectsByEnvironment } from '@/types/questions';
+import { Question, getEnvironmentName } from '@/types/questions';
+import { useQuestions, DbQuestion } from '@/hooks/useQuestions';
 import { Plus, LogOut, Filter } from 'lucide-react';
-
-// Dados fictícios para demonstração
-const mockQuestions: Question[] = [
-  {
-    id: '1',
-    environmentId: 1,
-    subject: 'Biologia',
-    baseText: 'Sobre a célula e suas organelas, analise as afirmações abaixo de acordo com seus conhecimentos sobre biologia celular:',
-    statements: [
-      { id: 's1', text: 'A mitocôndria é responsável pela produção de energia (ATP) nas células.', isTrue: true },
-      { id: 's2', text: 'O núcleo contém o material genético da célula.', isTrue: true },
-      { id: 's3', text: 'O ribossomo é responsável pela fotossíntese.', isTrue: false },
-      { id: 's4', text: 'A membrana plasmática é impermeável a todas as substâncias.', isTrue: false },
-    ],
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  },
-  {
-    id: '2',
-    environmentId: 3,
-    subject: 'Matemática',
-    baseText: 'Sobre geometria plana, analise as afirmações abaixo considerando as propriedades das figuras geométricas:',
-    statements: [
-      { id: 's5', text: 'A soma dos ângulos internos de um triângulo é 180 graus.', isTrue: true },
-      { id: 's6', text: 'Um quadrado tem todos os lados iguais e ângulos retos.', isTrue: true },
-      { id: 's7', text: 'O perímetro de um círculo é calculado por πr².', isTrue: false },
-      { id: 's8', text: 'A diagonal de um quadrado divide-o em dois triângulos retângulos.', isTrue: true },
-    ],
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  },
-];
+import { useToast } from '@/hooks/use-toast';
 
 interface QuestionAdminScreenProps {
   onBack: () => void;
 }
 
+// Convert DB question to the Question type used by the form/list
+const dbToQuestion = (q: DbQuestion): Question => ({
+  id: q.id,
+  environmentId: q.environment_id as 1 | 2 | 3 | 4,
+  subject: q.subject,
+  baseText: q.base_text,
+  statements: q.statements.map((s, i) => ({
+    id: s.id || `s_${i}`,
+    text: s.text,
+    isTrue: s.isTrue,
+  })),
+  createdAt: new Date(q.created_at),
+  updatedAt: new Date(q.updated_at),
+});
+
 const QuestionAdminScreen = ({ onBack }: QuestionAdminScreenProps) => {
-  const [questions, setQuestions] = useState<Question[]>(mockQuestions);
+  const { questions: dbQuestions, loading, fetchQuestions, saveQuestion, updateQuestion, deleteQuestion } = useQuestions();
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingQuestion, setEditingQuestion] = useState<Question | null>(null);
   const [filterEnvironment, setFilterEnvironment] = useState<1 | 2 | 3 | 4 | 'all'>('all');
+  const { toast } = useToast();
 
-  const handleSaveQuestion = (questionData: Omit<Question, 'id' | 'createdAt' | 'updatedAt'>) => {
-    if (editingQuestion) {
-      // Editar existente
-      setQuestions(prev => prev.map(q => 
-        q.id === editingQuestion.id 
-          ? { ...q, ...questionData, updatedAt: new Date() } 
-          : q
-      ));
-    } else {
-      // Criar nova
-      const newQuestion: Question = {
-        id: `q_${Date.now()}`,
-        ...questionData,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      };
-      setQuestions(prev => [...prev, newQuestion]);
+  useEffect(() => {
+    fetchQuestions();
+  }, [fetchQuestions]);
+
+  const questions: Question[] = dbQuestions.map(dbToQuestion);
+
+  const handleSaveQuestion = async (questionData: Omit<Question, 'id' | 'createdAt' | 'updatedAt'>) => {
+    try {
+      if (editingQuestion) {
+        await updateQuestion(editingQuestion.id, {
+          environment_id: questionData.environmentId,
+          subject: questionData.subject,
+          base_text: questionData.baseText,
+          statements: questionData.statements.map(s => ({
+            id: s.id,
+            text: s.text,
+            isTrue: s.isTrue,
+          })),
+        });
+        toast({ title: 'Questão atualizada!' });
+      } else {
+        await saveQuestion({
+          environment_id: questionData.environmentId,
+          subject: questionData.subject,
+          base_text: questionData.baseText,
+          statements: questionData.statements.map(s => ({
+            id: s.id,
+            text: s.text,
+            isTrue: s.isTrue,
+          })),
+        });
+        toast({ title: 'Questão criada!' });
+      }
+      setIsFormOpen(false);
+      setEditingQuestion(null);
+      fetchQuestions();
+    } catch (err: any) {
+      toast({ title: 'Erro ao salvar', description: err.message, variant: 'destructive' });
     }
-    setIsFormOpen(false);
-    setEditingQuestion(null);
   };
 
   const handleEditQuestion = (question: Question) => {
@@ -75,9 +80,15 @@ const QuestionAdminScreen = ({ onBack }: QuestionAdminScreenProps) => {
     setIsFormOpen(true);
   };
 
-  const handleDeleteQuestion = (id: string) => {
+  const handleDeleteQuestion = async (id: string) => {
     if (confirm('Tem certeza que deseja excluir esta questão?')) {
-      setQuestions(prev => prev.filter(q => q.id !== id));
+      try {
+        await deleteQuestion(id);
+        toast({ title: 'Questão excluída!' });
+        fetchQuestions();
+      } catch (err: any) {
+        toast({ title: 'Erro ao excluir', description: err.message, variant: 'destructive' });
+      }
     }
   };
 
@@ -95,7 +106,7 @@ const QuestionAdminScreen = ({ onBack }: QuestionAdminScreenProps) => {
               Gerenciamento de Questões
             </h1>
             <p className="text-white/70 mt-1">
-              {questions.length} questões cadastradas
+              {loading ? 'Carregando...' : `${questions.length} questões cadastradas`}
             </p>
           </div>
           <GameButton onClick={onBack} variant="primary" className="flex items-center gap-2">
