@@ -1,8 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { ArrowLeft, Trophy, Star, Target, CheckCircle, Lock, Pencil, X, Check } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
 import { environmentConfigs } from '@/config/environments';
 import { useToast } from '@/hooks/use-toast';
+import { apiUpdateUser, type AppUser } from '@/lib/api';
 
 // Avatares disponíveis
 import claraImage from '@/assets/characters/clara.png';
@@ -57,6 +57,7 @@ interface ProfileScreenProps {
   totalScore?: number;
   completedEnvironments?: number[];
   onUpdateProfile?: (name: string, avatarId: string) => void;
+  user?: AppUser | null;
 }
 
 const ProfileScreen = ({ 
@@ -65,44 +66,18 @@ const ProfileScreen = ({
   playerAvatar = "clara",
   totalScore = 0,
   completedEnvironments = [],
-  onUpdateProfile
+  onUpdateProfile,
+  user
 }: ProfileScreenProps) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editName, setEditName] = useState(playerName);
   const [editAvatar, setEditAvatar] = useState(playerAvatar);
-  const [dbProfile, setDbProfile] = useState<{
-    display_name: string;
-    avatar_id: string;
-    total_score: number;
-    completed_environments: number[];
-  } | null>(null);
   const { toast } = useToast();
 
-  // Load profile from database
-  useEffect(() => {
-    const loadProfile = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
-
-      const { data } = await supabase
-        .from('profiles')
-        .select('display_name, avatar_id, total_score, completed_environments')
-        .eq('user_id', user.id)
-        .maybeSingle();
-
-      if (data) {
-        setDbProfile(data);
-        setEditName(data.display_name);
-        setEditAvatar(data.avatar_id);
-      }
-    };
-    loadProfile();
-  }, []);
-
-  const effectiveName = dbProfile?.display_name || playerName;
-  const effectiveAvatar = dbProfile?.avatar_id || playerAvatar;
-  const effectiveScore = dbProfile?.total_score || totalScore;
-  const effectiveCompleted = dbProfile?.completed_environments || completedEnvironments;
+  const effectiveName = playerName;
+  const effectiveAvatar = playerAvatar;
+  const effectiveScore = user?.pontuacao ?? totalScore;
+  const effectiveCompleted = completedEnvironments;
 
   const getCurrentAvatar = (avatarId: string) => {
     return avatarOptions.find(a => a.id === avatarId)?.image || claraImage;
@@ -111,20 +86,14 @@ const ProfileScreen = ({
   const handleSave = async () => {
     if (!editName.trim()) return;
 
-    // Update in database
-    const { data: { user } } = await supabase.auth.getUser();
+    // Update in backend
     if (user) {
-      const { error } = await supabase
-        .from('profiles')
-        .update({ display_name: editName.trim(), avatar_id: editAvatar })
-        .eq('user_id', user.id);
-
-      if (error) {
-        toast({ title: 'Erro ao salvar perfil', description: error.message, variant: 'destructive' });
+      try {
+        await apiUpdateUser(user.id, { nome: editName.trim() } as any);
+      } catch (err: any) {
+        toast({ title: 'Erro ao salvar perfil', description: err.message, variant: 'destructive' });
         return;
       }
-
-      setDbProfile(prev => prev ? { ...prev, display_name: editName.trim(), avatar_id: editAvatar } : prev);
     }
 
     if (onUpdateProfile) {
@@ -140,7 +109,7 @@ const ProfileScreen = ({
     setIsEditing(false);
   };
 
-  // Build environment progress from config (correct mapping)
+  // Build environment progress from config
   const environments: EnvironmentProgress[] = ([1, 2, 3, 4] as const).map(id => {
     const config = environmentConfigs[id];
     return {

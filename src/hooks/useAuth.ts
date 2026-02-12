@@ -1,70 +1,74 @@
-import { useState, useEffect } from 'react';
-import { supabase } from '@/integrations/supabase/client';
-import type { User, Session } from '@supabase/supabase-js';
+import { useState, useEffect, useCallback } from 'react';
+import {
+  apiLogin,
+  apiRegisterUser,
+  apiGetUser,
+  getToken,
+  setToken,
+  clearAuth,
+  getSavedUser,
+  setSavedUser,
+  type AppUser,
+} from '@/lib/api';
 
 export const useAuth = () => {
-  const [user, setUser] = useState<User | null>(null);
-  const [session, setSession] = useState<Session | null>(null);
+  const [user, setUser] = useState<AppUser | null>(null);
   const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
 
+  // Restore session on mount
   useEffect(() => {
-    // Get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      if (session?.user) {
-        checkAdminRole(session.user.id);
-      }
-      setLoading(false);
-    });
-
-    // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      if (session?.user) {
-        checkAdminRole(session.user.id);
-      } else {
-        setIsAdmin(false);
-      }
-    });
-
-    return () => subscription.unsubscribe();
+    const token = getToken();
+    const saved = getSavedUser();
+    if (token && saved) {
+      setUser(saved);
+      setIsAdmin(saved.role === 1);
+    }
+    setLoading(false);
   }, []);
 
-  const checkAdminRole = async (userId: string) => {
-    const { data } = await supabase
-      .from('user_roles')
-      .select('role')
-      .eq('user_id', userId)
-      .eq('role', 'admin')
-      .maybeSingle();
-    setIsAdmin(!!data);
-  };
+  const signIn = useCallback(async (email: string, password: string) => {
+    try {
+      const result = await apiLogin(email, password);
+      setToken(result.token);
 
-  const signUp = async (email: string, password: string, displayName: string) => {
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: { data: { display_name: displayName } },
-    });
-    return { data, error };
-  };
+      // Fetch full user profile
+      const fullUser = await apiGetUser(result.id);
+      setSavedUser(fullUser);
+      setUser(fullUser);
+      setIsAdmin(fullUser.role === 1);
 
-  const signIn = async (email: string, password: string) => {
-    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-    return { data, error };
-  };
+      return { data: fullUser, error: null };
+    } catch (err: any) {
+      return { data: null, error: { message: err.message } };
+    }
+  }, []);
 
-  const signOut = async () => {
-    await supabase.auth.signOut();
-  };
+  const signUp = useCallback(async (email: string, password: string, displayName: string) => {
+    try {
+      const newUser = await apiRegisterUser({
+        nome: displayName,
+        email,
+        senha: password,
+        cursoid: 1, // default
+      });
+      return { data: newUser, error: null };
+    } catch (err: any) {
+      return { data: null, error: { message: err.message } };
+    }
+  }, []);
 
-  const resetPassword = async (email: string) => {
-    const { data, error } = await supabase.auth.resetPasswordForEmail(email);
-    return { data, error };
-  };
+  const signOut = useCallback(async () => {
+    clearAuth();
+    setUser(null);
+    setIsAdmin(false);
+  }, []);
 
-  return { user, session, loading, isAdmin, signUp, signIn, signOut, resetPassword, checkAdminRole };
+  const checkAdminRole = useCallback(async () => {
+    if (user) {
+      setIsAdmin(user.role === 1);
+    }
+  }, [user]);
+
+  return { user, loading, isAdmin, signIn, signUp, signOut, checkAdminRole };
 };
