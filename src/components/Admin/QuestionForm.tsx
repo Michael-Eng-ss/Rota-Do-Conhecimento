@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Plus, Trash2, Check, X } from 'lucide-react';
-import { Question, Statement, subjectsByEnvironment, getEnvironmentName } from '@/types/questions';
+import { Question, Alternative, subjectsByEnvironment, getEnvironmentName } from '@/types/questions';
 import GameButton from '@/components/Game/GameButton';
 
 interface QuestionFormProps {
@@ -9,18 +9,18 @@ interface QuestionFormProps {
   onCancel: () => void;
 }
 
-const emptyStatement = (): Omit<Statement, 'id'> => ({
+const emptyAlternative = (): Omit<Alternative, 'id'> => ({
   text: '',
-  isTrue: true,
+  isCorrect: false,
 });
 
 const QuestionForm = ({ initialData, onSave, onCancel }: QuestionFormProps) => {
   const [environmentId, setEnvironmentId] = useState<1 | 2 | 3 | 4>(initialData?.environmentId || 1);
   const [subject, setSubject] = useState(initialData?.subject || subjectsByEnvironment[1][0]);
   const [baseText, setBaseText] = useState(initialData?.baseText || '');
-  const [statements, setStatements] = useState<Omit<Statement, 'id'>[]>(
-    initialData?.statements.map(s => ({ text: s.text, isTrue: s.isTrue })) || 
-    [emptyStatement(), emptyStatement(), emptyStatement(), emptyStatement()]
+  const [alternatives, setAlternatives] = useState<Omit<Alternative, 'id'>[]>(
+    initialData?.alternatives.map(a => ({ text: a.text, isCorrect: a.isCorrect })) || 
+    [emptyAlternative(), emptyAlternative(), emptyAlternative(), emptyAlternative()]
   );
 
   // Atualizar matéria quando ambiente muda
@@ -31,34 +31,68 @@ const QuestionForm = ({ initialData, onSave, onCancel }: QuestionFormProps) => {
     }
   }, [environmentId, subject]);
 
-  const handleStatementChange = (index: number, field: 'text' | 'isTrue', value: string | boolean) => {
-    setStatements(prev => prev.map((s, i) => 
-      i === index ? { ...s, [field]: value } : s
+  const handleAlternativeTextChange = (index: number, value: string) => {
+    setAlternatives(prev => prev.map((a, i) => 
+      i === index ? { ...a, text: value } : a
     ));
   };
 
+  const handleCorrectChange = (index: number) => {
+    // Apenas 1 correta: desmarcar todas e marcar a selecionada
+    setAlternatives(prev => prev.map((a, i) => ({
+      ...a,
+      isCorrect: i === index,
+    })));
+  };
+
+  const addAlternative = () => {
+    if (alternatives.length < 5) {
+      setAlternatives(prev => [...prev, emptyAlternative()]);
+    }
+  };
+
+  const removeAlternative = (index: number) => {
+    if (alternatives.length > 2) {
+      setAlternatives(prev => {
+        const updated = prev.filter((_, i) => i !== index);
+        // Se removeu a correta, não selecionar nenhuma
+        return updated;
+      });
+    }
+  };
+
   const handleSubmit = () => {
-    // Validar
     if (!baseText.trim()) {
-      alert('Digite o texto base/enunciado da questão');
+      alert('Digite o enunciado da questão');
       return;
     }
 
-    const validStatements = statements.filter(s => s.text.trim());
-    if (validStatements.length < 4) {
-      alert('Preencha todas as 4 afirmações');
+    const validAlternatives = alternatives.filter(a => a.text.trim());
+    if (validAlternatives.length < 2) {
+      alert('Preencha pelo menos 2 alternativas');
       return;
     }
+
+    const hasCorrect = alternatives.some(a => a.isCorrect && a.text.trim());
+    if (!hasCorrect) {
+      alert('Selecione a alternativa correta');
+      return;
+    }
+
+    // Filtrar apenas alternativas preenchidas
+    const finalAlternatives = alternatives
+      .filter(a => a.text.trim())
+      .map((a, i) => ({
+        id: initialData?.alternatives[i]?.id || `alt_${Date.now()}_${i}`,
+        text: a.text.trim(),
+        isCorrect: a.isCorrect,
+      }));
 
     onSave({
       environmentId,
       subject,
       baseText: baseText.trim(),
-      statements: statements.map((s, i) => ({
-        id: initialData?.statements[i]?.id || `stmt_${Date.now()}_${i}`,
-        text: s.text.trim(),
-        isTrue: s.isTrue,
-      })),
+      alternatives: finalAlternatives,
     });
   };
 
@@ -103,69 +137,76 @@ const QuestionForm = ({ initialData, onSave, onCancel }: QuestionFormProps) => {
         </div>
       </div>
 
-      {/* Texto Base/Enunciado */}
+      {/* Enunciado */}
       <div className="mb-4">
         <label className="block text-sm font-medium text-gray-700 mb-1">
-          Texto Base/Enunciado da Questão *
+          Enunciado da Questão *
         </label>
         <textarea
           value={baseText}
           onChange={(e) => setBaseText(e.target.value)}
-          placeholder="Cole aqui o texto base da questão (notícia, contexto, situação-problema...)&#10;&#10;Ex: O presidente Luiz Inácio Lula da Silva assina nesta sexta-feira contratos de financiamento do BNDES..."
-          className="w-full p-3 border-2 border-gray-300 rounded-lg text-gray-800 min-h-[150px]"
+          placeholder="Digite o enunciado da questão..."
+          className="w-full p-3 border-2 border-gray-300 rounded-lg text-gray-800 min-h-[120px]"
         />
       </div>
 
-      {/* 4 Afirmações (A, B, C, D) */}
+      {/* Alternativas */}
       <div className="mb-4">
         <label className="block text-sm font-medium text-gray-700 mb-2">
-          Assinale V (verdadeiro) ou F (falso) para as alternativas de acordo com o texto: *
+          Alternativas (selecione a correta) *
         </label>
         
         <div className="space-y-3">
-          {statements.map((statement, index) => {
-            const letter = String.fromCharCode(65 + index); // A, B, C, D
+          {alternatives.map((alt, index) => {
+            const letter = String.fromCharCode(65 + index); // A, B, C, D, E
             return (
-            <div key={index} className="flex gap-2 items-start">
-              <span className="flex-shrink-0 w-8 h-10 flex items-center justify-center bg-blue-100 text-blue-800 font-bold rounded">
-                {letter}
-              </span>
-              
-              <textarea
-                value={statement.text}
-                onChange={(e) => handleStatementChange(index, 'text', e.target.value)}
-                placeholder={`Afirmação ${letter}...`}
-                className="flex-1 p-2 border-2 border-gray-300 rounded-lg text-gray-800 min-h-[60px]"
-              />
-              
-              <div className="flex gap-1">
+              <div key={index} className="flex gap-2 items-start">
+                {/* Radio para selecionar correta */}
                 <button
                   type="button"
-                  onClick={() => handleStatementChange(index, 'isTrue', true)}
-                  className={`w-10 h-10 rounded-lg flex items-center justify-center font-bold transition-all ${
-                    statement.isTrue 
-                      ? 'bg-green-500 text-white shadow-lg scale-110' 
-                      : 'bg-gray-200 text-gray-600 hover:bg-green-100'
+                  onClick={() => handleCorrectChange(index)}
+                  className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center font-bold transition-all border-2 ${
+                    alt.isCorrect 
+                      ? 'bg-green-500 text-white border-green-600 shadow-lg scale-110' 
+                      : 'bg-white text-gray-600 border-gray-300 hover:border-green-400 hover:bg-green-50'
                   }`}
+                  title={alt.isCorrect ? 'Alternativa correta' : 'Marcar como correta'}
                 >
-                  V
+                  {letter}
                 </button>
-                <button
-                  type="button"
-                  onClick={() => handleStatementChange(index, 'isTrue', false)}
-                  className={`w-10 h-10 rounded-lg flex items-center justify-center font-bold transition-all ${
-                    !statement.isTrue 
-                      ? 'bg-red-500 text-white shadow-lg scale-110' 
-                      : 'bg-gray-200 text-gray-600 hover:bg-red-100'
-                  }`}
-                >
-                  F
-                </button>
+                
+                <textarea
+                  value={alt.text}
+                  onChange={(e) => handleAlternativeTextChange(index, e.target.value)}
+                  placeholder={`Alternativa ${letter}...`}
+                  className="flex-1 p-2 border-2 border-gray-300 rounded-lg text-gray-800 min-h-[50px]"
+                />
+                
+                {alternatives.length > 2 && (
+                  <button
+                    type="button"
+                    onClick={() => removeAlternative(index)}
+                    className="flex-shrink-0 w-10 h-10 rounded-lg flex items-center justify-center bg-red-100 text-red-600 hover:bg-red-200 transition-colors"
+                    title="Remover alternativa"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                )}
               </div>
-            </div>
             );
           })}
         </div>
+
+        {alternatives.length < 5 && (
+          <button
+            type="button"
+            onClick={addAlternative}
+            className="mt-3 flex items-center gap-2 px-4 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors"
+          >
+            <Plus className="w-4 h-4" />
+            Adicionar Alternativa
+          </button>
+        )}
       </div>
 
       {/* Botões */}

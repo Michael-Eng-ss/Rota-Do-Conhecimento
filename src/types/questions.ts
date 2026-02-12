@@ -1,4 +1,4 @@
-// Sistema de perguntas com 4 afirmações V/F por questão
+// Sistema de perguntas de múltipla escolha
 
 import { environmentConfigs } from '@/config/environments';
 
@@ -14,20 +14,20 @@ export const subjectsByEnvironment: Record<1 | 2 | 3 | 4, string[]> = {
   ],
 };
 
-// Uma única afirmação V/F
-export interface Statement {
+// Uma alternativa de múltipla escolha
+export interface Alternative {
   id: string;
   text: string;
-  isTrue: boolean;
+  isCorrect: boolean;
 }
 
-// Uma questão completa com texto base e 4 afirmações
+// Uma questão completa com enunciado e alternativas
 export interface Question {
   id: string;
   environmentId: 1 | 2 | 3 | 4;
   subject: string;
-  baseText: string; // Texto base/enunciado da questão (notícia, contexto, etc.)
-  statements: Statement[]; // 4 afirmações (A, B, C, D)
+  baseText: string; // Enunciado da questão
+  alternatives: Alternative[]; // 2-5 alternativas (apenas 1 correta)
   createdAt: Date;
   updatedAt: Date;
 }
@@ -35,20 +35,15 @@ export interface Question {
 // Resposta do usuário para uma questão
 export interface UserAnswer {
   questionId: string;
-  answers: Record<string, boolean>; // statementId -> resposta do usuário
+  selectedAlternativeId: string;
 }
 
 // Resultado de uma questão
 export interface QuestionResult {
   questionId: string;
-  correctCount: number;
-  totalStatements: number;
-  statementResults: {
-    statementId: string;
-    userAnswer: boolean;
-    correctAnswer: boolean;
-    isCorrect: boolean;
-  }[];
+  isCorrect: boolean;
+  selectedAlternativeId: string;
+  correctAlternativeId: string;
 }
 
 // Obter nome do ambiente
@@ -59,24 +54,4 @@ export const getEnvironmentName = (envId: 1 | 2 | 3 | 4): string => {
 // Verificar se a matéria pertence ao ambiente
 export const isSubjectValidForEnvironment = (subject: string, envId: 1 | 2 | 3 | 4): boolean => {
   return subjectsByEnvironment[envId].includes(subject);
-};
-
-// Calcular resultado de uma questão
-export const calculateQuestionResult = (
-  question: Question,
-  userAnswers: Record<string, boolean>
-): QuestionResult => {
-  const statementResults = question.statements.map(statement => ({
-    statementId: statement.id,
-    userAnswer: userAnswers[statement.id] ?? false,
-    correctAnswer: statement.isTrue,
-    isCorrect: userAnswers[statement.id] === statement.isTrue,
-  }));
-
-  return {
-    questionId: question.id,
-    correctCount: statementResults.filter(r => r.isCorrect).length,
-    totalStatements: question.statements.length,
-    statementResults,
-  };
 };

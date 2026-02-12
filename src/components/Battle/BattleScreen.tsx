@@ -8,7 +8,7 @@ import BossHealthBar from './BossHealthBar';
 import SoundButton from '@/components/Environment/SoundButton';
 import EnvironmentMenu from '@/components/Environment/EnvironmentMenu';
 import ProfileAvatar from '@/components/Environment/ProfileAvatar';
-import TrueFalseCard from './TrueFalseCard';
+import MultipleChoiceCard from './MultipleChoiceCard';
 import VictoryScreen from './VictoryScreen';
 import DefeatScreen from './DefeatScreen';
 import DialogBox from '@/components/VisualNovel/DialogBox';
@@ -77,17 +77,17 @@ type BattlePhase = 'intro-1' | 'intro-2' | 'intro-3' | 'battle-start' | 'questio
 
 type FeedbackType = 'correct' | 'wrong' | null;
 
-// Nova estrutura de questão com texto base e 4 afirmações
-interface Statement {
+// Estrutura de questão de múltipla escolha
+interface Alternative {
   id: string;
   text: string;
-  isTrue: boolean;
+  isCorrect: boolean;
 }
 
 interface BattleQuestion {
   id: string;
   baseText: string;
-  statements: Statement[];
+  alternatives: Alternative[];
   subject: string;
 }
 
@@ -128,7 +128,7 @@ const BattleScreen = ({ environmentId, onBackToPatio, onProfile, onVictory }: Ba
   const [feedback, setFeedback] = useState<FeedbackType>(null);
   const [lastFeedback, setLastFeedback] = useState<FeedbackType>(null);
   const [pendingResult, setPendingResult] = useState<{ isCorrect: boolean; newPlayerHealth: number; newBossHealth: number; damageDealt: number } | null>(null);
-  const [reviewResults, setReviewResults] = useState<{ statementId: string; userAnswer: boolean; correctAnswer: boolean; isCorrect: boolean }[]>([]);
+  const [reviewSelectedId, setReviewSelectedId] = useState<string | undefined>(undefined);
   const [bossTransformed, setBossTransformed] = useState(false);
   const { settings, toggleMute } = useSoundSystem();
   const { playSound } = useSoundEffects();
@@ -378,49 +378,31 @@ const BattleScreen = ({ environmentId, onBackToPatio, onProfile, onVictory }: Ba
     }
   };
 
-  const handleAnswerConfirm = (answers: Record<string, boolean>) => {
-    // Calcular quantas afirmações foram acertadas
-    const correctCount = currentQuestion.statements.filter(
-      s => answers[s.id] === s.isTrue
-    ).length;
-    const totalStatements = currentQuestion.statements.length;
-    const allCorrect = correctCount === totalStatements;
-    const correctRatio = correctCount / totalStatements; // 0, 0.25, 0.5, 0.75, 1
-    
-    // Play sound effect based on answer (only if not muted)
+  const handleAnswerConfirm = (selectedAlternativeId: string) => {
+    // Verificar se a alternativa selecionada é a correta
+    const selectedAlt = currentQuestion.alternatives.find(a => a.id === selectedAlternativeId);
+    const isCorrect = selectedAlt?.isCorrect ?? false;
+
+    // Play sound effect
     if (!settings.isMuted) {
-      playSound(correctRatio >= 0.5 ? 'correct' : 'wrong');
+      playSound(isCorrect ? 'correct' : 'wrong');
     }
     
-    // === DANO NO BOSS (proporcional aos acertos) ===
-    // Cada afirmação correta causa 1/4 do dano da rodada
-    const damagePerStatement = damagePerCorrectAnswer / totalStatements;
-    const damageDealt = Math.round(damagePerStatement * correctCount);
+    // Dano no boss se acertou
+    const damageDealt = isCorrect ? damagePerCorrectAnswer : 0;
     
-    // === DANO NA CLARA (proporcional aos erros) ===
-    // Cada afirmação errada causa 1/4 do dano de erro da rodada
-    const wrongCount = totalStatements - correctCount;
-    const playerDamagePerError = damagePerWrongAnswer / totalStatements;
-    const playerDamage = Math.round(playerDamagePerError * wrongCount);
+    // Dano na Clara se errou
+    const playerDamage = isCorrect ? 0 : damagePerWrongAnswer;
     
     const newBossHealth = Math.max(0, bossHealth - damageDealt);
     const newPlayerHealth = Math.max(0, playerHealth - playerDamage);
     
-    // Determinar tipo de feedback (positivo se acertou pelo menos metade)
-    const feedbackType: 'correct' | 'wrong' = correctRatio >= 0.5 ? 'correct' : 'wrong';
-    
-    // Store review results for display
-    const results = currentQuestion.statements.map(s => ({
-      statementId: s.id,
-      userAnswer: answers[s.id] ?? false,
-      correctAnswer: s.isTrue,
-      isCorrect: answers[s.id] === s.isTrue,
-    }));
-    setReviewResults(results);
+    // Store selected for review
+    setReviewSelectedId(selectedAlternativeId);
 
     // Store pending result and show feedback
-    setPendingResult({ isCorrect: correctRatio >= 0.5, newPlayerHealth, newBossHealth, damageDealt });
-    setFeedback(feedbackType);
+    setPendingResult({ isCorrect, newPlayerHealth, newBossHealth, damageDealt });
+    setFeedback(isCorrect ? 'correct' : 'wrong');
     setPhase('feedback');
   };
 
@@ -448,7 +430,7 @@ const BattleScreen = ({ environmentId, onBackToPatio, onProfile, onVictory }: Ba
 
     // Clear pending
     setPendingResult(null);
-    setReviewResults([]);
+    setReviewSelectedId(undefined);
 
     // Check for player defeat (Clara's health reached 0)
     if (newPlayerHealth <= 0) {
@@ -496,7 +478,7 @@ const BattleScreen = ({ environmentId, onBackToPatio, onProfile, onVictory }: Ba
     setFeedback(null);
     setPendingResult(null);
     setBossTransformed(false);
-    setReviewResults([]);
+    setReviewSelectedId(undefined);
   };
 
   const handleVictoryComplete = () => {
@@ -569,29 +551,29 @@ const BattleScreen = ({ environmentId, onBackToPatio, onProfile, onVictory }: Ba
         </div>
       </div>
 
-      {/* Question Phase - True/False com 4 afirmações */}
+      {/* Question Phase - Multiple Choice */}
       {(phase === 'question' || phase === 'feedback') && currentQuestion && (
-        <TrueFalseCard
+        <MultipleChoiceCard
           questionNumber={currentQuestionIndex + 1}
           totalQuestions={questions.length}
           baseText={currentQuestion.baseText}
-          statements={currentQuestion.statements}
+          alternatives={currentQuestion.alternatives}
           onConfirm={handleAnswerConfirm}
           disabled={phase === 'feedback'}
         />
       )}
 
-      {/* Review Phase - Show correct/incorrect per statement */}
+      {/* Review Phase - Show correct/incorrect */}
       {phase === 'review' && currentQuestion && (
-        <TrueFalseCard
+        <MultipleChoiceCard
           questionNumber={currentQuestionIndex + 1}
           totalQuestions={questions.length}
           baseText={currentQuestion.baseText}
-          statements={currentQuestion.statements}
+          alternatives={currentQuestion.alternatives}
           onConfirm={handleAnswerConfirm}
           disabled={true}
           reviewMode={true}
-          reviewResults={reviewResults}
+          reviewSelectedId={reviewSelectedId}
           onContinue={handleReviewContinue}
         />
       )}

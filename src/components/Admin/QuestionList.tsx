@@ -1,4 +1,4 @@
-import { Edit, Trash2, Check, X } from 'lucide-react';
+import { Edit, Trash2, CheckCircle } from 'lucide-react';
 import { Question, getEnvironmentName } from '@/types/questions';
 
 interface QuestionListProps {
@@ -52,29 +52,29 @@ const QuestionList = ({ questions, onEdit, onDelete }: QuestionListProps) => {
             </div>
           </div>
 
-          {/* Texto Base */}
+          {/* Enunciado */}
           <div className="px-4 py-3 border-b border-gray-200">
             <p className="text-gray-800 text-sm whitespace-pre-wrap line-clamp-3">{question.baseText}</p>
           </div>
 
-          {/* Afirmações */}
+          {/* Alternativas */}
           <div className="p-4 space-y-2">
-            {question.statements.map((statement, index) => {
-              const letter = String.fromCharCode(65 + index); // A, B, C, D
+            {question.alternatives.map((alt, index) => {
+              const letter = String.fromCharCode(65 + index);
               return (
-              <div key={statement.id} className="flex items-start gap-3">
-                <span className="flex-shrink-0 w-6 h-6 flex items-center justify-center bg-gray-100 text-gray-600 font-bold rounded text-sm">
-                  {letter}
-                </span>
-                <p className="flex-1 text-gray-700 text-sm">{statement.text}</p>
-                <span className={`flex-shrink-0 w-6 h-6 flex items-center justify-center rounded font-bold text-sm ${
-                  statement.isTrue 
-                    ? 'bg-green-100 text-green-700' 
-                    : 'bg-red-100 text-red-700'
-                }`}>
-                  {statement.isTrue ? 'V' : 'F'}
-                </span>
-              </div>
+                <div key={alt.id} className="flex items-start gap-3">
+                  <span className={`flex-shrink-0 w-7 h-7 flex items-center justify-center rounded-full font-bold text-sm ${
+                    alt.isCorrect 
+                      ? 'bg-green-500 text-white' 
+                      : 'bg-gray-100 text-gray-600'
+                  }`}>
+                    {letter}
+                  </span>
+                  <p className="flex-1 text-gray-700 text-sm">{alt.text}</p>
+                  {alt.isCorrect && (
+                    <CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0" />
+                  )}
+                </div>
               );
             })}
           </div>
