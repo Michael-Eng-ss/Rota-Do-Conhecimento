@@ -438,23 +438,23 @@ const BattleScreen = ({ environmentId, onBackToPatio, onProfile, onVictory }: Ba
       return;
     }
 
-    // Next question or final evaluation
-    if (currentQuestionIndex < questions.length - 1) {
-      setCurrentQuestionIndex(prev => prev + 1);
-      setPhase('question');
-    } else {
-      // === VERIFICAÇÃO FINAL DOS 80% ===
-      // Calcular dano total causado ao boss (incluindo esta rodada)
+    // Check for boss defeat (Boss health reached 0)
+    if (newBossHealth <= 0) {
+      // Boss derrotado - verificar se atingiu 80% para vitória
       const finalDamage = totalDamageDealt + damageDealt;
       const damagePercentage = finalDamage / envConfig.maxHealth;
-      
-      // O jogador PRECISA ter causado pelo menos 80% de dano para vencer
       if (damagePercentage >= MIN_PASS_PERCENTAGE) {
         setPhase('victory');
       } else {
         setPhase('defeat');
       }
+      return;
     }
+
+    // Loop das questões: volta para a primeira quando acabam
+    const nextIndex = (currentQuestionIndex + 1) % questions.length;
+    setCurrentQuestionIndex(nextIndex);
+    setPhase('question');
   }, [pendingResult, currentQuestionIndex, questions.length, totalDamageDealt, envConfig.maxHealth]);
 
   // Play victory/defeat sounds
