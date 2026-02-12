@@ -18,10 +18,10 @@ const dbToQuestion = (q: DbQuestion): Question => ({
   environmentId: q.environment_id as 1 | 2 | 3 | 4,
   subject: q.subject,
   baseText: q.base_text,
-  statements: q.statements.map((s, i) => ({
-    id: s.id || `s_${i}`,
-    text: s.text,
-    isTrue: s.isTrue,
+  alternatives: q.alternatives.map((a, i) => ({
+    id: a.id || `a_${i}`,
+    text: a.text,
+    isCorrect: a.isCorrect,
   })),
   createdAt: new Date(q.created_at),
   updatedAt: new Date(q.updated_at),
@@ -47,10 +47,10 @@ const QuestionAdminScreen = ({ onBack }: QuestionAdminScreenProps) => {
           environment_id: questionData.environmentId,
           subject: questionData.subject,
           base_text: questionData.baseText,
-          statements: questionData.statements.map(s => ({
-            id: s.id,
-            text: s.text,
-            isTrue: s.isTrue,
+          alternatives: questionData.alternatives.map(a => ({
+            id: a.id,
+            text: a.text,
+            isCorrect: a.isCorrect,
           })),
         });
         toast({ title: 'Questão atualizada!' });
@@ -59,10 +59,10 @@ const QuestionAdminScreen = ({ onBack }: QuestionAdminScreenProps) => {
           environment_id: questionData.environmentId,
           subject: questionData.subject,
           base_text: questionData.baseText,
-          statements: questionData.statements.map(s => ({
-            id: s.id,
-            text: s.text,
-            isTrue: s.isTrue,
+          alternatives: questionData.alternatives.map(a => ({
+            id: a.id,
+            text: a.text,
+            isCorrect: a.isCorrect,
           })),
         });
         toast({ title: 'Questão criada!' });

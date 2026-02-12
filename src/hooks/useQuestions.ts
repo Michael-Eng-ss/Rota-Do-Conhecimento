@@ -1,11 +1,11 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
-// Types matching the database schema
-export interface DbStatement {
+// Types matching the new multiple-choice structure
+export interface DbAlternative {
   id: string;
   text: string;
-  isTrue: boolean;
+  isCorrect: boolean;
 }
 
 export interface DbQuestion {
@@ -13,99 +13,99 @@ export interface DbQuestion {
   environment_id: number;
   subject: string;
   base_text: string;
-  statements: DbStatement[];
+  alternatives: DbAlternative[];
   is_active: boolean;
   created_at: string;
   updated_at: string;
 }
 
-// Fallback hardcoded questions (used when DB is empty for an environment)
-const fallbackQuestions: Record<number, Array<{ baseText: string; subject: string; statements: DbStatement[] }>> = {
+// Fallback hardcoded questions (multiple choice)
+const fallbackQuestions: Record<number, Array<{ baseText: string; subject: string; alternatives: DbAlternative[] }>> = {
   1: [
     {
-      baseText: 'Sobre a célula e suas organelas, considere os conhecimentos de biologia celular para analisar as seguintes afirmações:',
+      baseText: 'Qual organela celular é responsável pela produção de energia (ATP) nas células eucarióticas?',
       subject: 'Biologia',
-      statements: [
-        { id: 'f1_1', text: 'A mitocôndria é responsável pela produção de energia (ATP) nas células.', isTrue: true },
-        { id: 'f1_2', text: 'O núcleo contém o material genético da célula.', isTrue: true },
-        { id: 'f1_3', text: 'O ribossomo é responsável pela fotossíntese.', isTrue: false },
-        { id: 'f1_4', text: 'A membrana plasmática é impermeável a todas as substâncias.', isTrue: false },
+      alternatives: [
+        { id: 'f1_a', text: 'Ribossomo', isCorrect: false },
+        { id: 'f1_b', text: 'Mitocôndria', isCorrect: true },
+        { id: 'f1_c', text: 'Complexo de Golgi', isCorrect: false },
+        { id: 'f1_d', text: 'Lisossomo', isCorrect: false },
       ],
     },
     {
-      baseText: 'Considerando os elementos químicos e suas propriedades, analise as afirmações sobre a tabela periódica:',
+      baseText: 'Qual é o símbolo químico do elemento Ouro na tabela periódica?',
       subject: 'Química',
-      statements: [
-        { id: 'f1_5', text: 'O oxigênio é classificado como um gás nobre.', isTrue: false },
-        { id: 'f1_6', text: 'O átomo é a menor partícula que mantém as propriedades de um elemento.', isTrue: true },
-        { id: 'f1_7', text: 'A água (H₂O) é composta por dois átomos de hidrogênio e um de oxigênio.', isTrue: true },
-        { id: 'f1_8', text: 'Todos os metais são sólidos à temperatura ambiente.', isTrue: false },
+      alternatives: [
+        { id: 'f1_e', text: 'Ag', isCorrect: false },
+        { id: 'f1_f', text: 'Fe', isCorrect: false },
+        { id: 'f1_g', text: 'Au', isCorrect: true },
+        { id: 'f1_h', text: 'Or', isCorrect: false },
       ],
     },
   ],
   2: [
     {
-      baseText: 'Sobre as classes gramaticais da língua portuguesa, analise as afirmações a seguir:',
+      baseText: 'Qual classe gramatical tem a função de modificar o substantivo, atribuindo-lhe qualidade ou característica?',
       subject: 'Português',
-      statements: [
-        { id: 'f2_1', text: 'Substantivo é uma classe de palavra que nomeia seres, lugares e objetos.', isTrue: true },
-        { id: 'f2_2', text: 'Verbos são palavras que indicam qualidade ou característica.', isTrue: false },
-        { id: 'f2_3', text: 'Adjetivos podem modificar substantivos.', isTrue: true },
-        { id: 'f2_4', text: 'Advérbios modificam apenas verbos.', isTrue: false },
+      alternatives: [
+        { id: 'f2_a', text: 'Advérbio', isCorrect: false },
+        { id: 'f2_b', text: 'Adjetivo', isCorrect: true },
+        { id: 'f2_c', text: 'Pronome', isCorrect: false },
+        { id: 'f2_d', text: 'Conjunção', isCorrect: false },
       ],
     },
     {
-      baseText: 'Sobre a literatura brasileira e seus principais autores, considere as seguintes afirmações:',
+      baseText: 'Quem escreveu a obra "Dom Casmurro"?',
       subject: 'Literatura',
-      statements: [
-        { id: 'f2_5', text: 'Machado de Assis escreveu "Dom Casmurro".', isTrue: true },
-        { id: 'f2_6', text: 'O Modernismo brasileiro começou em 1822.', isTrue: false },
-        { id: 'f2_7', text: 'A Semana de Arte Moderna ocorreu em São Paulo em 1922.', isTrue: true },
-        { id: 'f2_8', text: 'Carlos Drummond de Andrade foi um poeta modernista.', isTrue: true },
+      alternatives: [
+        { id: 'f2_e', text: 'José de Alencar', isCorrect: false },
+        { id: 'f2_f', text: 'Machado de Assis', isCorrect: true },
+        { id: 'f2_g', text: 'Carlos Drummond de Andrade', isCorrect: false },
+        { id: 'f2_h', text: 'Guimarães Rosa', isCorrect: false },
       ],
     },
   ],
   3: [
     {
-      baseText: 'Sobre geometria plana e suas propriedades, analise as afirmações:',
+      baseText: 'Qual é a soma dos ângulos internos de um triângulo?',
       subject: 'Matemática',
-      statements: [
-        { id: 'f3_1', text: 'A soma dos ângulos internos de um triângulo é 180°.', isTrue: true },
-        { id: 'f3_2', text: 'Pi (π) é igual a exatamente 3,14.', isTrue: false },
-        { id: 'f3_3', text: 'Um quadrado tem todos os lados iguais e ângulos retos.', isTrue: true },
-        { id: 'f3_4', text: 'A área de um círculo é calculada por 2πr.', isTrue: false },
+      alternatives: [
+        { id: 'f3_a', text: '90°', isCorrect: false },
+        { id: 'f3_b', text: '180°', isCorrect: true },
+        { id: 'f3_c', text: '360°', isCorrect: false },
+        { id: 'f3_d', text: '270°', isCorrect: false },
       ],
     },
     {
-      baseText: 'Sobre geografia do Brasil e do mundo, considere as afirmações:',
+      baseText: 'Quantos estados possui o Brasil?',
       subject: 'Geografia',
-      statements: [
-        { id: 'f3_5', text: 'O Brasil possui 26 estados e 1 Distrito Federal.', isTrue: true },
-        { id: 'f3_6', text: 'O Amazonas é o maior rio do mundo em volume de água.', isTrue: true },
-        { id: 'f3_7', text: 'O Monte Everest fica na América do Sul.', isTrue: false },
-        { id: 'f3_8', text: 'O Brasil faz fronteira com todos os países da América do Sul.', isTrue: false },
+      alternatives: [
+        { id: 'f3_e', text: '24', isCorrect: false },
+        { id: 'f3_f', text: '25', isCorrect: false },
+        { id: 'f3_g', text: '26', isCorrect: true },
+        { id: 'f3_h', text: '27', isCorrect: false },
       ],
     },
   ],
   4: [
     {
-      baseText: 'Esta é a prova final! Reúna todos os seus conhecimentos para analisar as afirmações sobre ciências:',
-      subject: 'Multidisciplinar',
-      statements: [
-        { id: 'f4_1', text: 'O DNA contém as informações genéticas dos seres vivos.', isTrue: true },
-        { id: 'f4_2', text: 'A tabela periódica possui 118 elementos químicos conhecidos.', isTrue: true },
-        { id: 'f4_3', text: 'A velocidade da luz no vácuo é infinita.', isTrue: false },
-        { id: 'f4_4', text: 'A gravidade na Terra é aproximadamente 9,8 m/s².', isTrue: true },
+      baseText: 'Qual molécula contém as informações genéticas dos seres vivos?',
+      subject: 'Biologia',
+      alternatives: [
+        { id: 'f4_a', text: 'RNA', isCorrect: false },
+        { id: 'f4_b', text: 'DNA', isCorrect: true },
+        { id: 'f4_c', text: 'ATP', isCorrect: false },
+        { id: 'f4_d', text: 'Proteína', isCorrect: false },
       ],
     },
     {
-      baseText: 'Analise as afirmações sobre história, literatura e gramática:',
-      subject: 'Multidisciplinar',
-      statements: [
-        { id: 'f4_5', text: 'A Revolução Francesa ocorreu em 1789.', isTrue: true },
-        { id: 'f4_6', text: 'Fernando Pessoa criou heterônimos como Alberto Caeiro.', isTrue: true },
-        { id: 'f4_7', text: '"Goodbye" significa "bom dia" em inglês.', isTrue: false },
-        { id: 'f4_8', text: 'Adjetivos são palavras que modificam verbos.', isTrue: false },
+      baseText: 'Em que ano ocorreu a Revolução Francesa?',
+      subject: 'História',
+      alternatives: [
+        { id: 'f4_e', text: '1776', isCorrect: false },
+        { id: 'f4_f', text: '1789', isCorrect: true },
+        { id: 'f4_g', text: '1822', isCorrect: false },
+        { id: 'f4_h', text: '1848', isCorrect: false },
       ],
     },
   ],
@@ -126,10 +126,10 @@ export const useQuestions = () => {
       
       if (error) throw error;
       
-      // Parse JSONB statements
+      // Parse JSONB statements as alternatives
       const parsed = (data || []).map(q => ({
         ...q,
-        statements: (typeof q.statements === 'string' ? JSON.parse(q.statements) : q.statements) as DbStatement[],
+        alternatives: (typeof q.statements === 'string' ? JSON.parse(q.statements) : q.statements) as DbAlternative[],
       }));
       
       setQuestions(parsed);
@@ -156,7 +156,7 @@ export const useQuestions = () => {
         id: q.id,
         baseText: q.base_text,
         subject: q.subject,
-        statements: (typeof q.statements === 'string' ? JSON.parse(q.statements) : q.statements) as DbStatement[],
+        alternatives: (typeof q.statements === 'string' ? JSON.parse(q.statements) : q.statements) as DbAlternative[],
       }));
 
       // If no questions in DB, use fallback
@@ -165,19 +165,18 @@ export const useQuestions = () => {
           id: `fallback_${environmentId}_${i}`,
           baseText: q.baseText,
           subject: q.subject,
-          statements: q.statements,
+          alternatives: q.alternatives,
         }));
       }
 
       return parsed;
     } catch (err) {
       console.error('Error fetching battle questions:', err);
-      // Return fallback on error
       return (fallbackQuestions[environmentId] || []).map((q, i) => ({
         id: `fallback_${environmentId}_${i}`,
         baseText: q.baseText,
         subject: q.subject,
-        statements: q.statements,
+        alternatives: q.alternatives,
       }));
     }
   }, []);
@@ -186,7 +185,7 @@ export const useQuestions = () => {
     environment_id: number;
     subject: string;
     base_text: string;
-    statements: DbStatement[];
+    alternatives: DbAlternative[];
     is_active?: boolean;
   }) => {
     const { data, error } = await supabase
@@ -195,7 +194,7 @@ export const useQuestions = () => {
         environment_id: questionData.environment_id,
         subject: questionData.subject,
         base_text: questionData.base_text,
-        statements: JSON.stringify(questionData.statements),
+        statements: JSON.stringify(questionData.alternatives),
         is_active: questionData.is_active ?? true,
       }])
       .select()
@@ -209,14 +208,14 @@ export const useQuestions = () => {
     environment_id?: number;
     subject?: string;
     base_text?: string;
-    statements?: DbStatement[];
+    alternatives?: DbAlternative[];
     is_active?: boolean;
   }) => {
     const updateData: Record<string, unknown> = {};
     if (questionData.environment_id !== undefined) updateData.environment_id = questionData.environment_id;
     if (questionData.subject !== undefined) updateData.subject = questionData.subject;
     if (questionData.base_text !== undefined) updateData.base_text = questionData.base_text;
-    if (questionData.statements !== undefined) updateData.statements = JSON.stringify(questionData.statements);
+    if (questionData.alternatives !== undefined) updateData.statements = JSON.stringify(questionData.alternatives);
     if (questionData.is_active !== undefined) updateData.is_active = questionData.is_active;
 
     const { data, error } = await supabase
