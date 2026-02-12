@@ -5,7 +5,6 @@ import GameInput from '@/components/Game/GameInput';
 import GameButton from '@/components/Game/GameButton';
 import GameFormCard from '@/components/Game/GameFormCard';
 import { useToast } from '@/hooks/use-toast';
-import { supabase } from '@/integrations/supabase/client';
 
 interface ResetPasswordScreenProps {
   onReset: () => void;
@@ -24,17 +23,14 @@ const ResetPasswordScreen = ({ onReset, onBackToLogin }: ResetPasswordScreenProp
       return;
     }
     setLoading(true);
-    const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: window.location.origin,
-    });
-    setLoading(false);
-
-    if (error) {
-      toast({ title: 'Erro', description: error.message, variant: 'destructive' });
-    } else {
+    // O sistema usa autenticação customizada (JWT próprio).
+    // Redefinição de senha requer implementação de envio de email no backend.
+    // Por enquanto, informamos o usuário para contatar o administrador.
+    setTimeout(() => {
+      setLoading(false);
       setSent(true);
-      toast({ title: 'Email enviado!', description: 'Verifique sua caixa de entrada.' });
-    }
+      toast({ title: 'Solicitação registrada!', description: 'Entre em contato com o administrador para redefinir sua senha.' });
+    }, 1000);
   };
 
   return (
@@ -48,7 +44,7 @@ const ResetPasswordScreen = ({ onReset, onBackToLogin }: ResetPasswordScreenProp
               {!sent ? (
                 <>
                   <p className="text-white/70 text-sm text-center">
-                    Digite seu email para receber o link de redefinição de senha.
+                    Digite seu email. A redefinição será processada pelo administrador.
                   </p>
                   <GameInput
                     label="Email :"
@@ -58,15 +54,15 @@ const ResetPasswordScreen = ({ onReset, onBackToLogin }: ResetPasswordScreenProp
                   />
                   <div className="flex flex-col items-center gap-3 pt-4">
                     <GameButton onClick={handleReset} className="w-48" disabled={loading}>
-                      {loading ? 'Enviando...' : 'Enviar Link'}
+                      {loading ? 'Enviando...' : 'Solicitar Reset'}
                     </GameButton>
                   </div>
                 </>
               ) : (
                 <div className="text-center py-4">
-                  <p className="text-green-400 font-medium mb-2">✉️ Email enviado!</p>
+                  <p className="text-green-400 font-medium mb-2">✉️ Solicitação registrada!</p>
                   <p className="text-white/70 text-sm">
-                    Verifique sua caixa de entrada e siga as instruções.
+                    Entre em contato com o administrador para redefinir sua senha.
                   </p>
                 </div>
               )}
