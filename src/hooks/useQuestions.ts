@@ -1,7 +1,9 @@
 import { useState, useCallback } from 'react';
-import { supabase } from '@/integrations/supabase/client';
 
-// Types matching the new multiple-choice structure
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
+const SUPABASE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+
+// Types matching the multiple-choice structure
 export interface DbAlternative {
   id: string;
   text: string;
@@ -17,6 +19,55 @@ export interface DbQuestion {
   is_active: boolean;
   created_at: string;
   updated_at: string;
+}
+
+// Raw types from perguntas-api
+interface RawPergunta {
+  id: number;
+  conteudo: string | null;
+  perguntasnivelid: number;
+  tempo: number;
+  pathimage: string | null;
+  status: boolean;
+  categoriasid: number;
+  quizid: number | null;
+  alternativas?: Array<{
+    id: number;
+    conteudo: string | null;
+    imagem: string | null;
+    correta: boolean;
+    perguntasid: number;
+  }>;
+}
+
+async function callPerguntasApi(path: string, options?: { method?: string; body?: unknown }): Promise<Response> {
+  const { method = 'GET', body } = options || {};
+  return fetch(`${SUPABASE_URL}/functions/v1/perguntas-api/${path}`, {
+    method,
+    headers: {
+      'Content-Type': 'application/json',
+      'apikey': SUPABASE_KEY,
+    },
+    body: body ? JSON.stringify(body) : undefined,
+  });
+}
+
+// Map raw perguntas to DbQuestion format used by the game
+function mapPerguntaToDbQuestion(p: RawPergunta): DbQuestion {
+  return {
+    id: String(p.id),
+    environment_id: p.categoriasid,
+    subject: '', // perguntas table doesn't have subject field, we can derive or leave empty
+    base_text: p.conteudo || '',
+    alternatives: (p.alternativas || []).map(a => ({
+      id: String(a.id),
+      text: a.conteudo || '',
+      isCorrect: a.correta,
+    })),
+    is_active: p.status,
+    created_at: '',
+    updated_at: '',
+  };
 }
 
 // Fallback hardcoded questions (multiple choice)
@@ -115,23 +166,18 @@ export const useQuestions = () => {
   const [questions, setQuestions] = useState<DbQuestion[]>([]);
   const [loading, setLoading] = useState(false);
 
+  // Fetch all questions (for admin), optionally filtered by environmentId (categoriasid)
   const fetchQuestions = useCallback(async (environmentId?: number) => {
     setLoading(true);
     try {
-      let query = supabase.from('questions').select('*');
-      if (environmentId) {
-        query = query.eq('environment_id', environmentId);
-      }
-      const { data, error } = await query.order('created_at', { ascending: false });
-      
-      if (error) throw error;
-      
-      // Parse JSONB statements as alternatives
-      const parsed = (data || []).map(q => ({
-        ...q,
-        alternatives: (typeof q.statements === 'string' ? JSON.parse(q.statements) : q.statements) as DbAlternative[],
-      }));
-      
+      const path = environmentId
+        ? `completas/${environmentId}?active=false`
+        : 'todas';
+      const res = await callPerguntasApi(path);
+      if (!res.ok) throw new Error('Erro ao buscar perguntas');
+      const data: RawPergunta[] = await res.json();
+
+      const parsed = data.map(mapPerguntaToDbQuestion);
       setQuestions(parsed);
       return parsed;
     } catch (err) {
@@ -142,22 +188,25 @@ export const useQuestions = () => {
     }
   }, []);
 
+  // Fetch active questions with alternatives for battle
   const fetchBattleQuestions = useCallback(async (environmentId: number) => {
     try {
-      const { data, error } = await supabase
-        .from('questions')
-        .select('*')
-        .eq('environment_id', environmentId)
-        .eq('is_active', true);
-      
-      if (error) throw error;
-      
-      const parsed = (data || []).map(q => ({
-        id: q.id,
-        baseText: q.base_text,
-        subject: q.subject,
-        alternatives: (typeof q.statements === 'string' ? JSON.parse(q.statements) : q.statements) as DbAlternative[],
-      }));
+      const res = await callPerguntasApi(`completas/${environmentId}`);
+      if (!res.ok) throw new Error('Erro ao buscar perguntas');
+      const data: RawPergunta[] = await res.json();
+
+      const parsed = data
+        .filter(p => p.alternativas && p.alternativas.length > 0)
+        .map(p => ({
+          id: String(p.id),
+          baseText: p.conteudo || '',
+          subject: '',
+          alternatives: (p.alternativas || []).map(a => ({
+            id: String(a.id),
+            text: a.conteudo || '',
+            isCorrect: a.correta,
+          })),
+        }));
 
       // If no questions in DB, use fallback
       if (parsed.length === 0) {
@@ -181,6 +230,7 @@ export const useQuestions = () => {
     }
   }, []);
 
+  // Create a new question with alternatives
   const saveQuestion = async (questionData: {
     environment_id: number;
     subject: string;
@@ -188,22 +238,28 @@ export const useQuestions = () => {
     alternatives: DbAlternative[];
     is_active?: boolean;
   }) => {
-    const { data, error } = await supabase
-      .from('questions')
-      .insert([{
-        environment_id: questionData.environment_id,
-        subject: questionData.subject,
-        base_text: questionData.base_text,
-        statements: JSON.stringify(questionData.alternatives),
-        is_active: questionData.is_active ?? true,
-      }])
-      .select()
-      .single();
-    
-    if (error) throw error;
-    return data;
+    const res = await callPerguntasApi('', {
+      method: 'POST',
+      body: {
+        conteudo: questionData.base_text,
+        categoriasid: questionData.environment_id,
+        perguntasnivelid: 1,
+        tempo: 30,
+        status: questionData.is_active ?? true,
+        alternativas: questionData.alternatives.map(a => ({
+          conteudo: a.text,
+          correta: a.isCorrect,
+        })),
+      },
+    });
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(err.message || 'Erro ao salvar pergunta');
+    }
+    return await res.json();
   };
 
+  // Update a question and its alternatives
   const updateQuestion = async (id: string, questionData: {
     environment_id?: number;
     subject?: string;
@@ -211,31 +267,32 @@ export const useQuestions = () => {
     alternatives?: DbAlternative[];
     is_active?: boolean;
   }) => {
-    const updateData: Record<string, unknown> = {};
-    if (questionData.environment_id !== undefined) updateData.environment_id = questionData.environment_id;
-    if (questionData.subject !== undefined) updateData.subject = questionData.subject;
-    if (questionData.base_text !== undefined) updateData.base_text = questionData.base_text;
-    if (questionData.alternatives !== undefined) updateData.statements = JSON.stringify(questionData.alternatives);
-    if (questionData.is_active !== undefined) updateData.is_active = questionData.is_active;
+    const body: Record<string, unknown> = {};
+    if (questionData.base_text !== undefined) body.conteudo = questionData.base_text;
+    if (questionData.environment_id !== undefined) body.categoriasid = questionData.environment_id;
+    if (questionData.is_active !== undefined) body.status = questionData.is_active;
+    if (questionData.alternatives) {
+      body.alternativas = questionData.alternatives.map(a => ({
+        conteudo: a.text,
+        correta: a.isCorrect,
+      }));
+    }
 
-    const { data, error } = await supabase
-      .from('questions')
-      .update(updateData)
-      .eq('id', id)
-      .select()
-      .single();
-    
-    if (error) throw error;
-    return data;
+    const res = await callPerguntasApi(id, { method: 'PUT', body });
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(err.message || 'Erro ao atualizar pergunta');
+    }
+    return await res.json();
   };
 
+  // Delete a question (and its alternatives)
   const deleteQuestion = async (id: string) => {
-    const { error } = await supabase
-      .from('questions')
-      .delete()
-      .eq('id', id);
-    
-    if (error) throw error;
+    const res = await callPerguntasApi(id, { method: 'DELETE' });
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(err.message || 'Erro ao excluir pergunta');
+    }
   };
 
   return { questions, loading, fetchQuestions, fetchBattleQuestions, saveQuestion, updateQuestion, deleteQuestion };
