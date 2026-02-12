@@ -1,1 +1,37 @@
 project_id = "wgamgvplgftfsjoxwsky"
+
+[functions.auth-api]
+verify_jwt = false
+
+[functions.usuarios-api]
+verify_jwt = false
+
+[functions.perguntas-api]
+verify_jwt = false
+
+[functions.alternativas-api]
+verify_jwt = false
+
+[functions.quiz-api]
+verify_jwt = false
+
+[functions.categorias-api]
+verify_jwt = false
+
+[functions.campus-api]
+verify_jwt = false
+
+[functions.curso-api]
+verify_jwt = false
+
+[functions.perguntas-nivel-api]
+verify_jwt = false
+
+[functions.progresso-perguntas-api]
+verify_jwt = false
+
+[functions.quiz-avaliativo-api]
+verify_jwt = false
+
+[functions.relatorios-api]
+verify_jwt = false
