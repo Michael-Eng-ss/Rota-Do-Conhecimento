@@ -10,7 +10,7 @@ interface AdminLoginScreenProps {
   onLogin: () => void;
   onBack: () => void;
   signIn: (email: string, password: string) => Promise<{ data: any; error: any }>;
-  checkAdminRole: (userId: string) => Promise<void>;
+  checkAdminRole: () => Promise<void>;
 }
 
 const AdminLoginScreen = ({ onLogin, onBack, signIn, checkAdminRole }: AdminLoginScreenProps) => {
@@ -26,34 +26,19 @@ const AdminLoginScreen = ({ onLogin, onBack, signIn, checkAdminRole }: AdminLogi
     }
     setLoading(true);
     const { data, error } = await signIn(email, password);
+    setLoading(false);
+
     if (error) {
-      setLoading(false);
       toast({ title: 'Credenciais inválidas', description: error.message, variant: 'destructive' });
       return;
     }
 
-    // Check admin role
-    if (data?.user) {
-      await checkAdminRole(data.user.id);
-      // Re-check via direct query
-      const { supabase } = await import('@/integrations/supabase/client');
-      const { data: roleData } = await supabase
-        .from('user_roles')
-        .select('role')
-        .eq('user_id', data.user.id)
-        .eq('role', 'admin')
-        .maybeSingle();
-      
-      setLoading(false);
-      if (roleData) {
-        toast({ title: 'Login realizado!', description: 'Bem-vindo, administrador.' });
-        onLogin();
-      } else {
-        toast({ title: 'Acesso negado', description: 'Você não tem permissão de administrador.', variant: 'destructive' });
-      }
+    // Check admin role (role === 1 in usuarios table)
+    if (data && data.role === 1) {
+      toast({ title: 'Login realizado!', description: 'Bem-vindo, administrador.' });
+      onLogin();
     } else {
-      setLoading(false);
-      toast({ title: 'Erro ao verificar permissões', variant: 'destructive' });
+      toast({ title: 'Acesso negado', description: 'Você não tem permissão de administrador.', variant: 'destructive' });
     }
   };
 
