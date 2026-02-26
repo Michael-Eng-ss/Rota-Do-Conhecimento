@@ -1,7 +1,31 @@
-// Helper for calling edge functions (replaces direct Supabase client usage)
+// Helper for calling edge functions or local backend API
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 const SUPABASE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+const LOCAL_API_URL = import.meta.env.VITE_API_URL; // ex: http://localhost:4000
+
+/**
+ * Detecta automaticamente se está rodando local (Docker) ou na nuvem.
+ * - Se VITE_API_URL estiver definida → modo local (Express backend)
+ * - Caso contrário → modo nuvem (Edge Functions)
+ */
+const isLocal = !!LOCAL_API_URL;
+
+/** Mapeia nome da edge function para path da API local */
+const edgeFnToLocalPath: Record<string, string> = {
+  'auth-api': '/auth',
+  'usuarios-api': '/usuarios',
+  'perguntas-api': '/perguntas',
+  'alternativas-api': '/alternativas',
+  'campus-api': '/campus',
+  'curso-api': '/curso',
+  'categorias-api': '/categorias',
+  'quiz-api': '/quiz',
+  'perguntas-nivel-api': '/perguntas-nivel',
+  'progresso-perguntas-api': '/progresso-perguntas',
+  'quiz-avaliativo-api': '/quiz-avaliativo',
+  'relatorios-api': '/relatorios',
+};
 
 const AUTH_TOKEN_KEY = 'app_token';
 const AUTH_USER_KEY = 'app_user';
@@ -65,23 +89,40 @@ async function callEdge(
 
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
-    'apikey': SUPABASE_KEY,
   };
 
-  if (auth) {
-    const token = getToken();
-    if (token) {
-      headers['Authorization'] = `Bearer ${token}`;
+  if (isLocal) {
+    // Modo local: chama Express backend
+    const basePath = edgeFnToLocalPath[fnName] || `/${fnName}`;
+    const url = `${LOCAL_API_URL}${basePath}${path ? '/' + path : ''}`;
+
+    if (auth) {
+      const token = getToken();
+      if (token) headers['Authorization'] = `Bearer ${token}`;
     }
+
+    return fetch(url, {
+      method,
+      headers,
+      body: body ? JSON.stringify(body) : undefined,
+    });
+  } else {
+    // Modo nuvem: chama Edge Functions
+    headers['apikey'] = SUPABASE_KEY;
+
+    if (auth) {
+      const token = getToken();
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+    }
+
+    const url = `${SUPABASE_URL}/functions/v1/${fnName}${path ? '/' + path : ''}`;
+
+    return fetch(url, {
+      method,
+      headers,
+      body: body ? JSON.stringify(body) : undefined,
+    });
   }
-
-  const url = `${SUPABASE_URL}/functions/v1/${fnName}${path ? '/' + path : ''}`;
-
-  return fetch(url, {
-    method,
-    headers,
-    body: body ? JSON.stringify(body) : undefined,
-  });
 }
 
 // ---- Auth API ----
