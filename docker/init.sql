@@ -4,6 +4,9 @@
 -- na primeira vez que o container sobe.
 -- ============================================
 
+-- Extensão necessária para encode(digest(...))
+CREATE EXTENSION IF NOT EXISTS pgcrypto;
+
 -- Tabela: campus
 CREATE TABLE IF NOT EXISTS campus (
   id SERIAL PRIMARY KEY,
