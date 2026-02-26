@@ -1,0 +1,2 @@
+UPDATE usuarios SET senha = encode(digest('jogador123', 'sha256'), 'hex') WHERE email = 'jogador@teste.com';
+UPDATE usuarios SET senha = encode(digest('admin123', 'sha256'), 'hex') WHERE email = 'admin123@teste.com';
