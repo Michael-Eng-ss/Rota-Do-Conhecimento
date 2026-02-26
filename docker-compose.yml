@@ -21,22 +21,42 @@ services:
       timeout: 5s
       retries: 5
 
+  # ---- Backend API (Express) ----
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: quizgame-backend
+    restart: unless-stopped
+    ports:
+      - "4000:4000"
+    environment:
+      PORT: 4000
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_USER: ${POSTGRES_USER:-quizgame}
+      DB_PASSWORD: ${POSTGRES_PASSWORD:-quizgame123}
+      DB_NAME: ${POSTGRES_DB:-quizgame}
+      JWT_SECRET: ${JWT_SECRET:-3099708496ef917af0b641323143ba7a}
+    depends_on:
+      db:
+        condition: service_healthy
+
   # ---- Frontend (React/Vite) ----
   frontend:
     build:
       context: .
       dockerfile: Dockerfile
       args:
-        VITE_SUPABASE_URL: ${VITE_SUPABASE_URL:-http://localhost:8000}
-        VITE_SUPABASE_PUBLISHABLE_KEY: ${VITE_SUPABASE_PUBLISHABLE_KEY:-your-anon-key}
+        VITE_SUPABASE_URL: ${VITE_SUPABASE_URL:-http://localhost:4000}
+        VITE_SUPABASE_PUBLISHABLE_KEY: ${VITE_SUPABASE_PUBLISHABLE_KEY:-local}
         VITE_SUPABASE_PROJECT_ID: ${VITE_SUPABASE_PROJECT_ID:-local}
     container_name: quizgame-frontend
     restart: unless-stopped
     ports:
       - "3000:80"
     depends_on:
-      db:
-        condition: service_healthy
+      - backend
 
 volumes:
   pgdata:
