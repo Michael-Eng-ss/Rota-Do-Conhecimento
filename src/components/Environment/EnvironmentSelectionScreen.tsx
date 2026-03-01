@@ -60,10 +60,12 @@ const EnvironmentSelectionScreen = ({
   ];
 
   const isEnvironmentUnlocked = (env: EnvironmentOption): boolean => {
-    if (env.isFinalBoss) {
-      return finalBossUnlocked;
-    }
+    // TODO: Remover bypass temporário após testes
     return true;
+    // if (env.isFinalBoss) {
+    //   return finalBossUnlocked;
+    // }
+    // return true;
   };
 
   return (
