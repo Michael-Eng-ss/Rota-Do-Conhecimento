@@ -381,17 +381,19 @@ const BattleScreen = ({ environmentId, onBackToPatio, onProfile, onVictory }: Ba
       <div className="absolute inset-0 z-10 pointer-events-none">
         <div className="absolute bottom-24 left-4 md:left-16 w-52 md:w-72">
           <img 
+            key={getClaraSprite()}
             src={getClaraSprite()} 
             alt="Clara" 
-            className="w-full h-auto object-contain drop-shadow-lg"
+            className="w-full h-auto object-contain drop-shadow-lg animate-sprite-swap"
           />
         </div>
         
         <div className="absolute bottom-24 right-4 md:right-16 w-72 md:w-96 flex items-center justify-center">
           <img 
+            key={getBossSprite()}
             src={getBossSprite()} 
             alt="Chefão" 
-            className="w-full h-auto object-contain drop-shadow-lg relative z-10"
+            className="w-full h-auto object-contain drop-shadow-lg relative z-10 animate-sprite-swap"
           />
         </div>
       </div>
