@@ -106,6 +106,8 @@ const BattleScreen = ({ environmentId, onBackToPatio, onProfile, onVictory }: Ba
   const [pendingResult, setPendingResult] = useState<{ isCorrect: boolean; newPlayerHealth: number; newBossHealth: number; damageDealt: number } | null>(null);
   const [reviewSelectedId, setReviewSelectedId] = useState<string | undefined>(undefined);
   const [bossTransformed, setBossTransformed] = useState(false);
+  const [shakeClara, setShakeClara] = useState(false);
+  const [shakeBoss, setShakeBoss] = useState(false);
   const { settings, toggleMute } = useSoundSystem();
   const { playSound } = useSoundEffects();
 
@@ -283,6 +285,15 @@ const BattleScreen = ({ environmentId, onBackToPatio, onProfile, onVictory }: Ba
     
     const { newPlayerHealth, newBossHealth, damageDealt } = pendingResult;
     
+    // Trigger shake on the character that took damage
+    if (pendingResult.isCorrect) {
+      setShakeBoss(true);
+      setTimeout(() => setShakeBoss(false), 500);
+    } else {
+      setShakeClara(true);
+      setTimeout(() => setShakeClara(false), 500);
+    }
+
     setScore(prev => prev + (pendingResult.isCorrect ? 1 : 0));
     setBossHealth(newBossHealth);
     setPlayerHealth(newPlayerHealth);
@@ -379,7 +390,7 @@ const BattleScreen = ({ environmentId, onBackToPatio, onProfile, onVictory }: Ba
       </div>
 
       <div className="absolute inset-0 z-10 pointer-events-none">
-        <div className="absolute bottom-24 left-4 md:left-16 w-52 md:w-72">
+        <div className={`absolute bottom-24 left-4 md:left-16 w-52 md:w-72 ${shakeClara ? 'animate-shake-damage' : ''}`}>
           <img 
             key={getClaraSprite()}
             src={getClaraSprite()} 
@@ -388,7 +399,7 @@ const BattleScreen = ({ environmentId, onBackToPatio, onProfile, onVictory }: Ba
           />
         </div>
         
-        <div className="absolute bottom-24 right-4 md:right-16 w-72 md:w-96 flex items-center justify-center">
+        <div className={`absolute bottom-24 right-4 md:right-16 w-72 md:w-96 flex items-center justify-center ${shakeBoss ? 'animate-shake-damage' : ''}`}>
           <img 
             key={getBossSprite()}
             src={getBossSprite()} 
