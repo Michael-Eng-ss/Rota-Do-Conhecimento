@@ -1,27 +1,25 @@
-import { MapPin, Sparkles } from 'lucide-react';
+import { MapPin } from 'lucide-react';
 
 const GameHeader = () => {
   return (
     <div className="flex justify-center animate-fade-in">
-      <div className="relative group">
-        {/* Glow effect behind */}
-        <div className="absolute -inset-2 bg-gradient-to-r from-yellow-400 via-red-500 to-yellow-400 rounded-full opacity-60 blur-lg group-hover:opacity-80 transition-opacity duration-500 animate-pulse" />
+      <div className="relative bg-gradient-to-b from-white to-gray-100 rounded-2xl px-10 md:px-14 py-5 md:py-6 shadow-[0_4px_30px_rgba(0,0,0,0.15)] border border-gray-200/80">
+        {/* Subtle top accent line */}
+        <div className="absolute top-0 left-8 right-8 h-[3px] bg-gradient-to-r from-transparent via-red-600 to-transparent rounded-full" />
         
-        {/* Main container */}
-        <div className="relative bg-gradient-to-br from-white via-white to-yellow-50 backdrop-blur-sm rounded-full px-8 md:px-12 py-4 md:py-5 shadow-2xl flex items-center gap-4 border-2 border-yellow-300/50">
-          {/* Decorative sparkles */}
-          <Sparkles className="absolute -top-2 -left-1 w-5 h-5 text-yellow-400 animate-pulse" />
-          <Sparkles className="absolute -bottom-1 -right-2 w-4 h-4 text-yellow-400 animate-pulse" style={{ animationDelay: '0.5s' }} />
+        <div className="flex items-center gap-5">
+          <MapPin className="w-7 h-7 md:w-8 md:h-8 text-red-600 fill-red-500" />
           
-          <MapPin className="w-8 h-8 md:w-10 md:h-10 text-red-500 fill-red-400 drop-shadow-md animate-bounce" style={{ animationDuration: '2s' }} />
+          <div className="flex flex-col items-center">
+            <h1 className="text-2xl md:text-4xl font-bold tracking-wide text-gray-800"
+              style={{ fontFamily: "'Georgia', 'Times New Roman', serif", letterSpacing: '0.05em' }}
+            >
+              Rota do Conhecimento
+            </h1>
+            <div className="w-24 h-[2px] bg-red-600/60 mt-1 rounded-full" />
+          </div>
           
-          <h1 className="text-3xl md:text-5xl font-extrabold italic bg-gradient-to-r from-gray-800 via-red-700 to-gray-800 bg-clip-text text-transparent drop-shadow-sm tracking-tight"
-            style={{ fontFamily: "'Brush Script MT', cursive, serif" }}
-          >
-            Rota do Conhecimento
-          </h1>
-          
-          <MapPin className="w-8 h-8 md:w-10 md:h-10 text-red-500 fill-red-400 drop-shadow-md animate-bounce" style={{ animationDuration: '2s', animationDelay: '0.3s' }} />
+          <MapPin className="w-7 h-7 md:w-8 md:h-8 text-red-600 fill-red-500" />
         </div>
       </div>
     </div>
