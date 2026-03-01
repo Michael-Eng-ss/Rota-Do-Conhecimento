@@ -4,11 +4,11 @@ import { environmentConfigs, type EnvironmentId } from '@/config/environments';
 
 // Matérias disponíveis por ambiente
 export const subjectsByEnvironment: Record<EnvironmentId, string[]> = {
-  1: ['Biologia', 'Química', 'Física', 'Língua Portuguesa'],
-  2: ['Literatura', 'Matemática', 'Língua Inglesa', 'Geografia', 'História'],
+  1: ['Literatura', 'Matemática', 'Língua Inglesa', 'Geografia', 'História'],
+  2: ['Biologia', 'Química', 'Física', 'Língua Portuguesa'],
   3: [
-    'Biologia', 'Química', 'Física', 'Língua Portuguesa',
-    'Literatura', 'Matemática', 'Língua Inglesa', 'Geografia', 'História'
+    'Literatura', 'Matemática', 'Língua Inglesa', 'Geografia', 'História',
+    'Biologia', 'Química', 'Física', 'Língua Portuguesa'
   ],
 };
 

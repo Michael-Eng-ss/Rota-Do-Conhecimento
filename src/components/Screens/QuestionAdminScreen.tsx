@@ -129,7 +129,7 @@ const QuestionAdminScreen = ({ onBack }: QuestionAdminScreenProps) => {
             Nova Questão
           </GameButton>
 
-          {/* Filtro por ambiente */}
+          {/* Filtro por grupo */}
           <div className="flex items-center gap-2 bg-white/20 backdrop-blur-sm rounded-lg px-4 py-2">
             <Filter className="w-4 h-4 text-white" />
             <select
@@ -137,12 +137,10 @@ const QuestionAdminScreen = ({ onBack }: QuestionAdminScreenProps) => {
               onChange={(e) => setFilterEnvironment(e.target.value === 'all' ? 'all' : Number(e.target.value) as 1 | 2 | 3)}
               className="bg-transparent text-white border-none outline-none"
             >
-              <option value="all" className="text-gray-800">Todos os Ambientes</option>
-              {([1, 2, 3] as const).map(id => (
-                <option key={id} value={id} className="text-gray-800">
-                  {id} - {getEnvironmentName(id)}
-                </option>
-              ))}
+              <option value="all" className="text-gray-800">Todos os Grupos</option>
+              <option value={1} className="text-gray-800">Grupo 1 - Auditório</option>
+              <option value={2} className="text-gray-800">Grupo 2 - Biblioteca</option>
+              <option value={3} className="text-gray-800">Boss Final</option>
             </select>
           </div>
         </div>

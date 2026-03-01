@@ -29,12 +29,12 @@ const environmentVisualConfigs: Record<EnvironmentId, EnvironmentVisualConfig> =
   1: {
     background: auditorioImage,
     characterImage: claraDuvidaImage,
-    dialogue: "O auditório das ciências e linguagens... Biologia, Química, Física e Língua Portuguesa me aguardam!",
+    dialogue: "O auditório da formação geral... Literatura, Matemática, Língua Inglesa, Geografia e História me aguardam!",
   },
   2: {
     background: bibliotecaImage,
     characterImage: claraDuvidaMochilaImage,
-    dialogue: "A biblioteca da formação geral... Literatura, Matemática, Língua Inglesa, Geografia e História me esperam!",
+    dialogue: "A biblioteca das ciências e linguagens... Biologia, Química, Física e Língua Portuguesa me esperam!",
   },
   3: {
     background: salaMatematicaImage,
