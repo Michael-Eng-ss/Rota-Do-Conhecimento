@@ -30,7 +30,7 @@ const GameManager = () => {
   const { user, isAdmin, signIn, signUp, signOut, checkAdminRole } = useAuth();
   const [currentScreen, setCurrentScreen] = useState<GameScreen>('login');
   const [previousScreen, setPreviousScreen] = useState<GameScreen>('menu');
-  const [currentEnvironment, setCurrentEnvironment] = useState<1 | 2 | 3 | 4>(1);
+  const [currentEnvironment, setCurrentEnvironment] = useState<1 | 2 | 3>(1);
   const [completedEnvironments, setCompletedEnvironments] = useState<number[]>([]);
   const [playerName, setPlayerName] = useState<string>('Jogador');
   const [playerAvatar, setPlayerAvatar] = useState<string>('clara');
@@ -74,7 +74,7 @@ const GameManager = () => {
     setCurrentScreen('environmentSelection');
   };
 
-  const handleSelectEnvironment = (envId: 1 | 2 | 3 | 4) => {
+  const handleSelectEnvironment = (envId: 1 | 2 | 3) => {
     setCurrentEnvironment(envId);
     setCurrentScreen('environment');
   };

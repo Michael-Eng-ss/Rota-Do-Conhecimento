@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { ArrowLeft, Trophy, Star, Target, CheckCircle, Lock, Pencil, X, Check } from 'lucide-react';
-import { environmentConfigs } from '@/config/environments';
+import { environmentConfigs, TOTAL_ENVIRONMENTS, type EnvironmentId } from '@/config/environments';
 import { useToast } from '@/hooks/use-toast';
 import { apiUpdateUser, type AppUser } from '@/lib/api';
 
@@ -15,7 +15,6 @@ import claraMatematicaImage from '@/assets/characters/clara-matematica.png';
 // Backgrounds para preview dos ambientes
 import auditorioImage from '@/assets/backgrounds/auditorio.png';
 import bibliotecaImage from '@/assets/backgrounds/biblioteca.png';
-import laboratorioImage from '@/assets/backgrounds/laboratorio.png';
 import salaMatematicaImage from '@/assets/backgrounds/sala-matematica.png';
 
 interface AvatarOption {
@@ -44,10 +43,9 @@ interface EnvironmentProgress {
 }
 
 const environmentBackgrounds: Record<number, string> = {
-  1: laboratorioImage,
-  2: auditorioImage,
-  3: bibliotecaImage,
-  4: salaMatematicaImage,
+  1: auditorioImage,
+  2: bibliotecaImage,
+  3: salaMatematicaImage,
 };
 
 interface ProfileScreenProps {
@@ -110,7 +108,7 @@ const ProfileScreen = ({
   };
 
   // Build environment progress from config
-  const environments: EnvironmentProgress[] = ([1, 2, 3, 4] as const).map(id => {
+  const environments: EnvironmentProgress[] = ([1, 2, 3] as const).map(id => {
     const config = environmentConfigs[id];
     return {
       id,
@@ -127,10 +125,9 @@ const ProfileScreen = ({
   const overallProgress = (totalCompleted / environments.length) * 100;
 
   const getMedal = () => {
-    if (totalCompleted === 4) return { icon: '🏆', label: 'Mestre do Conhecimento', color: 'text-yellow-400' };
-    if (totalCompleted >= 3) return { icon: '🥇', label: 'Especialista', color: 'text-yellow-500' };
-    if (totalCompleted >= 2) return { icon: '🥈', label: 'Estudante Dedicado', color: 'text-gray-300' };
-    if (totalCompleted >= 1) return { icon: '🥉', label: 'Iniciante', color: 'text-amber-600' };
+    if (totalCompleted === 3) return { icon: '🏆', label: 'Mestre do Conhecimento', color: 'text-yellow-400' };
+    if (totalCompleted >= 2) return { icon: '🥇', label: 'Especialista', color: 'text-yellow-500' };
+    if (totalCompleted >= 1) return { icon: '🥈', label: 'Estudante Dedicado', color: 'text-gray-300' };
     return { icon: '📚', label: 'Novato', color: 'text-blue-400' };
   };
 
@@ -200,7 +197,7 @@ const ProfileScreen = ({
                       <Target className="w-5 h-5 text-green-400" />
                       <div>
                         <p className="text-xs text-white/60">Progresso</p>
-                        <p className="text-lg font-bold text-white">{totalCompleted}/4</p>
+                        <p className="text-lg font-bold text-white">{totalCompleted}/3</p>
                       </div>
                     </div>
                     <div className="flex items-center gap-2 bg-black/30 px-4 py-2 rounded-lg">
@@ -208,7 +205,7 @@ const ProfileScreen = ({
                       <div>
                         <p className="text-xs text-white/60">Ambientes</p>
                         <p className="text-lg font-bold text-white">
-                          {effectiveCompleted.map(id => environmentConfigs[id as 1|2|3|4]?.name?.[0] || '?').join(', ') || '-'}
+                          {effectiveCompleted.map(id => environmentConfigs[id as EnvironmentId]?.name?.[0] || '?').join(', ') || '-'}
                         </p>
                       </div>
                     </div>
@@ -337,7 +334,7 @@ const ProfileScreen = ({
                   <div>
                     <div className="flex items-center gap-2">
                       <span className="text-sm bg-blue-600/80 text-white px-2 py-0.5 rounded">
-                        {env.id}/4
+                        {env.id}/3
                       </span>
                       {env.completed && (
                         <CheckCircle className="w-5 h-5 text-green-400" />
@@ -387,7 +384,7 @@ const ProfileScreen = ({
               <p className="text-xs text-white/60">Ambientes Completos</p>
             </div>
             <div>
-              <p className="text-2xl font-bold text-green-400">{4 - totalCompleted}</p>
+              <p className="text-2xl font-bold text-green-400">{3 - totalCompleted}</p>
               <p className="text-xs text-white/60">Ambientes Restantes</p>
             </div>
             <div>

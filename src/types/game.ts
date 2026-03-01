@@ -7,11 +7,11 @@ export interface SoundSettings {
 
 export interface GameState {
   health: number; // 0-100
-  currentEnvironment: 1 | 2 | 3 | 4;
+  currentEnvironment: 1 | 2 | 3;
   soundSettings: SoundSettings;
 }
 
-export type EnvironmentId = 1 | 2 | 3 | 4;
+export type EnvironmentId = 1 | 2 | 3;
 
 export interface EnvironmentData {
   id: EnvironmentId;
@@ -25,7 +25,7 @@ export interface Question {
   text: string;
   options: string[];
   correctIndex: number;
-  damage: number; // Dano na vida ao errar
+  damage: number;
 }
 
 export interface MenuOption {

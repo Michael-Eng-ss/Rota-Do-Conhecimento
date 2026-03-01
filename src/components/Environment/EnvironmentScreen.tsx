@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useSoundSystem } from '@/hooks/useSoundSystem';
-import { environmentConfigs as envConfigsFromFile } from '@/config/environments';
+import { environmentConfigs as envConfigsFromFile, type EnvironmentId } from '@/config/environments';
 import HealthBar from './HealthBar';
 import SoundButton from './SoundButton';
 import EnvironmentMenu from './EnvironmentMenu';
@@ -12,13 +12,11 @@ import BattleScreen from '@/components/Battle/BattleScreen';
 // Import backgrounds
 import auditorioImage from '@/assets/backgrounds/auditorio.png';
 import bibliotecaImage from '@/assets/backgrounds/biblioteca.png';
-import laboratorioImage from '@/assets/backgrounds/laboratorio.png';
 import salaMatematicaImage from '@/assets/backgrounds/sala-matematica.png';
 
 // Import character sprites
 import claraDuvidaImage from '@/assets/characters/clara-duvida.png';
 import claraDuvidaMochilaImage from '@/assets/characters/clara-duvida-mochila.png';
-import claraLaboratorioImage from '@/assets/characters/clara-laboratorio.png';
 import claraMatematicaImage from '@/assets/characters/clara-matematica.png';
 
 interface EnvironmentVisualConfig {
@@ -27,23 +25,18 @@ interface EnvironmentVisualConfig {
   dialogue: string;
 }
 
-const environmentVisualConfigs: Record<1 | 2 | 3 | 4, EnvironmentVisualConfig> = {
+const environmentVisualConfigs: Record<EnvironmentId, EnvironmentVisualConfig> = {
   1: {
-    background: laboratorioImage,
-    characterImage: claraLaboratorioImage,
-    dialogue: "Este laboratório está cheio de mistérios científicos! Biologia, Química e História me aguardam.",
-  },
-  2: {
     background: auditorioImage,
     characterImage: claraDuvidaImage,
-    dialogue: "O auditório das letras... Português, Língua Estrangeira e Literatura. Hora de mostrar meu conhecimento!",
+    dialogue: "O auditório das ciências e linguagens... Biologia, Química, Física e Língua Portuguesa me aguardam!",
   },
-  3: {
+  2: {
     background: bibliotecaImage,
     characterImage: claraDuvidaMochilaImage,
-    dialogue: "A biblioteca dos números e do mundo... Matemática, Física e Geografia me esperam!",
+    dialogue: "A biblioteca da formação geral... Literatura, Matemática, Língua Inglesa, Geografia e História me esperam!",
   },
-  4: {
+  3: {
     background: salaMatematicaImage,
     characterImage: claraMatematicaImage,
     dialogue: "O desafio final! Todas as matérias em um só combate... Preciso dar o meu melhor!",
@@ -51,7 +44,7 @@ const environmentVisualConfigs: Record<1 | 2 | 3 | 4, EnvironmentVisualConfig> =
 };
 
 interface EnvironmentScreenProps {
-  environmentId: 1 | 2 | 3 | 4;
+  environmentId: EnvironmentId;
   onBackToPatio: () => void;
   onProfile: () => void;
   onEnvironmentComplete?: (envId: number, score: number) => void;
@@ -73,7 +66,6 @@ const EnvironmentScreen = ({ environmentId, onBackToPatio, onProfile, onEnvironm
   const handleDialogueClick = () => {
     if (!dialogueRead) {
       setDialogueRead(true);
-      // Todos os ambientes têm batalha agora
       setShowBattle(true);
     }
   };
@@ -82,7 +74,6 @@ const EnvironmentScreen = ({ environmentId, onBackToPatio, onProfile, onEnvironm
     onEnvironmentComplete?.(environmentId, score);
   };
 
-  // Show battle screen for all environments
   if (showBattle) {
     return (
       <BattleScreen
@@ -96,31 +87,26 @@ const EnvironmentScreen = ({ environmentId, onBackToPatio, onProfile, onEnvironm
 
   return (
     <div className="relative w-full h-screen overflow-hidden">
-      {/* Background */}
       <div
         className="absolute inset-0 bg-cover bg-center bg-no-repeat"
         style={{ backgroundImage: `url(${visualConfig.background})` }}
       />
 
-      {/* Top UI - Left: Profile + Health */}
       <div className="absolute top-4 left-4 flex items-center gap-4 z-20">
         <ProfileAvatar onProfileClick={onProfile} />
         <HealthBar health={health} />
       </div>
 
-      {/* Bottom Left UI - Sound + Menu (moved down) */}
       <div className="absolute bottom-40 md:bottom-48 left-4 flex flex-col gap-3 z-20">
         <SoundButton isMuted={settings.isMuted} onToggle={toggleMute} />
         <EnvironmentMenu onBackToPatio={onBackToPatio} onHelp={handleHelp} />
       </div>
 
-      {/* Environment Indicator */}
       <div className="absolute top-4 left-1/2 -translate-x-1/2 bg-black/50 text-white px-4 py-2 rounded-full text-sm z-20">
-        <span className="font-bold">{envConfig.name}</span> - Ambiente {environmentId} / 4
+        <span className="font-bold">{envConfig.name}</span> - Ambiente {environmentId} / 3
         {envConfig.isFinalBoss && <span className="ml-2 text-red-300">★ BOSS FINAL</span>}
       </div>
 
-      {/* Character */}
       <div className="absolute inset-0 z-10">
         <CharacterSprite
           character={{
@@ -133,7 +119,6 @@ const EnvironmentScreen = ({ environmentId, onBackToPatio, onProfile, onEnvironm
         />
       </div>
 
-      {/* Dialogue */}
       <div 
         className="absolute bottom-0 left-0 right-0 p-4 md:p-8 z-20 cursor-pointer"
         onClick={handleDialogueClick}
