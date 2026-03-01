@@ -1,8 +1,9 @@
+import { forwardRef } from 'react';
 import { MapPin } from 'lucide-react';
 
-const GameHeader = () => {
+const GameHeader = forwardRef<HTMLDivElement>((_, ref) => {
   return (
-    <div className="flex justify-center animate-fade-in">
+    <div ref={ref} className="flex justify-center animate-fade-in">
       <div className="relative bg-gradient-to-b from-white to-gray-100 rounded-2xl px-10 md:px-14 py-5 md:py-6 shadow-[0_4px_30px_rgba(0,0,0,0.15)] border border-gray-200/80">
         {/* Subtle top accent line */}
         <div className="absolute top-0 left-8 right-8 h-[3px] bg-gradient-to-r from-transparent via-red-600 to-transparent rounded-full" />
@@ -24,6 +25,8 @@ const GameHeader = () => {
       </div>
     </div>
   );
-};
+});
+
+GameHeader.displayName = 'GameHeader';
 
 export default GameHeader;
