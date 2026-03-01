@@ -171,6 +171,7 @@ const BattleScreen = ({ environmentId, onBackToPatio, onProfile, onVictory }: Ba
         if (phase === 'question' || phase === 'feedback' || phase === 'review') return profMatematicaBossImage;
         return profMatematicaBossSorrindoImage;
       }
+      if (phase === 'intro-1') return profMatematicaPurificadaFelizImage;
       if (phase === 'intro-2') return profMatematicaPurificadaTristeImage;
       if (phase === 'intro-3') return profMatematicaNormalImage;
       return profMatematicaNormalImage;
@@ -378,7 +379,7 @@ const BattleScreen = ({ environmentId, onBackToPatio, onProfile, onVictory }: Ba
       </div>
 
       <div className="absolute inset-0 z-10 pointer-events-none">
-        <div className="absolute bottom-24 left-4 md:left-16 w-64 md:w-80">
+        <div className="absolute bottom-24 left-4 md:left-16 w-52 md:w-72">
           <img 
             src={getClaraSprite()} 
             alt="Clara" 
@@ -386,7 +387,7 @@ const BattleScreen = ({ environmentId, onBackToPatio, onProfile, onVictory }: Ba
           />
         </div>
         
-        <div className="absolute bottom-24 right-4 md:right-16 w-64 md:w-80 flex items-center justify-center">
+        <div className="absolute bottom-24 right-4 md:right-16 w-72 md:w-96 flex items-center justify-center">
           <img 
             src={getBossSprite()} 
             alt="Chefão" 
