@@ -19,20 +19,20 @@ export const environmentConfigs: Record<EnvironmentId, EnvironmentConfig> = {
   1: {
     id: 1,
     name: 'Auditório',
-    subjects: ['Biologia', 'Química', 'Física', 'Língua Portuguesa'],
-    questionCounts: { 'Biologia': 8, 'Química': 8, 'Física': 8, 'Língua Portuguesa': 6 },
-    maxHealth: 60,
-    minHealthToPass: 48,  // 80% de 60
+    subjects: ['Literatura', 'Matemática', 'Língua Inglesa', 'Geografia', 'História'],
+    questionCounts: { 'Literatura': 4, 'Matemática': 4, 'Língua Inglesa': 4, 'Geografia': 4, 'História': 4 },
+    maxHealth: 40,
+    minHealthToPass: 32,  // 80% de 40
     pointsPerQuestion: 2,
-    totalQuestions: 30,
+    totalQuestions: 20,
     isFinalBoss: false,
     requiresAllCompleted: false,
   },
   2: {
     id: 2,
     name: 'Biblioteca',
-    subjects: ['Literatura', 'Matemática', 'Língua Inglesa', 'Geografia', 'História'],
-    questionCounts: { 'Literatura': 4, 'Matemática': 4, 'Língua Inglesa': 4, 'Geografia': 4, 'História': 4 },
+    subjects: ['Biologia', 'Química', 'Física', 'Língua Portuguesa'],
+    questionCounts: { 'Biologia': 5, 'Química': 5, 'Física': 5, 'Língua Portuguesa': 5 },
     maxHealth: 40,
     minHealthToPass: 32,  // 80% de 40
     pointsPerQuestion: 2,
@@ -44,25 +44,25 @@ export const environmentConfigs: Record<EnvironmentId, EnvironmentConfig> = {
     id: 3,
     name: 'Boss Final',
     subjects: [
-      'Biologia', 'Química', 'Física', 'Língua Portuguesa',
-      'Literatura', 'Matemática', 'Língua Inglesa', 'Geografia', 'História'
+      'Literatura', 'Matemática', 'Língua Inglesa', 'Geografia', 'História',
+      'Biologia', 'Química', 'Física', 'Língua Portuguesa'
     ],
     questionCounts: {
-      'Biologia': 8, 'Química': 8, 'Física': 8, 'Língua Portuguesa': 6,
-      'Literatura': 4, 'Matemática': 4, 'Língua Inglesa': 4, 'Geografia': 4, 'História': 4
+      'Literatura': 4, 'Matemática': 4, 'Língua Inglesa': 4, 'Geografia': 4, 'História': 4,
+      'Biologia': 5, 'Química': 5, 'Física': 5, 'Língua Portuguesa': 5
     },
-    maxHealth: 100,
-    minHealthToPass: 80,  // 80% de 100
+    maxHealth: 80,
+    minHealthToPass: 64,  // 80% de 80
     pointsPerQuestion: 2,
-    totalQuestions: 50,
+    totalQuestions: 40,
     isFinalBoss: true,
     requiresAllCompleted: true,
   },
 };
 
 // Total de pontos possíveis
-export const TOTAL_MAX_SCORE = 100;
-export const TOTAL_MIN_SCORE = 80;
+export const TOTAL_MAX_SCORE = 80;
+export const TOTAL_MIN_SCORE = 64;
 
 // Percentual mínimo para passar de qualquer chefão
 export const MIN_PASS_PERCENTAGE = 0.80;

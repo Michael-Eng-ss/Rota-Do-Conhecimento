@@ -74,85 +74,85 @@ function mapPerguntaToDbQuestion(p: RawPergunta): DbQuestion {
 const fallbackQuestions: Record<number, Array<{ baseText: string; subject: string; alternatives: DbAlternative[] }>> = {
   1: [
     {
-      baseText: 'Qual organela celular é responsável pela produção de energia (ATP) nas células eucarióticas?',
-      subject: 'Biologia',
-      alternatives: [
-        { id: 'f1_a', text: 'Ribossomo', isCorrect: false },
-        { id: 'f1_b', text: 'Mitocôndria', isCorrect: true },
-        { id: 'f1_c', text: 'Complexo de Golgi', isCorrect: false },
-        { id: 'f1_d', text: 'Lisossomo', isCorrect: false },
-      ],
-    },
-    {
-      baseText: 'Qual é o símbolo químico do elemento Ouro na tabela periódica?',
-      subject: 'Química',
-      alternatives: [
-        { id: 'f1_e', text: 'Ag', isCorrect: false },
-        { id: 'f1_f', text: 'Fe', isCorrect: false },
-        { id: 'f1_g', text: 'Au', isCorrect: true },
-        { id: 'f1_h', text: 'Or', isCorrect: false },
-      ],
-    },
-    {
-      baseText: 'A velocidade é uma grandeza escalar ou vetorial?',
-      subject: 'Física',
-      alternatives: [
-        { id: 'f1_i', text: 'Escalar', isCorrect: false },
-        { id: 'f1_j', text: 'Vetorial', isCorrect: true },
-        { id: 'f1_k', text: 'Nenhuma das anteriores', isCorrect: false },
-        { id: 'f1_l', text: 'Ambas', isCorrect: false },
-      ],
-    },
-    {
-      baseText: 'Qual classe gramatical tem a função de modificar o substantivo, atribuindo-lhe qualidade ou característica?',
-      subject: 'Língua Portuguesa',
-      alternatives: [
-        { id: 'f1_m', text: 'Advérbio', isCorrect: false },
-        { id: 'f1_n', text: 'Adjetivo', isCorrect: true },
-        { id: 'f1_o', text: 'Pronome', isCorrect: false },
-        { id: 'f1_p', text: 'Conjunção', isCorrect: false },
-      ],
-    },
-  ],
-  2: [
-    {
       baseText: 'Quem escreveu a obra "Dom Casmurro"?',
       subject: 'Literatura',
       alternatives: [
-        { id: 'f2_a', text: 'José de Alencar', isCorrect: false },
-        { id: 'f2_b', text: 'Machado de Assis', isCorrect: true },
-        { id: 'f2_c', text: 'Carlos Drummond de Andrade', isCorrect: false },
-        { id: 'f2_d', text: 'Guimarães Rosa', isCorrect: false },
+        { id: 'f1_a', text: 'José de Alencar', isCorrect: false },
+        { id: 'f1_b', text: 'Machado de Assis', isCorrect: true },
+        { id: 'f1_c', text: 'Carlos Drummond de Andrade', isCorrect: false },
+        { id: 'f1_d', text: 'Guimarães Rosa', isCorrect: false },
       ],
     },
     {
       baseText: 'Qual é a soma dos ângulos internos de um triângulo?',
       subject: 'Matemática',
       alternatives: [
-        { id: 'f2_e', text: '90°', isCorrect: false },
-        { id: 'f2_f', text: '180°', isCorrect: true },
-        { id: 'f2_g', text: '360°', isCorrect: false },
-        { id: 'f2_h', text: '270°', isCorrect: false },
+        { id: 'f1_e', text: '90°', isCorrect: false },
+        { id: 'f1_f', text: '180°', isCorrect: true },
+        { id: 'f1_g', text: '360°', isCorrect: false },
+        { id: 'f1_h', text: '270°', isCorrect: false },
       ],
     },
     {
       baseText: 'Quantos estados possui o Brasil?',
       subject: 'Geografia',
       alternatives: [
-        { id: 'f2_i', text: '24', isCorrect: false },
-        { id: 'f2_j', text: '25', isCorrect: false },
-        { id: 'f2_k', text: '26', isCorrect: true },
-        { id: 'f2_l', text: '27', isCorrect: false },
+        { id: 'f1_i', text: '24', isCorrect: false },
+        { id: 'f1_j', text: '25', isCorrect: false },
+        { id: 'f1_k', text: '26', isCorrect: true },
+        { id: 'f1_l', text: '27', isCorrect: false },
       ],
     },
     {
       baseText: 'Em que ano ocorreu a Revolução Francesa?',
       subject: 'História',
       alternatives: [
-        { id: 'f2_m', text: '1776', isCorrect: false },
-        { id: 'f2_n', text: '1789', isCorrect: true },
-        { id: 'f2_o', text: '1822', isCorrect: false },
-        { id: 'f2_p', text: '1848', isCorrect: false },
+        { id: 'f1_m', text: '1776', isCorrect: false },
+        { id: 'f1_n', text: '1789', isCorrect: true },
+        { id: 'f1_o', text: '1822', isCorrect: false },
+        { id: 'f1_p', text: '1848', isCorrect: false },
+      ],
+    },
+  ],
+  2: [
+    {
+      baseText: 'Qual organela celular é responsável pela produção de energia (ATP) nas células eucarióticas?',
+      subject: 'Biologia',
+      alternatives: [
+        { id: 'f2_a', text: 'Ribossomo', isCorrect: false },
+        { id: 'f2_b', text: 'Mitocôndria', isCorrect: true },
+        { id: 'f2_c', text: 'Complexo de Golgi', isCorrect: false },
+        { id: 'f2_d', text: 'Lisossomo', isCorrect: false },
+      ],
+    },
+    {
+      baseText: 'Qual é o símbolo químico do elemento Ouro na tabela periódica?',
+      subject: 'Química',
+      alternatives: [
+        { id: 'f2_e', text: 'Ag', isCorrect: false },
+        { id: 'f2_f', text: 'Fe', isCorrect: false },
+        { id: 'f2_g', text: 'Au', isCorrect: true },
+        { id: 'f2_h', text: 'Or', isCorrect: false },
+      ],
+    },
+    {
+      baseText: 'A velocidade é uma grandeza escalar ou vetorial?',
+      subject: 'Física',
+      alternatives: [
+        { id: 'f2_i', text: 'Escalar', isCorrect: false },
+        { id: 'f2_j', text: 'Vetorial', isCorrect: true },
+        { id: 'f2_k', text: 'Nenhuma das anteriores', isCorrect: false },
+        { id: 'f2_l', text: 'Ambas', isCorrect: false },
+      ],
+    },
+    {
+      baseText: 'Qual classe gramatical tem a função de modificar o substantivo, atribuindo-lhe qualidade ou característica?',
+      subject: 'Língua Portuguesa',
+      alternatives: [
+        { id: 'f2_m', text: 'Advérbio', isCorrect: false },
+        { id: 'f2_n', text: 'Adjetivo', isCorrect: true },
+        { id: 'f2_o', text: 'Pronome', isCorrect: false },
+        { id: 'f2_p', text: 'Conjunção', isCorrect: false },
       ],
     },
   ],

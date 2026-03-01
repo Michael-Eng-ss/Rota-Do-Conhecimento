@@ -102,22 +102,20 @@ const QuestionForm = ({ initialData, onSave, onCancel }: QuestionFormProps) => {
         {initialData ? 'Editar Questão' : 'Nova Questão'}
       </h3>
       
-      {/* Ambiente e Matéria */}
+      {/* Grupo e Matéria */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
-            Ambiente *
+            Grupo *
           </label>
           <select
             value={environmentId}
             onChange={(e) => setEnvironmentId(Number(e.target.value) as 1 | 2 | 3)}
             className="w-full p-3 border-2 border-gray-300 rounded-lg text-gray-800 bg-white"
           >
-            {([1, 2, 3] as const).map(id => (
-              <option key={id} value={id}>
-                {id} - {getEnvironmentName(id)}
-              </option>
-            ))}
+            <option value={1}>Grupo 1 - Auditório (Literatura, Matemática, L. Inglesa, Geografia, História)</option>
+            <option value={2}>Grupo 2 - Biblioteca (Biologia, Química, Física, L. Portuguesa)</option>
+            <option value={3}>Boss Final - Todas as Matérias</option>
           </select>
         </div>
         
