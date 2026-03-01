@@ -164,6 +164,7 @@ const GameManager = () => {
             onSelectEnvironment={handleSelectEnvironment}
             onBack={() => setCurrentScreen('menu')}
             completedEnvironments={completedEnvironments}
+            isAdmin={isAdmin}
           />
         );
       
