@@ -125,7 +125,7 @@ const BattleScreen = ({ environmentId, onBackToPatio, onProfile, onVictory }: Ba
   const bossNameByEnv: Record<EnvironmentId, string> = {
     1: 'Professor do Auditório',
     2: 'Professora da Biblioteca',
-    3: 'Diretor Supremo',
+    3: 'Diretora',
   };
 
   const handleHelp = () => {
@@ -219,13 +219,13 @@ const BattleScreen = ({ environmentId, onBackToPatio, onProfile, onVictory }: Ba
     if (environmentId === 3) {
       switch (phase) {
         case 'intro-1':
-          return { speaker: 'Clara', text: 'Professora! Você está aqui, estava muito preocupada com você, sabe tanto que gosto de você, como você está?' };
+          return { speaker: 'Clara', text: 'Diretora! Você está aqui... Eu sabia que teria que enfrentá-la no final.' };
         case 'intro-2':
-          return { speaker: 'Professora', text: 'Estou bem, Clara, só que hoje eu não poderei relevar erros. Espero muito de você agora. Lembra de quando estudei com você até tarde? Agora é a hora!' };
+          return { speaker: 'Diretora', text: 'Clara, você chegou longe. Mas este é o desafio final. Não será fácil, eu garanto. Mostre tudo o que aprendeu!' };
         case 'intro-3':
-          return { speaker: 'Clara', text: 'Senhora, lembra quando me deu esse lápis e esse compasso? Hoje não irei decepcioná-la, pode ter certeza.' };
+          return { speaker: 'Clara', text: 'Eu não vou desistir agora. Passei por todos os outros desafios e vou vencer este também!' };
         case 'battle-start':
-          return { speaker: 'Professora', text: 'Agora é o momento!' };
+          return { speaker: 'Diretora', text: 'Então prove seu valor, Clara. O destino da escola está em suas mãos!' };
         default: return null;
       }
     }
