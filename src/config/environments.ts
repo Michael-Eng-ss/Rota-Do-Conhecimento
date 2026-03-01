@@ -1,73 +1,78 @@
-// Configuração dos ambientes e matérias baseada na tabela de conhecimento
+// Configuração dos ambientes baseada no novo agrupamento
+
+export type EnvironmentId = 1 | 2 | 3;
 
 export interface EnvironmentConfig {
-  id: 1 | 2 | 3 | 4;
+  id: EnvironmentId;
   name: string;
   subjects: string[];
-  maxHealth: number;        // 100% da vida do chefão em pontos
-  minHealthToPass: number;  // 80% mínimo para vencer (em pontos)
-  weight: number;           // Peso da somatória
+  questionCounts: Record<string, number>; // Questões por disciplina
+  maxHealth: number;        // Pontuação máxima (vida do chefão)
+  minHealthToPass: number;  // 80% mínimo para vencer
+  pointsPerQuestion: number;
+  totalQuestions: number;
   isFinalBoss: boolean;
-  requiresAllCompleted: boolean;  // Se requer todos os outros ambientes completados
+  requiresAllCompleted: boolean;
 }
 
-export const environmentConfigs: Record<1 | 2 | 3 | 4, EnvironmentConfig> = {
+export const environmentConfigs: Record<EnvironmentId, EnvironmentConfig> = {
   1: {
     id: 1,
-    name: 'Laboratório',
-    subjects: ['Biologia', 'Química', 'História'],
-    maxHealth: 96,
-    minHealthToPass: 77,  // 80% de 96
-    weight: 24,
+    name: 'Auditório',
+    subjects: ['Biologia', 'Química', 'Física', 'Língua Portuguesa'],
+    questionCounts: { 'Biologia': 8, 'Química': 8, 'Física': 8, 'Língua Portuguesa': 6 },
+    maxHealth: 60,
+    minHealthToPass: 48,  // 80% de 60
+    pointsPerQuestion: 2,
+    totalQuestions: 30,
     isFinalBoss: false,
     requiresAllCompleted: false,
   },
   2: {
     id: 2,
-    name: 'Auditório',
-    subjects: ['Português', 'L. Estrangeira', 'Literatura'],
-    maxHealth: 88,
-    minHealthToPass: 70,  // 80% de 88
-    weight: 24,
+    name: 'Biblioteca',
+    subjects: ['Literatura', 'Matemática', 'Língua Inglesa', 'Geografia', 'História'],
+    questionCounts: { 'Literatura': 4, 'Matemática': 4, 'Língua Inglesa': 4, 'Geografia': 4, 'História': 4 },
+    maxHealth: 40,
+    minHealthToPass: 32,  // 80% de 40
+    pointsPerQuestion: 2,
+    totalQuestions: 20,
     isFinalBoss: false,
     requiresAllCompleted: false,
   },
   3: {
     id: 3,
-    name: 'Biblioteca',
-    subjects: ['Matemática', 'Física', 'Geografia'],
-    maxHealth: 80,
-    minHealthToPass: 64,  // 80% de 80
-    weight: 20,
-    isFinalBoss: false,
-    requiresAllCompleted: false,
-  },
-  4: {
-    id: 4,
     name: 'Boss Final',
     subjects: [
-      'Biologia', 'Química', 'História',
-      'Português', 'L. Estrangeira', 'Literatura',
-      'Matemática', 'Física', 'Geografia'
+      'Biologia', 'Química', 'Física', 'Língua Portuguesa',
+      'Literatura', 'Matemática', 'Língua Inglesa', 'Geografia', 'História'
     ],
-    maxHealth: 264,
-    minHealthToPass: 211,  // 80% de 264
-    weight: 66,
+    questionCounts: {
+      'Biologia': 8, 'Química': 8, 'Física': 8, 'Língua Portuguesa': 6,
+      'Literatura': 4, 'Matemática': 4, 'Língua Inglesa': 4, 'Geografia': 4, 'História': 4
+    },
+    maxHealth: 100,
+    minHealthToPass: 80,  // 80% de 100
+    pointsPerQuestion: 2,
+    totalQuestions: 50,
     isFinalBoss: true,
-    requiresAllCompleted: true,  // Só libera após completar 1, 2 e 3
+    requiresAllCompleted: true,
   },
 };
 
 // Total de pontos possíveis
-export const TOTAL_MAX_SCORE = 264;  // 100%
-export const TOTAL_MIN_SCORE = 211;  // 80%
+export const TOTAL_MAX_SCORE = 100;
+export const TOTAL_MIN_SCORE = 80;
 
 // Percentual mínimo para passar de qualquer chefão
-export const MIN_PASS_PERCENTAGE = 0.80;  // 80%
+export const MIN_PASS_PERCENTAGE = 0.80;
+
+// Número total de ambientes
+export const TOTAL_ENVIRONMENTS = 3;
 
 // Verificar se o Boss Final está liberado
 export const isFinalBossUnlocked = (completedEnvironments: number[]): boolean => {
-  return [1, 2, 3].every(envId => completedEnvironments.includes(envId));
+  return [1, 2].every(envId => completedEnvironments.includes(envId));
 };
 
 // Calcular se o jogador passou do chefão

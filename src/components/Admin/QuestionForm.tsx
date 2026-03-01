@@ -15,7 +15,7 @@ const emptyAlternative = (): Omit<Alternative, 'id'> => ({
 });
 
 const QuestionForm = ({ initialData, onSave, onCancel }: QuestionFormProps) => {
-  const [environmentId, setEnvironmentId] = useState<1 | 2 | 3 | 4>(initialData?.environmentId || 1);
+  const [environmentId, setEnvironmentId] = useState<1 | 2 | 3>(initialData?.environmentId || 1);
   const [subject, setSubject] = useState(initialData?.subject || subjectsByEnvironment[1][0]);
   const [baseText, setBaseText] = useState(initialData?.baseText || '');
   const [alternatives, setAlternatives] = useState<Omit<Alternative, 'id'>[]>(
@@ -110,10 +110,10 @@ const QuestionForm = ({ initialData, onSave, onCancel }: QuestionFormProps) => {
           </label>
           <select
             value={environmentId}
-            onChange={(e) => setEnvironmentId(Number(e.target.value) as 1 | 2 | 3 | 4)}
+            onChange={(e) => setEnvironmentId(Number(e.target.value) as 1 | 2 | 3)}
             className="w-full p-3 border-2 border-gray-300 rounded-lg text-gray-800 bg-white"
           >
-            {([1, 2, 3, 4] as const).map(id => (
+            {([1, 2, 3] as const).map(id => (
               <option key={id} value={id}>
                 {id} - {getEnvironmentName(id)}
               </option>

@@ -15,7 +15,7 @@ interface QuestionAdminScreenProps {
 // Convert DB question to the Question type used by the form/list
 const dbToQuestion = (q: DbQuestion): Question => ({
   id: q.id,
-  environmentId: q.environment_id as 1 | 2 | 3 | 4,
+  environmentId: q.environment_id as 1 | 2 | 3,
   subject: q.subject,
   baseText: q.base_text,
   alternatives: q.alternatives.map((a, i) => ({
@@ -31,7 +31,7 @@ const QuestionAdminScreen = ({ onBack }: QuestionAdminScreenProps) => {
   const { questions: dbQuestions, loading, fetchQuestions, saveQuestion, updateQuestion, deleteQuestion } = useQuestions();
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingQuestion, setEditingQuestion] = useState<Question | null>(null);
-  const [filterEnvironment, setFilterEnvironment] = useState<1 | 2 | 3 | 4 | 'all'>('all');
+  const [filterEnvironment, setFilterEnvironment] = useState<1 | 2 | 3 | 'all'>('all');
   const { toast } = useToast();
 
   useEffect(() => {
@@ -134,11 +134,11 @@ const QuestionAdminScreen = ({ onBack }: QuestionAdminScreenProps) => {
             <Filter className="w-4 h-4 text-white" />
             <select
               value={filterEnvironment}
-              onChange={(e) => setFilterEnvironment(e.target.value === 'all' ? 'all' : Number(e.target.value) as 1 | 2 | 3 | 4)}
+              onChange={(e) => setFilterEnvironment(e.target.value === 'all' ? 'all' : Number(e.target.value) as 1 | 2 | 3)}
               className="bg-transparent text-white border-none outline-none"
             >
               <option value="all" className="text-gray-800">Todos os Ambientes</option>
-              {([1, 2, 3, 4] as const).map(id => (
+              {([1, 2, 3] as const).map(id => (
                 <option key={id} value={id} className="text-gray-800">
                   {id} - {getEnvironmentName(id)}
                 </option>

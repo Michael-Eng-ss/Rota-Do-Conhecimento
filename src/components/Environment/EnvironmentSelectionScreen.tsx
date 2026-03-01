@@ -1,16 +1,15 @@
 import { useState } from 'react';
 import { Lock } from 'lucide-react';
 import patioEscolaImage from '@/assets/backgrounds/patio-escola.png';
-import { isFinalBossUnlocked } from '@/config/environments';
+import { isFinalBossUnlocked, type EnvironmentId } from '@/config/environments';
 
 // Preview images for each environment
 import auditorioImage from '@/assets/backgrounds/auditorio.png';
 import bibliotecaImage from '@/assets/backgrounds/biblioteca.png';
-import laboratorioImage from '@/assets/backgrounds/laboratorio.png';
 import salaMatematicaImage from '@/assets/backgrounds/sala-matematica.png';
 
 interface EnvironmentOption {
-  id: 1 | 2 | 3 | 4;
+  id: EnvironmentId;
   name: string;
   subjects: string[];
   description: string;
@@ -19,7 +18,7 @@ interface EnvironmentOption {
 }
 
 interface EnvironmentSelectionScreenProps {
-  onSelectEnvironment: (environmentId: 1 | 2 | 3 | 4) => void;
+  onSelectEnvironment: (environmentId: EnvironmentId) => void;
   onBack: () => void;
   completedEnvironments?: number[];
 }
@@ -31,36 +30,27 @@ const EnvironmentSelectionScreen = ({
 }: EnvironmentSelectionScreenProps) => {
   const [hoveredEnv, setHoveredEnv] = useState<number | null>(null);
 
-  // Verifica se o Boss Final está liberado
   const finalBossUnlocked = isFinalBossUnlocked(completedEnvironments);
 
   const environments: EnvironmentOption[] = [
     {
       id: 1,
-      name: 'Laboratório',
-      subjects: ['Biologia', 'Química', 'História'],
-      description: 'Enfrente o vilão das ciências naturais!',
-      background: laboratorioImage,
-      isFinalBoss: false,
-    },
-    {
-      id: 2,
       name: 'Auditório',
-      subjects: ['Português', 'L. Estrangeira', 'Literatura'],
-      description: 'Domine as artes da linguagem e literatura!',
+      subjects: ['Biologia', 'Química', 'Física', 'L. Portuguesa'],
+      description: 'Grupo 1 - Ciências da Natureza e Linguagens!',
       background: auditorioImage,
       isFinalBoss: false,
     },
     {
-      id: 3,
+      id: 2,
       name: 'Biblioteca',
-      subjects: ['Matemática', 'Física', 'Geografia'],
-      description: 'Desvende os mistérios dos números e do mundo!',
+      subjects: ['Literatura', 'Matemática', 'L. Inglesa', 'Geografia', 'História'],
+      description: 'Grupo 2 - Formação Geral!',
       background: bibliotecaImage,
       isFinalBoss: false,
     },
     {
-      id: 4,
+      id: 3,
       name: 'Boss Final',
       subjects: ['Todas as Matérias'],
       description: 'O desafio supremo! Todas as matérias em um só combate!',
@@ -78,18 +68,13 @@ const EnvironmentSelectionScreen = ({
 
   return (
     <div className="relative w-full h-screen overflow-hidden">
-      {/* Background */}
       <div
         className="absolute inset-0 bg-cover bg-center bg-no-repeat"
         style={{ backgroundImage: `url(${patioEscolaImage})` }}
       />
-      
-      {/* Overlay escuro */}
       <div className="absolute inset-0 bg-black/60" />
 
-      {/* Conteúdo */}
       <div className="relative z-10 flex flex-col items-center justify-center h-full p-4">
-        {/* Título */}
         <div className="text-center mb-8">
           <h1 className="text-4xl md:text-5xl font-bold text-white mb-2 drop-shadow-lg">
             Escolha seu Destino
@@ -99,8 +84,7 @@ const EnvironmentSelectionScreen = ({
           </p>
         </div>
 
-        {/* Grid de Ambientes */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-5xl w-full">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-4xl w-full">
           {environments.map((env) => {
             const isCompleted = completedEnvironments.includes(env.id);
             const isUnlocked = isEnvironmentUnlocked(env);
@@ -121,13 +105,11 @@ const EnvironmentSelectionScreen = ({
                   ${env.isFinalBoss && isUnlocked ? 'ring-2 ring-red-500 animate-pulse' : ''}
                 `}
               >
-                {/* Imagem de Preview */}
                 <div 
                   className="aspect-[4/3] bg-cover bg-center"
                   style={{ backgroundImage: `url(${env.background})` }}
                 />
                 
-                {/* Overlay com informações */}
                 <div className={`
                   absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent
                   flex flex-col justify-end p-3
@@ -135,28 +117,24 @@ const EnvironmentSelectionScreen = ({
                   ${hoveredEnv === env.id ? 'from-black/95' : ''}
                   ${env.isFinalBoss ? 'from-red-900/90' : ''}
                 `}>
-                  {/* Número do ambiente ou indicador de Boss Final */}
                   <div className={`absolute top-2 left-2 text-white text-xs font-bold px-2 py-1 rounded ${
                     env.isFinalBoss ? 'bg-red-600' : 'bg-blue-600'
                   }`}>
-                    {env.isFinalBoss ? '★ FINAL' : `${env.id}/4`}
+                    {env.isFinalBoss ? '★ FINAL' : `Grupo ${env.id}`}
                   </div>
                   
-                  {/* Indicador de completo */}
                   {isCompleted && (
                     <div className="absolute top-2 right-2 bg-green-500 text-white text-xs font-bold px-2 py-1 rounded">
                       ✓
                     </div>
                   )}
                   
-                  {/* Nome */}
                   <h3 className={`text-white font-bold text-lg drop-shadow-lg ${
                     env.isFinalBoss ? 'text-red-300' : ''
                   }`}>
                     {env.name}
                   </h3>
                   
-                  {/* Matérias */}
                   <div className="flex flex-wrap gap-1 mt-1">
                     {env.subjects.map((subject, idx) => (
                       <span 
@@ -172,7 +150,6 @@ const EnvironmentSelectionScreen = ({
                     ))}
                   </div>
                   
-                  {/* Descrição (aparece no hover) */}
                   <p className={`
                     text-white/80 text-xs mt-1
                     transition-all duration-300
@@ -181,15 +158,13 @@ const EnvironmentSelectionScreen = ({
                     {env.description}
                   </p>
 
-                  {/* Aviso de requisito para Boss Final */}
                   {env.isFinalBoss && !isUnlocked && (
                     <p className="text-red-300 text-xs mt-1">
-                      Complete os ambientes 1, 2 e 3 primeiro!
+                      Complete os ambientes 1 e 2 primeiro!
                     </p>
                   )}
                 </div>
 
-                {/* Bloqueado overlay */}
                 {!isUnlocked && (
                   <div className="absolute inset-0 bg-black/70 flex flex-col items-center justify-center gap-2">
                     <Lock className="w-8 h-8 text-white/80" />
@@ -203,7 +178,6 @@ const EnvironmentSelectionScreen = ({
           })}
         </div>
 
-        {/* Botão Voltar */}
         <button
           onClick={onBack}
           className="mt-8 px-6 py-3 bg-gray-800/80 hover:bg-gray-700 text-white rounded-lg transition-colors border border-white/20"
