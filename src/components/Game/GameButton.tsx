@@ -1,3 +1,4 @@
+import { forwardRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
@@ -10,14 +11,14 @@ interface GameButtonProps {
   disabled?: boolean;
 }
 
-const GameButton = ({ 
+const GameButton = forwardRef<HTMLButtonElement, GameButtonProps>(({ 
   children, 
   onClick, 
   variant = 'primary',
   size = 'md',
   className = '',
   disabled = false
-}: GameButtonProps) => {
+}, ref) => {
   const baseClasses = "font-bold rounded-xl transition-all duration-200 hover:scale-105 active:scale-95 shadow-lg";
   
   const sizeClasses = {
@@ -35,6 +36,7 @@ const GameButton = ({
 
   return (
     <Button
+      ref={ref}
       onClick={onClick}
       disabled={disabled}
       className={cn(
@@ -47,6 +49,8 @@ const GameButton = ({
       {children}
     </Button>
   );
-};
+});
+
+GameButton.displayName = 'GameButton';
 
 export default GameButton;
