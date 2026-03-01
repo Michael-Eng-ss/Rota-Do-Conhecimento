@@ -18,19 +18,19 @@ const GameButton = ({
   className = '',
   disabled = false
 }: GameButtonProps) => {
-  const baseClasses = "font-bold rounded-xl transition-all duration-200 hover:scale-105 active:scale-95 shadow-lg";
+  const baseClasses = "font-semibold rounded-lg transition-all duration-200 tracking-wide";
   
   const sizeClasses = {
     sm: 'px-4 py-2 text-sm',
-    md: 'px-8 py-3 text-lg',
-    lg: 'px-12 py-4 text-xl'
+    md: 'px-8 py-3 text-base',
+    lg: 'px-12 py-4 text-lg'
   };
 
   const variantClasses = {
-    primary: 'bg-gradient-to-b from-primary to-primary/80 text-primary-foreground border-2 border-primary/60',
-    secondary: 'bg-gradient-to-b from-white to-gray-100 text-foreground border-2 border-primary/40',
-    outline: 'bg-transparent text-white border-2 border-white/50 hover:bg-white/10',
-    link: 'bg-transparent text-white underline shadow-none hover:scale-100 hover:text-white/80'
+    primary: 'bg-gray-800 hover:bg-gray-900 text-white border border-gray-700 shadow-md hover:shadow-lg active:scale-[0.98]',
+    secondary: 'bg-white hover:bg-gray-50 text-gray-800 border border-gray-300 shadow-md hover:shadow-lg active:scale-[0.98]',
+    outline: 'bg-transparent text-white border border-white/40 hover:bg-white/10 active:scale-[0.98]',
+    link: 'bg-transparent text-white underline underline-offset-4 shadow-none hover:text-white/80 decoration-white/50'
   };
 
   return (

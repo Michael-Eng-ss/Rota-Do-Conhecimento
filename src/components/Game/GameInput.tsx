@@ -20,7 +20,7 @@ const GameInput = ({
   return (
     <div className={`w-full ${className}`}>
       {label && (
-        <label className="block text-white font-bold text-lg mb-2 drop-shadow-md">
+        <label className="block text-gray-700 font-medium text-sm mb-1.5 tracking-wide uppercase">
           {label}
         </label>
       )}
@@ -29,7 +29,7 @@ const GameInput = ({
         placeholder={placeholder}
         value={value}
         onChange={onChange}
-        className="w-full bg-white/90 border-2 border-white/50 rounded-xl px-4 py-3 text-foreground placeholder:text-muted-foreground shadow-lg focus:ring-2 focus:ring-primary"
+        className="w-full bg-white border border-gray-300 rounded-lg px-4 py-3 text-gray-800 placeholder:text-gray-400 shadow-sm focus:ring-2 focus:ring-gray-400 focus:border-gray-400 transition-all"
       />
     </div>
   );
