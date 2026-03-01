@@ -39,47 +39,41 @@ const LoginScreen = ({ onLogin, onRegister, onForgotPassword, onAdminLogin, sign
       <div className="flex flex-col items-center justify-start min-h-screen pt-8 md:pt-12 px-4">
         <GameHeader />
         
-        <div className="mt-8 md:mt-12 w-full max-w-md">
-          <div className="bg-white/95 backdrop-blur-sm rounded-2xl p-8 shadow-[0_4px_30px_rgba(0,0,0,0.12)] border border-gray-200/60">
-            <div className="space-y-4">
-              <GameInput
-                label="E-mail"
-                placeholder="jogador@email.com"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-              />
-              
-              <GameInput
-                label="Senha"
-                placeholder="••••••••••"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-              />
-            </div>
+        <div className="mt-8 md:mt-12 w-full max-w-md space-y-4">
+          <GameInput
+            placeholder="jogador@email.com"
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
+          
+          <GameInput
+            placeholder="************"
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
 
-            <div className="flex flex-col items-center gap-3 pt-6">
-              <GameButton onClick={handleLogin} className="w-full" disabled={loading}>
-                {loading ? 'Entrando...' : 'Entrar'}
-              </GameButton>
-              
-              <GameButton onClick={onRegister} variant="secondary" className="w-full">
-                Cadastrar
-              </GameButton>
-            </div>
+          <div className="flex flex-col items-center gap-3 pt-4">
+            <GameButton onClick={handleLogin} className="w-48" disabled={loading}>
+              {loading ? 'Entrando...' : 'Login'}
+            </GameButton>
+            
+            <GameButton onClick={onRegister} variant="secondary" className="w-48">
+              Cadastrar
+            </GameButton>
+          </div>
 
-            <div className="flex items-center justify-between pt-5 border-t border-gray-200 mt-6">
-              <GameButton onClick={onForgotPassword} variant="link" className="text-gray-600 text-sm no-underline hover:text-gray-800">
-                Esqueceu a senha?
+          <div className="text-center pt-4 space-y-2">
+            <GameButton onClick={onForgotPassword} variant="link">
+              Esqueceu a senha ?
+            </GameButton>
+            
+            {onAdminLogin && (
+              <GameButton onClick={onAdminLogin} variant="link" className="opacity-60 text-sm">
+                Área Admin
               </GameButton>
-              
-              {onAdminLogin && (
-                <GameButton onClick={onAdminLogin} variant="link" className="text-gray-400 text-xs no-underline hover:text-gray-600">
-                  Área Admin
-                </GameButton>
-              )}
-            </div>
+            )}
           </div>
         </div>
       </div>
