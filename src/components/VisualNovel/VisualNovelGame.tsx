@@ -188,9 +188,11 @@ const VisualNovelGame = ({ onBack, onCutsceneEnd }: VisualNovelGameProps) => {
   }, [currentSceneIndex, currentScene.characters]);
 
   const handleSkip = useCallback(() => {
-    // Skip to end or handle skip logic
-    setCurrentSceneIndex(scenes.length - 1);
-  }, []);
+    // Skip directly to environment selection
+    if (onCutsceneEnd) {
+      onCutsceneEnd();
+    }
+  }, [onCutsceneEnd]);
 
   const handleGoToFirst = useCallback(() => {
     setPrevCharacterIds([]);
