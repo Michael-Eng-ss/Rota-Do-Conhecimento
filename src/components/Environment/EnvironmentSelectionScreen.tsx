@@ -21,12 +21,14 @@ interface EnvironmentSelectionScreenProps {
   onSelectEnvironment: (environmentId: EnvironmentId) => void;
   onBack: () => void;
   completedEnvironments?: number[];
+  isAdmin?: boolean;
 }
 
 const EnvironmentSelectionScreen = ({ 
   onSelectEnvironment, 
   onBack,
-  completedEnvironments = []
+  completedEnvironments = [],
+  isAdmin = false
 }: EnvironmentSelectionScreenProps) => {
   const [hoveredEnv, setHoveredEnv] = useState<number | null>(null);
 
@@ -60,12 +62,11 @@ const EnvironmentSelectionScreen = ({
   ];
 
   const isEnvironmentUnlocked = (env: EnvironmentOption): boolean => {
-    // TODO: Remover bypass temporário após testes
+    if (isAdmin) return true;
+    if (env.isFinalBoss) {
+      return finalBossUnlocked;
+    }
     return true;
-    // if (env.isFinalBoss) {
-    //   return finalBossUnlocked;
-    // }
-    // return true;
   };
 
   return (
