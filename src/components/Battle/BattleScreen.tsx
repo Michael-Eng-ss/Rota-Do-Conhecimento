@@ -353,7 +353,7 @@ const BattleScreen = ({ environmentId, onBackToPatio, onProfile, onVictory }: Ba
   };
 
   const handleVictoryComplete = () => {
-    onVictory(score);
+    onVictory(totalDamageDealt);
     onBackToPatio();
   };
 
