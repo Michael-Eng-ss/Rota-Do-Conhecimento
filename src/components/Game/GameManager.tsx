@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
-import { apiUpdateScore, apiUpdateUser, type AppUser } from '@/lib/api';
+import { apiUpdateScore, apiUpdateUser, setSavedUser, type AppUser } from '@/lib/api';
 import LoginScreen from '@/components/Screens/LoginScreen';
 import UserMenuScreen from '@/components/Screens/UserMenuScreen';
 import RegisterScreen from '@/components/Screens/RegisterScreen';
@@ -56,10 +56,11 @@ const GameManager = () => {
     setCompletedEnvironments(newCompleted);
     setTotalScore(prev => prev + score);
 
-    // Persist score to backend
+    // Persist score to backend and refresh user data
     if (user) {
       try {
-        await apiUpdateScore(user.id, score);
+        const updatedUser = await apiUpdateScore(user.id, score);
+        setSavedUser(updatedUser);
       } catch (err) {
         console.error('Failed to update score:', err);
       }
