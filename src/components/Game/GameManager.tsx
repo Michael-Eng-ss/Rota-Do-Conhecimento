@@ -27,7 +27,7 @@ type GameScreen =
   | 'questionAdmin';
 
 const GameManager = () => {
-  const { user, isAdmin, signIn, signUp, signOut, checkAdminRole } = useAuth();
+  const { user, setUser, isAdmin, signIn, signUp, signOut, checkAdminRole } = useAuth();
   const [currentScreen, setCurrentScreen] = useState<GameScreen>('login');
   const [previousScreen, setPreviousScreen] = useState<GameScreen>('menu');
   const [currentEnvironment, setCurrentEnvironment] = useState<1 | 2 | 3>(1);
@@ -61,6 +61,7 @@ const GameManager = () => {
       try {
         const updatedUser = await apiUpdateScore(user.id, score);
         setSavedUser(updatedUser);
+        setUser(updatedUser);
       } catch (err) {
         console.error('Failed to update score:', err);
       }

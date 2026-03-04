@@ -74,7 +74,7 @@ const ProfileScreen = ({
 
   const effectiveName = playerName;
   const effectiveAvatar = playerAvatar;
-  const effectiveScore = user?.pontuacao ?? totalScore;
+  const effectiveScore = totalScore > 0 ? totalScore : (user?.pontuacao ?? 0);
   const effectiveCompleted = completedEnvironments;
 
   const getCurrentAvatar = (avatarId: string) => {

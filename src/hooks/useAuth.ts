@@ -70,5 +70,5 @@ export const useAuth = () => {
     }
   }, [user]);
 
-  return { user, loading, isAdmin, signIn, signUp, signOut, checkAdminRole };
+  return { user, setUser, loading, isAdmin, signIn, signUp, signOut, checkAdminRole };
 };
