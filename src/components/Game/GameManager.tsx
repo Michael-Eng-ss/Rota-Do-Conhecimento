@@ -54,9 +54,8 @@ const GameManager = () => {
       : [...completedEnvironments, envId];
 
     setCompletedEnvironments(newCompleted);
-    setTotalScore(prev => prev + score);
 
-    // Persist score to backend and refresh user data
+    // Persist score to backend and refresh user data (totalScore syncs via useEffect)
     if (user) {
       try {
         const updatedUser = await apiUpdateScore(user.id, score);
@@ -64,6 +63,8 @@ const GameManager = () => {
         setUser(updatedUser);
       } catch (err) {
         console.error('Failed to update score:', err);
+        // Fallback: update locally if API fails
+        setTotalScore(prev => prev + score);
       }
     }
   };
