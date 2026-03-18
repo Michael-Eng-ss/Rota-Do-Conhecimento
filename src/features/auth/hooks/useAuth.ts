@@ -1,7 +1,11 @@
 import { useState, useEffect, useCallback } from 'react';
 import { getToken, setToken, clearAuth, getSavedUser, setSavedUser, type AppUser } from '@/lib/api-client';
-import { apiLogin } from '@/features/auth/services/auth.service';
-import { apiRegisterUser, apiGetUser } from '@/features/profile/services/user.service';
+import { AuthController } from '@/controllers';
+import { UsuarioController } from '@/controllers';
+import type { UsuarioCreate } from '@/models/types';
+
+const authCtrl = new AuthController();
+const usuarioCtrl = new UsuarioController();
 
 export const useAuth = () => {
   const [user, setUser] = useState<AppUser | null>(null);
@@ -21,15 +25,10 @@ export const useAuth = () => {
 
   const signIn = useCallback(async (email: string, password: string) => {
     try {
-      const result = await apiLogin(email, password);
-      setToken(result.token);
-
-      // Fetch full user profile
-      const fullUser = await apiGetUser(result.id);
-      setSavedUser(fullUser);
+      const result = await authCtrl.login(email, password);
+      const fullUser = result.user as unknown as AppUser;
       setUser(fullUser);
       setIsAdmin(fullUser.role === 1);
-
       return { data: fullUser, error: null };
     } catch (err: any) {
       return { data: null, error: { message: err.message } };
@@ -38,11 +37,11 @@ export const useAuth = () => {
 
   const signUp = useCallback(async (email: string, password: string, displayName: string) => {
     try {
-      const newUser = await apiRegisterUser({
+      const newUser = await usuarioCtrl.create({
         nome: displayName,
         email,
         senha: password,
-        cursoid: 1, // default
+        cursoid: 1,
       });
       return { data: newUser, error: null };
     } catch (err: any) {
@@ -51,7 +50,7 @@ export const useAuth = () => {
   }, []);
 
   const signOut = useCallback(async () => {
-    clearAuth();
+    authCtrl.logout();
     setUser(null);
     setIsAdmin(false);
   }, []);
