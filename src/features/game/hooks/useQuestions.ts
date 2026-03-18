@@ -1,6 +1,47 @@
 import { useState, useCallback } from 'react';
 import { callEdge } from '@/lib/api-client';
 
+// Types matching the multiple-choice structure
+export interface DbAlternative {
+  id: string;
+  text: string;
+  isCorrect: boolean;
+}
+
+export interface DbQuestion {
+  id: string;
+  environment_id: number;
+  subject: string;
+  base_text: string;
+  alternatives: DbAlternative[];
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+// Raw types from perguntas-api
+interface RawPergunta {
+  id: number;
+  conteudo: string | null;
+  perguntasnivelid: number;
+  tempo: number;
+  pathimage: string | null;
+  status: boolean;
+  categoriasid: number;
+  quizid: number | null;
+  alternativas?: Array<{
+    id: number;
+    conteudo: string | null;
+    imagem: string | null;
+    correta: boolean;
+    perguntasid: number;
+  }>;
+}
+
+function callPerguntasApi(path: string, options?: { method?: string; body?: unknown }) {
+  return callEdge('perguntas-api', path, options);
+}
+
 // Map raw perguntas to DbQuestion format used by the game
 function mapPerguntaToDbQuestion(p: RawPergunta): DbQuestion {
   return {
