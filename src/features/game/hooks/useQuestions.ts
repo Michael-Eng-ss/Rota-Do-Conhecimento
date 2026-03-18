@@ -1,7 +1,5 @@
 import { useState, useCallback } from 'react';
-
-const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
-const SUPABASE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+import { callEdge } from '@/lib/api-client';
 
 // Types matching the multiple-choice structure
 export interface DbAlternative {
@@ -40,16 +38,8 @@ interface RawPergunta {
   }>;
 }
 
-async function callPerguntasApi(path: string, options?: { method?: string; body?: unknown }): Promise<Response> {
-  const { method = 'GET', body } = options || {};
-  return fetch(`${SUPABASE_URL}/functions/v1/perguntas-api/${path}`, {
-    method,
-    headers: {
-      'Content-Type': 'application/json',
-      'apikey': SUPABASE_KEY,
-    },
-    body: body ? JSON.stringify(body) : undefined,
-  });
+function callPerguntasApi(path: string, options?: { method?: string; body?: unknown }) {
+  return callEdge('perguntas-api', path, options);
 }
 
 // Map raw perguntas to DbQuestion format used by the game

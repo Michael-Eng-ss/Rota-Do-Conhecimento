@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/features/auth/hooks/useAuth';
-import { apiUpdateScore, apiUpdateUser, setSavedUser, type AppUser } from '@/lib/api';
+import { setSavedUser, type AppUser } from '@/lib/api-client';
+import { apiUpdateScore, apiUpdateUser } from '@/features/profile/services/user.service';
 import LoginScreen from '@/features/auth/components/LoginScreen';
 import UserMenuScreen from '@/features/profile/components/UserMenuScreen';
 import RegisterScreen from '@/features/auth/components/RegisterScreen';

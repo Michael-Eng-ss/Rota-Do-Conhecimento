@@ -1,15 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
-import {
-  apiLogin,
-  apiRegisterUser,
-  apiGetUser,
-  getToken,
-  setToken,
-  clearAuth,
-  getSavedUser,
-  setSavedUser,
-  type AppUser,
-} from '@/lib/api';
+import { getToken, setToken, clearAuth, getSavedUser, setSavedUser, type AppUser } from '@/lib/api-client';
+import { apiLogin } from '@/features/auth/services/auth.service';
+import { apiRegisterUser, apiGetUser } from '@/features/profile/services/user.service';
 
 export const useAuth = () => {
   const [user, setUser] = useState<AppUser | null>(null);
