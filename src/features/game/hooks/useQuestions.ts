@@ -287,7 +287,7 @@ export const useQuestions = () => {
       }));
     }
 
-    const res = await callPerguntasApi(id, { method: 'PUT', body });
+    const res = await callPerguntasApi(id, { method: 'PUT', body, auth: true });
     if (!res.ok) {
       const err = await res.json();
       throw new Error(err.message || 'Erro ao atualizar pergunta');
