@@ -133,10 +133,7 @@ Deno.serve(async (req) => {
     // === WRITE routes (require auth + admin role) ===
 
     if (req.method === "POST") {
-      const authHeader = req.headers.get("authorization");
-      console.log("POST auth header:", authHeader?.substring(0, 50), "hasSecret:", !!Deno.env.get("JWT_SECRET"));
       const user = await verifyAuth(req);
-      console.log("POST verified user:", JSON.stringify(user));
       const denied = requireAdmin(user);
       if (denied) return denied;
 
