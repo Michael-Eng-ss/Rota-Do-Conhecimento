@@ -48,7 +48,7 @@ router.get('/:id', asyncHandler(async (req, res) => {
 }));
 
 // PUT /:id
-router.put('/:id', asyncHandler(async (req, res) => {
+router.put('/:id', requireAuth, asyncHandler(async (req, res) => {
   const b = req.body;
   const fields = []; const vals = []; let i = 1;
   for (const k of ['nome','email','telefone','sexo','datanascimento','uf','foto','cidade','turma','periodo','cursoid','campusid']) {
