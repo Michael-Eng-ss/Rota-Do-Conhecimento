@@ -248,6 +248,7 @@ export const useQuestions = () => {
   }) => {
     const res = await callPerguntasApi('', {
       method: 'POST',
+      auth: true,
       body: {
         conteudo: questionData.base_text,
         categoriasid: questionData.environment_id,
