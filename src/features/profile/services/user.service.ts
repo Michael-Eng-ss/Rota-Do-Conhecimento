@@ -33,7 +33,7 @@ export async function apiUpdateUser(id: number, updates: Partial<AppUser>) {
 }
 
 export async function apiUpdateScore(id: number, pontuacao: number) {
-  const res = await callEdge('usuarios-api', `${id}/pontuacao`, { method: 'PUT', body: { pontuacao } });
+  const res = await callEdge('usuarios-api', `${id}/pontuacao`, { method: 'PUT', body: { pontuacao }, auth: true });
   const data = await res.json();
   if (!res.ok) throw new Error(data.message || 'Erro ao atualizar pontuação');
   return data as AppUser;
