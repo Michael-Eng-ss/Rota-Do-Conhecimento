@@ -62,7 +62,7 @@ router.put('/:id', requireAuth, asyncHandler(async (req, res) => {
 }));
 
 // PUT /:id/senha
-router.put('/:id/senha', asyncHandler(async (req, res) => {
+router.put('/:id/senha', requireAuth, asyncHandler(async (req, res) => {
   const hashed = hashPassword(req.body.senha);
   await pool.query('UPDATE usuarios SET senha=$1 WHERE id=$2', [hashed, req.params.id]);
   res.json({ message: 'success' });
