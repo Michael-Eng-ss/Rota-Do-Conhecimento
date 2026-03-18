@@ -4,7 +4,9 @@ import GameBackground from '@/shared/components/GameBackground';
 import GameHeader from '@/shared/components/GameHeader';
 import GameButton from '@/shared/components/GameButton';
 import GameFormCard from '@/shared/components/GameFormCard';
-import { apiGetRanking } from '@/features/profile/services/user.service';
+import { UsuarioController } from '@/controllers';
+
+const usuarioCtrl = new UsuarioController();
 
 interface RankingScreenProps {
   onBack: () => void;
@@ -26,7 +28,7 @@ const RankingScreen = ({ onBack, cursoId = 1 }: RankingScreenProps) => {
     const fetchRanking = async () => {
       setLoading(true);
       try {
-        const data = await apiGetRanking(cursoId);
+        const data = await usuarioCtrl.getRanking(cursoId);
         setRanking(data.map((p, i) => ({
           position: i + 1,
           name: p.nome,

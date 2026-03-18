@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/features/auth/hooks/useAuth';
 import { setSavedUser, type AppUser } from '@/lib/api-client';
-import { apiUpdateScore, apiUpdateUser } from '@/features/profile/services/user.service';
+import { UsuarioController } from '@/controllers';
 import LoginScreen from '@/features/auth/components/LoginScreen';
 import UserMenuScreen from '@/features/profile/components/UserMenuScreen';
 import RegisterScreen from '@/features/auth/components/RegisterScreen';
@@ -13,6 +13,8 @@ import QuestionAdminScreen from '@/features/admin/components/QuestionAdminScreen
 import VisualNovelGame from '@/features/game/components/VisualNovel/VisualNovelGame';
 import EnvironmentScreen from '@/features/game/components/Environment/EnvironmentScreen';
 import EnvironmentSelectionScreen from '@/features/game/components/Environment/EnvironmentSelectionScreen';
+
+const usuarioCtrl = new UsuarioController();
 
 type GameScreen = 
   | 'login' 
@@ -56,15 +58,13 @@ const GameManager = () => {
 
     setCompletedEnvironments(newCompleted);
 
-    // Persist score to backend and refresh user data (totalScore syncs via useEffect)
     if (user) {
       try {
-        const updatedUser = await apiUpdateScore(user.id, score);
-        setSavedUser(updatedUser);
-        setUser(updatedUser);
+        const updatedUser = await usuarioCtrl.updateScore(user.id, score);
+        setSavedUser(updatedUser as unknown as AppUser);
+        setUser(updatedUser as unknown as AppUser);
       } catch (err) {
         console.error('Failed to update score:', err);
-        // Fallback: update locally if API fails
         setTotalScore(prev => prev + score);
       }
     }

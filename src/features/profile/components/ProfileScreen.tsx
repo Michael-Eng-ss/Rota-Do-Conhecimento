@@ -3,7 +3,9 @@ import { ArrowLeft, Trophy, Star, Target, CheckCircle, Lock, Pencil, X, Check } 
 import { environmentConfigs, TOTAL_ENVIRONMENTS, type EnvironmentId } from '@/features/game/config/environments';
 import { useToast } from '@/hooks/use-toast';
 import { type AppUser } from '@/lib/api-client';
-import { apiUpdateUser } from '@/features/profile/services/user.service';
+import { UsuarioController } from '@/controllers';
+
+const usuarioCtrl = new UsuarioController();
 
 // Avatares disponíveis
 import claraImage from '@/assets/characters/clara.png';
@@ -88,7 +90,7 @@ const ProfileScreen = ({
     // Update in backend
     if (user) {
       try {
-        await apiUpdateUser(user.id, { nome: editName.trim() } as any);
+        await usuarioCtrl.update(user.id, { nome: editName.trim() });
       } catch (err: any) {
         toast({ title: 'Erro ao salvar perfil', description: err.message, variant: 'destructive' });
         return;
