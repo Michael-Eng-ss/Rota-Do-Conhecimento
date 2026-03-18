@@ -22,8 +22,19 @@ Deno.serve(async (req) => {
     if (req.method === "POST") {
       const body = await req.json();
 
+      // Validate required fields
+      const errors: string[] = [];
+      if (!body.quizid || typeof body.quizid !== "number") errors.push("Campo 'quizid' é obrigatório e deve ser number");
+      if (!body.usuarioid || typeof body.usuarioid !== "number") errors.push("Campo 'usuarioid' é obrigatório e deve ser number");
+      if (body.pontuacao === undefined || body.pontuacao === null) errors.push("Campo 'pontuacao' é obrigatório");
+      if (errors.length > 0) {
+        return new Response(JSON.stringify({ status: "error", statusCode: 400, message: "Dados inválidos", errors }), {
+          status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
       if (body.pontuacao < 0) {
-        return new Response(JSON.stringify({ message: "A pontuacao nao pode ser negativa" }), {
+        return new Response(JSON.stringify({ status: "error", statusCode: 400, message: "A pontuacao nao pode ser negativa" }), {
           status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }

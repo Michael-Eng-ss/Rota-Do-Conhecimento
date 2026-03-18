@@ -155,6 +155,17 @@ Deno.serve(async (req) => {
     // POST /perguntas-api - create (with optional alternativas)
     if (req.method === "POST") {
       const body = await req.json();
+
+      // Validate required fields
+      const errors: string[] = [];
+      if (!body.conteudo || typeof body.conteudo !== "string") errors.push("Campo 'conteudo' é obrigatório e deve ser string");
+      if (!body.categoriasid || typeof body.categoriasid !== "number") errors.push("Campo 'categoriasid' é obrigatório e deve ser number");
+      if (errors.length > 0) {
+        return new Response(JSON.stringify({ status: "error", statusCode: 400, message: "Dados inválidos", errors }), {
+          status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
       const { data, error } = await supabase.from("perguntas").insert({
         conteudo: body.conteudo,
         perguntasnivelid: body.perguntasnivelid || 1,

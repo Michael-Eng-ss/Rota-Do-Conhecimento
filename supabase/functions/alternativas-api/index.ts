@@ -72,7 +72,15 @@ Deno.serve(async (req) => {
         });
       }
 
-      // Single insert
+      // Single insert - validate required fields
+      const errors: string[] = [];
+      if (!body.perguntasid || typeof body.perguntasid !== "number") errors.push("Campo 'perguntasid' é obrigatório e deve ser number");
+      if (errors.length > 0) {
+        return new Response(JSON.stringify({ status: "error", statusCode: 400, message: "Dados inválidos", errors }), {
+          status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
       // Check limit
       const { data: existing } = await supabase
         .from("alternativas")

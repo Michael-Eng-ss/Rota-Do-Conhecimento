@@ -21,6 +21,18 @@ Deno.serve(async (req) => {
     // POST /quiz-api - create quiz
     if (req.method === "POST") {
       const body = await req.json();
+
+      // Validate required fields
+      const errors: string[] = [];
+      if (!body.titulo || typeof body.titulo !== "string") errors.push("Campo 'titulo' é obrigatório e deve ser string");
+      if (!body.cursoid || typeof body.cursoid !== "number") errors.push("Campo 'cursoid' é obrigatório e deve ser number");
+      if (!body.usuarioid || typeof body.usuarioid !== "number") errors.push("Campo 'usuarioid' é obrigatório e deve ser number");
+      if (errors.length > 0) {
+        return new Response(JSON.stringify({ status: "error", statusCode: 400, message: "Dados inválidos", errors }), {
+          status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
       const { data, error } = await supabase.from("quiz").insert({
         titulo: body.titulo,
         cursoid: body.cursoid,

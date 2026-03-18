@@ -69,8 +69,19 @@ Deno.serve(async (req) => {
     if (req.method === "PUT" && rest[0]) {
       const id = parseInt(rest[0]);
       const body = await req.json();
+
+      if (!body.nomecampus || typeof body.nomecampus !== "string") {
+        return new Response(JSON.stringify({ status: "error", statusCode: 400, message: "Dados inválidos", errors: ["Campo 'nomecampus' é obrigatório e deve ser string"] }), {
+          status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
       const { data, error } = await supabase.from("campus").update({ nomecampus: body.nomecampus }).eq("id", id).select().single();
-      if (error) throw error;
+      if (error || !data) {
+        return new Response(JSON.stringify({ status: "error", statusCode: 404, message: "Campus nao encontrado" }), {
+          status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
       return new Response(JSON.stringify(data), {
         status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });

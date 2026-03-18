@@ -72,7 +72,16 @@ Deno.serve(async (req) => {
         });
       }
 
-      // Single insert
+      // Single insert - validate
+      const errors: string[] = [];
+      if (!body.usuariosid || typeof body.usuariosid !== "number") errors.push("Campo 'usuariosid' é obrigatório e deve ser number");
+      if (!body.perguntasid || typeof body.perguntasid !== "number") errors.push("Campo 'perguntasid' é obrigatório e deve ser number");
+      if (errors.length > 0) {
+        return new Response(JSON.stringify({ status: "error", statusCode: 400, message: "Dados inválidos", errors }), {
+          status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
       const { data: existing } = await supabase
         .from("progressoperguntas")
         .select("id")
