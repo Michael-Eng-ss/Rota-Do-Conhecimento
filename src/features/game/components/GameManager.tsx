@@ -60,9 +60,10 @@ const GameManager = () => {
 
     if (user) {
       try {
-        const updatedUser = await usuarioCtrl.updateScore(user.id, score);
-        setSavedUser(updatedUser as unknown as AppUser);
-        setUser(updatedUser as unknown as AppUser);
+        const updatedEntity = await usuarioCtrl.updateScore(user.id, score);
+        const updatedUser = updatedEntity.toApi() as unknown as AppUser;
+        setSavedUser(updatedUser);
+        setUser(updatedUser);
       } catch (err) {
         console.error('Failed to update score:', err);
         setTotalScore(prev => prev + score);

@@ -1,25 +1,30 @@
 import * as service from '@/models/services/pergunta-nivel.service';
-import type { PerguntaNivel, PerguntaNivelCreate, PerguntaNivelUpdate } from '@/models/types';
+import { PerguntaNivel } from '@/entities';
+import type { PerguntaNivelCreate, PerguntaNivelUpdate } from '@/models/types';
 
 export class PerguntaNivelController {
   async getAll(): Promise<PerguntaNivel[]> {
-    return service.getPerguntaNivelList();
+    const data = await service.getPerguntaNivelList();
+    return PerguntaNivel.fromApiList(data);
   }
 
   async getById(id: number): Promise<PerguntaNivel> {
     if (!id || id <= 0) throw new Error('ID do nível inválido');
-    return service.getPerguntaNivelById(id);
+    const data = await service.getPerguntaNivelById(id);
+    return PerguntaNivel.fromApi(data);
   }
 
-  async create(data: PerguntaNivelCreate): Promise<PerguntaNivel> {
-    if (!data.nivel || data.nivel <= 0) throw new Error('Nível deve ser positivo');
-    if (!data.pontuacao || data.pontuacao <= 0) throw new Error('Pontuação deve ser positiva');
-    if (!data.tempo || data.tempo <= 0) throw new Error('Tempo deve ser positivo');
-    return service.createPerguntaNivel(data);
+  async create(payload: PerguntaNivelCreate): Promise<PerguntaNivel> {
+    if (!payload.nivel || payload.nivel <= 0) throw new Error('Nível deve ser positivo');
+    if (!payload.pontuacao || payload.pontuacao <= 0) throw new Error('Pontuação deve ser positiva');
+    if (!payload.tempo || payload.tempo <= 0) throw new Error('Tempo deve ser positivo');
+    const data = await service.createPerguntaNivel(payload);
+    return PerguntaNivel.fromApi(data);
   }
 
   async update(id: number, updates: PerguntaNivelUpdate): Promise<PerguntaNivel> {
     if (!id || id <= 0) throw new Error('ID do nível inválido');
-    return service.updatePerguntaNivel(id, updates);
+    const data = await service.updatePerguntaNivel(id, updates);
+    return PerguntaNivel.fromApi(data);
   }
 }

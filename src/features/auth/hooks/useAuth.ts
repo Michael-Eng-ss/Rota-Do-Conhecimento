@@ -1,8 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
-import { getToken, setToken, clearAuth, getSavedUser, setSavedUser, type AppUser } from '@/lib/api-client';
-import { AuthController } from '@/controllers';
-import { UsuarioController } from '@/controllers';
-import type { UsuarioCreate } from '@/models/types';
+import { getToken, clearAuth, getSavedUser, type AppUser } from '@/lib/api-client';
+import { AuthController, UsuarioController } from '@/controllers';
 
 const authCtrl = new AuthController();
 const usuarioCtrl = new UsuarioController();
@@ -26,10 +24,10 @@ export const useAuth = () => {
   const signIn = useCallback(async (email: string, password: string) => {
     try {
       const result = await authCtrl.login(email, password);
-      const fullUser = result.user as unknown as AppUser;
-      setUser(fullUser);
-      setIsAdmin(fullUser.role === 1);
-      return { data: fullUser, error: null };
+      const appUser = result.user.toApi() as unknown as AppUser;
+      setUser(appUser);
+      setIsAdmin(result.user.isAdmin);
+      return { data: appUser, error: null };
     } catch (err: any) {
       return { data: null, error: { message: err.message } };
     }
@@ -43,7 +41,7 @@ export const useAuth = () => {
         senha: password,
         cursoid: 1,
       });
-      return { data: newUser, error: null };
+      return { data: newUser.toApi(), error: null };
     } catch (err: any) {
       return { data: null, error: { message: err.message } };
     }

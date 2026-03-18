@@ -1,13 +1,15 @@
 import * as service from '@/models/services/curso.service';
-import type { Curso } from '@/models/types';
+import { Curso } from '@/entities';
 
 export class CursoController {
   async getAll(): Promise<Curso[]> {
-    return service.getCursoList();
+    const data = await service.getCursoList();
+    return Curso.fromApiList(data);
   }
 
   async getById(id: number): Promise<Curso> {
     if (!id || id <= 0) throw new Error('ID de curso inválido');
-    return service.getCursoById(id);
+    const data = await service.getCursoById(id);
+    return Curso.fromApi(data);
   }
 }
