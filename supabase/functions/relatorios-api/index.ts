@@ -9,6 +9,12 @@ function getSupabase() {
   return createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
 }
 
+function errorResponse(status: number, message: string) {
+  return new Response(JSON.stringify({ status: "error", statusCode: status, message }), {
+    status, headers: { ...corsHeaders, "Content-Type": "application/json" },
+  });
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
@@ -16,17 +22,14 @@ Deno.serve(async (req) => {
 
   try {
     if (req.method === "GET") {
-      // Replicate the report query from the Express backend
-      // Get logs with user data for reporting
       const { data: logs, error: logsError } = await supabase
         .from("logs")
         .select("datalogin, usuariosid")
         .gte("datalogin", "2024-08-01")
         .lte("datalogin", "2024-08-31");
-      
+
       if (logsError) throw logsError;
 
-      // Get user details
       const userIds = [...new Set((logs || []).map(l => l.usuariosid))];
       if (userIds.length === 0) {
         return new Response(JSON.stringify([]), {
@@ -41,35 +44,27 @@ Deno.serve(async (req) => {
 
       const userMap = new Map((usuarios || []).map(u => [u.id, u]));
 
-      // Process report data
       const reportMap = new Map<string, any>();
       for (const log of logs || []) {
         const user = userMap.get(log.usuariosid);
         if (!user) continue;
-        
+
         const hour = new Date(log.datalogin).getHours();
         let periodo = "Outro";
         if (hour >= 7 && hour <= 11) periodo = "Manhã";
         else if (hour >= 12 && hour <= 17) periodo = "Tarde";
         else if (hour >= 18 && hour <= 23) periodo = "Noite";
-        
+
         if (periodo === "Outro") continue;
 
         const age = Math.floor((Date.now() - new Date(user.datanascimento).getTime()) / (365.25 * 24 * 60 * 60 * 1000));
         const key = `${user.sexo}_${user.cidade}`;
-        
+
         if (!reportMap.has(key)) {
           reportMap.set(key, {
-            sexo: user.sexo,
-            cidade: user.cidade,
-            quantidade_manha: 0,
-            quantidade_tarde: 0,
-            quantidade_noite: 0,
-            idade_15_19: 0,
-            idade_20_24: 0,
-            idade_25_29: 0,
-            idade_30_34: 0,
-            idade_35_mais: 0,
+            sexo: user.sexo, cidade: user.cidade,
+            quantidade_manha: 0, quantidade_tarde: 0, quantidade_noite: 0,
+            idade_15_19: 0, idade_20_24: 0, idade_25_29: 0, idade_30_34: 0, idade_35_mais: 0,
           });
         }
 
@@ -90,12 +85,8 @@ Deno.serve(async (req) => {
       });
     }
 
-    return new Response(JSON.stringify({ message: "Not Found" }), {
-      status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    return errorResponse(404, "Not Found");
   } catch (e) {
-    return new Response(JSON.stringify({ message: e.message || "Internal Error" }), {
-      status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    return errorResponse(500, e.message || "Erro interno do servidor");
   }
 });
