@@ -1,83 +1,48 @@
 const router = require('express').Router();
-const { pool } = require('../../db');
-const { hashPassword } = require('../../auth-utils');
-const { asyncHandler, requireAuth, validateBody, AppError } = require('../../middlewares');
+const usuarioController = require('../../controllers/usuario.controller');
+const { asyncHandler, requireAuth, validateBody } = require('../../middlewares');
 
 // POST / - create user
 router.post('/', validateBody({ nome: 'string', email: 'string', senha: 'string' }), asyncHandler(async (req, res) => {
-  const b = req.body;
-  const { rows: existing } = await pool.query('SELECT id FROM usuarios WHERE email = $1', [b.email]);
-  if (existing.length > 0) throw new AppError('Email ja cadastrado', 400);
-
-  const hashed = hashPassword(b.senha);
-  const { rows } = await pool.query(
-    `INSERT INTO usuarios (nome, email, senha, telefone, sexo, datanascimento, role, uf, foto, pontuacao, status, cidade, turma, periodo, cursoid, campusid)
-     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16) RETURNING *`,
-    [b.nome, b.email, hashed, b.telefone||'', b.sexo||0, b.datanascimento||new Date().toISOString(), b.role||3,
-     b.uf||'', b.foto||'', b.pontuacao||0, b.status??true, b.cidade||'', b.turma||null, b.periodo||null, b.cursoid, b.campusid||null]
-  );
-  const { senha: _, ...safe } = rows[0];
-  res.status(201).json(safe);
+  const user = await usuarioController.create(req.body);
+  res.status(201).json(user);
 }));
 
 // GET /ranking/:cursoId
 router.get('/ranking/:cursoId', asyncHandler(async (req, res) => {
-  const { rows } = await pool.query(
-    'SELECT id, nome, foto, pontuacao FROM usuarios WHERE cursoid=$1 AND status=true ORDER BY pontuacao DESC',
-    [req.params.cursoId]
-  );
-  res.json(rows);
+  const ranking = await usuarioController.getRanking(req.params.cursoId);
+  res.json(ranking);
 }));
 
 // GET /curso/:cursoId/:skip/:take
 router.get('/curso/:cursoId/:skip/:take', asyncHandler(async (req, res) => {
   const { cursoId, skip, take } = req.params;
-  const { rows } = await pool.query(
-    'SELECT id,nome,email,telefone,sexo,datanascimento,role,uf,foto,pontuacao,status,cidade,turma,periodo,cursoid,campusid FROM usuarios WHERE cursoid=$1 AND status=true LIMIT $2 OFFSET $3',
-    [cursoId, take, skip]
-  );
-  res.json(rows);
+  const users = await usuarioController.findByCurso(cursoId, skip, take);
+  res.json(users);
 }));
 
 // GET /:id
 router.get('/:id', asyncHandler(async (req, res) => {
-  const { rows } = await pool.query('SELECT * FROM usuarios WHERE id=$1', [req.params.id]);
-  if (!rows[0]) throw new AppError('Usuario nao encontrado', 404);
-  const { senha: _, ...safe } = rows[0];
-  res.json(safe);
+  const user = await usuarioController.getById(req.params.id);
+  res.json(user);
 }));
 
 // PUT /:id
 router.put('/:id', requireAuth, asyncHandler(async (req, res) => {
-  const b = req.body;
-  const fields = []; const vals = []; let i = 1;
-  for (const k of ['nome','email','telefone','sexo','datanascimento','uf','foto','cidade','turma','periodo','cursoid','campusid']) {
-    if (b[k] !== undefined) { fields.push(`${k}=$${i}`); vals.push(b[k]); i++; }
-  }
-  if (fields.length === 0) throw new AppError('Nada para atualizar', 400);
-  vals.push(req.params.id);
-  const { rows } = await pool.query(`UPDATE usuarios SET ${fields.join(',')} WHERE id=$${i} RETURNING *`, vals);
-  if (!rows[0]) throw new AppError('Usuario nao encontrado', 404);
-  const { senha: _, ...safe } = rows[0];
-  res.json(safe);
+  const user = await usuarioController.update(req.params.id, req.body);
+  res.json(user);
 }));
 
 // PUT /:id/senha
 router.put('/:id/senha', requireAuth, validateBody({ senha: 'string' }), asyncHandler(async (req, res) => {
-  const hashed = hashPassword(req.body.senha);
-  const { rowCount } = await pool.query('UPDATE usuarios SET senha=$1 WHERE id=$2', [hashed, req.params.id]);
-  if (rowCount === 0) throw new AppError('Usuario nao encontrado', 404);
-  res.json({ message: 'success' });
+  const result = await usuarioController.updatePassword(req.params.id, req.body.senha);
+  res.json(result);
 }));
 
 // PUT /:id/pontuacao
 router.put('/:id/pontuacao', requireAuth, asyncHandler(async (req, res) => {
-  const { rows: [user] } = await pool.query('SELECT pontuacao FROM usuarios WHERE id=$1', [req.params.id]);
-  if (!user) throw new AppError('Usuario nao encontrado', 404);
-  const newPont = (user.pontuacao || 0) + req.body.pontuacao;
-  const { rows } = await pool.query('UPDATE usuarios SET pontuacao=$1 WHERE id=$2 RETURNING *', [newPont, req.params.id]);
-  const { senha: _, ...safe } = rows[0];
-  res.json(safe);
+  const user = await usuarioController.updateScore(req.params.id, req.body.pontuacao);
+  res.json(user);
 }));
 
 module.exports = router;
