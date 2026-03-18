@@ -36,7 +36,7 @@ router.put('/:id/status', requireAuth, requireRole(1), asyncHandler(async (req, 
   res.json(rows[0]);
 }));
 
-router.put('/:id', asyncHandler(async (req, res) => {
+router.put('/:id', requireAuth, requireRole(1), asyncHandler(async (req, res) => {
   const { rows } = await pool.query('UPDATE categorias SET descricao=$1, imagem=$2 WHERE id=$3 RETURNING *', [req.body.descricao, req.body.imagem, req.params.id]);
   res.json(rows[0]);
 }));

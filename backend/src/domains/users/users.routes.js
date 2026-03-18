@@ -69,7 +69,7 @@ router.put('/:id/senha', requireAuth, asyncHandler(async (req, res) => {
 }));
 
 // PUT /:id/pontuacao
-router.put('/:id/pontuacao', asyncHandler(async (req, res) => {
+router.put('/:id/pontuacao', requireAuth, asyncHandler(async (req, res) => {
   const { rows: [user] } = await pool.query('SELECT pontuacao FROM usuarios WHERE id=$1', [req.params.id]);
   if (!user) return res.status(404).json({ message: 'Usuario nao encontrado' });
   const newPont = (user.pontuacao || 0) + req.body.pontuacao;

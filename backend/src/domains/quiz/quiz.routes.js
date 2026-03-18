@@ -54,7 +54,7 @@ router.put('/:id/status', requireAuth, requireRole(1), asyncHandler(async (req, 
 }));
 
 // PUT /:id
-router.put('/:id', asyncHandler(async (req, res) => {
+router.put('/:id', requireAuth, requireRole(1), asyncHandler(async (req, res) => {
   const { rows } = await pool.query('UPDATE quiz SET titulo=$1, imagem=$2 WHERE id=$3 RETURNING *', [req.body.titulo, req.body.imagem, req.params.id]);
   res.json(rows[0]);
 }));

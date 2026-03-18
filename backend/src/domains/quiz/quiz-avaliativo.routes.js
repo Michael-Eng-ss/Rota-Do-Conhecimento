@@ -3,7 +3,7 @@ const { pool } = require('../../db');
 const { asyncHandler, requireAuth } = require('../../middlewares');
 
 // POST /
-router.post('/', asyncHandler(async (req, res) => {
+router.post('/', requireAuth, asyncHandler(async (req, res) => {
   const b = req.body;
   if (b.pontuacao < 0) return res.status(400).json({ message: 'A pontuacao nao pode ser negativa' });
   const { rows: existing } = await pool.query('SELECT id FROM quiz_avaliativo_usuario WHERE quizid=$1 AND usuarioid=$2', [b.quizid, b.usuarioid]);

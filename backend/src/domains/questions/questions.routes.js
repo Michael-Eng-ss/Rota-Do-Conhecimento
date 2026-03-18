@@ -127,7 +127,7 @@ router.put('/:id', requireAuth, requireRole(1), asyncHandler(async (req, res) =>
 }));
 
 // DELETE /:id
-router.delete('/:id', asyncHandler(async (req, res) => {
+router.delete('/:id', requireAuth, requireRole(1), asyncHandler(async (req, res) => {
   await pool.query('DELETE FROM alternativas WHERE perguntasid=$1', [req.params.id]);
   await pool.query('DELETE FROM perguntas WHERE id=$1', [req.params.id]);
   res.status(204).send();

@@ -25,7 +25,7 @@ router.put('/:id', requireAuth, requireRole(1), asyncHandler(async (req, res) =>
   res.json(rows[0]);
 }));
 
-router.delete('/:id', asyncHandler(async (req, res) => {
+router.delete('/:id', requireAuth, requireRole(1), asyncHandler(async (req, res) => {
   await pool.query('DELETE FROM campus WHERE id=$1', [req.params.id]);
   res.status(204).send();
 }));
