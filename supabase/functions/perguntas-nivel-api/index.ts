@@ -9,17 +9,19 @@ function getSupabase() {
   return createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
 }
 
+function errorResponse(status: number, message: string) {
+  return new Response(JSON.stringify({ status: "error", statusCode: status, message }), {
+    status, headers: { ...corsHeaders, "Content-Type": "application/json" },
+  });
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   const supabase = getSupabase();
-  const url = new URL(req.url);
-  const pathParts = url.pathname.split("/").filter(Boolean);
-  const rest = pathParts.slice(1);
 
   try {
-    // GET /perguntas-nivel-api - all
-    if (req.method === "GET" && rest.length === 0) {
+    if (req.method === "GET") {
       const { data, error } = await supabase.from("perguntasnivel").select("*");
       if (error) throw error;
       return new Response(JSON.stringify(data || []), {
@@ -27,26 +29,20 @@ Deno.serve(async (req) => {
       });
     }
 
-    // GET /perguntas-nivel-api/:id
+    const url = new URL(req.url);
+    const pathParts = url.pathname.split("/").filter(Boolean);
+    const rest = pathParts.slice(1);
+
     if (req.method === "GET" && rest.length === 1) {
-      const id = parseInt(rest[0]);
-      const { data, error } = await supabase.from("perguntasnivel").select("*").eq("id", id).single();
-      if (error || !data) {
-        return new Response(JSON.stringify({ message: "Nivel nao encontrado" }), {
-          status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
+      const { data, error } = await supabase.from("perguntasnivel").select("*").eq("id", parseInt(rest[0])).single();
+      if (error || !data) return errorResponse(404, "Nivel nao encontrado");
       return new Response(JSON.stringify(data), {
         status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    return new Response(JSON.stringify({ message: "Not Found" }), {
-      status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    return errorResponse(404, "Not Found");
   } catch (e) {
-    return new Response(JSON.stringify({ message: e.message || "Internal Error" }), {
-      status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    return errorResponse(500, e.message || "Erro interno do servidor");
   }
 });

@@ -9,6 +9,34 @@ function getSupabase() {
   return createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
 }
 
+function errorResponse(status: number, message: string, errors?: string[]) {
+  const body: Record<string, unknown> = { status: "error", statusCode: status, message };
+  if (errors) body.errors = errors;
+  return new Response(JSON.stringify(body), {
+    status, headers: { ...corsHeaders, "Content-Type": "application/json" },
+  });
+}
+
+async function verifyAuth(req: Request): Promise<Record<string, unknown> | null> {
+  const header = req.headers.get("authorization");
+  if (!header?.startsWith("Bearer ")) return null;
+  const token = header.split(" ")[1];
+  const secret = Deno.env.get("JWT_SECRET");
+  if (!secret) return null;
+  try {
+    const key = await crypto.subtle.importKey("raw", new TextEncoder().encode(secret), { name: "HMAC", hash: "SHA-256" }, false, ["verify"]);
+    const parts = token.split(".");
+    if (parts.length !== 3) return null;
+    const signingInput = `${parts[0]}.${parts[1]}`;
+    const signature = Uint8Array.from(atob(parts[2].replace(/-/g, "+").replace(/_/g, "/")), c => c.charCodeAt(0));
+    const valid = await crypto.subtle.verify("HMAC", key, signature, new TextEncoder().encode(signingInput));
+    if (!valid) return null;
+    const payload = JSON.parse(atob(parts[1].replace(/-/g, "+").replace(/_/g, "/")));
+    if (payload.exp && payload.exp < Math.floor(Date.now() / 1000)) return null;
+    return payload;
+  } catch { return null; }
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
@@ -18,45 +46,25 @@ Deno.serve(async (req) => {
   const rest = pathParts.slice(1);
 
   try {
-    // POST /quiz-avaliativo-api - save score
+    // POST /quiz-avaliativo-api - save score (authenticated)
     if (req.method === "POST") {
-      const body = await req.json();
+      const user = await verifyAuth(req);
+      if (!user) return errorResponse(401, "Token não fornecido ou inválido");
 
-      // Validate required fields
+      const body = await req.json();
       const errors: string[] = [];
       if (!body.quizid || typeof body.quizid !== "number") errors.push("Campo 'quizid' é obrigatório e deve ser number");
       if (!body.usuarioid || typeof body.usuarioid !== "number") errors.push("Campo 'usuarioid' é obrigatório e deve ser number");
       if (body.pontuacao === undefined || body.pontuacao === null) errors.push("Campo 'pontuacao' é obrigatório");
-      if (errors.length > 0) {
-        return new Response(JSON.stringify({ status: "error", statusCode: 400, message: "Dados inválidos", errors }), {
-          status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
+      if (errors.length > 0) return errorResponse(400, "Dados inválidos", errors);
 
-      if (body.pontuacao < 0) {
-        return new Response(JSON.stringify({ status: "error", statusCode: 400, message: "A pontuacao nao pode ser negativa" }), {
-          status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
+      if (body.pontuacao < 0) return errorResponse(400, "A pontuacao nao pode ser negativa");
 
-      // Check if score already exists
-      const { data: existing } = await supabase
-        .from("quiz_avaliativo_usuario")
-        .select("id")
-        .eq("quizid", body.quizid)
-        .eq("usuarioid", body.usuarioid)
-        .single();
-      
-      if (existing) {
-        return new Response(JSON.stringify({ message: "Pontuacao ja existe" }), {
-          status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
+      const { data: existing } = await supabase.from("quiz_avaliativo_usuario").select("id").eq("quizid", body.quizid).eq("usuarioid", body.usuarioid).single();
+      if (existing) return errorResponse(400, "Pontuacao ja existe");
 
       const { data, error } = await supabase.from("quiz_avaliativo_usuario").insert({
-        quizid: body.quizid,
-        usuarioid: body.usuarioid,
-        pontuacao: body.pontuacao,
+        quizid: body.quizid, usuarioid: body.usuarioid, pontuacao: body.pontuacao,
         horainicial: body.horainicial || new Date().toISOString(),
         horafinal: body.horafinal || new Date().toISOString(),
       }).select().single();
@@ -66,42 +74,20 @@ Deno.serve(async (req) => {
       });
     }
 
-    // GET /quiz-avaliativo-api/:id
     if (req.method === "GET" && rest.length === 1 && !isNaN(parseInt(rest[0]))) {
-      const id = parseInt(rest[0]);
-      const { data, error } = await supabase.from("quiz_avaliativo_usuario").select("*").eq("id", id).single();
-      if (error || !data) {
-        return new Response(JSON.stringify({ message: "Pontuacao nao encontrada" }), {
-          status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
-      return new Response(JSON.stringify(data), {
-        status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      const { data, error } = await supabase.from("quiz_avaliativo_usuario").select("*").eq("id", parseInt(rest[0])).single();
+      if (error || !data) return errorResponse(404, "Pontuacao nao encontrada");
+      return new Response(JSON.stringify(data), { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
-    // GET /quiz-avaliativo-api/quiz/:quizId/:skip/:take
     if (req.method === "GET" && rest[0] === "quiz") {
-      const quizId = parseInt(rest[1]);
-      const skip = parseInt(rest[2]) || 0;
-      const take = parseInt(rest[3]) || 20;
-      const { data, error } = await supabase
-        .from("quiz_avaliativo_usuario")
-        .select("*")
-        .eq("quizid", quizId)
-        .range(skip, skip + take - 1);
+      const { data, error } = await supabase.from("quiz_avaliativo_usuario").select("*").eq("quizid", parseInt(rest[1])).range(parseInt(rest[2]) || 0, (parseInt(rest[2]) || 0) + (parseInt(rest[3]) || 20) - 1);
       if (error) throw error;
-      return new Response(JSON.stringify(data || []), {
-        status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      return new Response(JSON.stringify(data || []), { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
-    return new Response(JSON.stringify({ message: "Not Found" }), {
-      status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    return errorResponse(404, "Not Found");
   } catch (e) {
-    return new Response(JSON.stringify({ message: e.message || "Internal Error" }), {
-      status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    return errorResponse(500, e.message || "Erro interno do servidor");
   }
 });

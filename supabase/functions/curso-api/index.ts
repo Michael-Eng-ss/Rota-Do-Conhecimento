@@ -9,6 +9,12 @@ function getSupabase() {
   return createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
 }
 
+function errorResponse(status: number, message: string) {
+  return new Response(JSON.stringify({ status: "error", statusCode: status, message }), {
+    status, headers: { ...corsHeaders, "Content-Type": "application/json" },
+  });
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
@@ -23,12 +29,8 @@ Deno.serve(async (req) => {
       });
     }
 
-    return new Response(JSON.stringify({ message: "Not Found" }), {
-      status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    return errorResponse(404, "Not Found");
   } catch (e) {
-    return new Response(JSON.stringify({ message: e.message || "Internal Error" }), {
-      status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    return errorResponse(500, e.message || "Erro interno do servidor");
   }
 });
