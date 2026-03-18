@@ -20,7 +20,7 @@ router.post('/', requireAuth, requireRole(1), asyncHandler(async (req, res) => {
   res.status(201).json(rows[0]);
 }));
 
-router.put('/:id', asyncHandler(async (req, res) => {
+router.put('/:id', requireAuth, requireRole(1), asyncHandler(async (req, res) => {
   const { rows } = await pool.query('UPDATE campus SET nomecampus=$1 WHERE id=$2 RETURNING *', [req.body.nomecampus, req.params.id]);
   res.json(rows[0]);
 }));
