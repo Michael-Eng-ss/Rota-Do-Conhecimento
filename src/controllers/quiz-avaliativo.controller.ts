@@ -1,15 +1,18 @@
 import * as service from '@/models/services/quiz-avaliativo.service';
-import type { QuizAvaliativoUsuario, QuizAvaliativoCreate } from '@/models/types';
+import { QuizAvaliativoUsuario } from '@/entities';
+import type { QuizAvaliativoCreate } from '@/models/types';
 
 export class QuizAvaliativoController {
   async getByUsuario(usuarioId: number): Promise<QuizAvaliativoUsuario[]> {
     if (!usuarioId || usuarioId <= 0) throw new Error('ID do usuário inválido');
-    return service.getQuizAvaliativoByUsuario(usuarioId);
+    const data = await service.getQuizAvaliativoByUsuario(usuarioId);
+    return QuizAvaliativoUsuario.fromApiList(data);
   }
 
-  async registrar(data: QuizAvaliativoCreate): Promise<QuizAvaliativoUsuario> {
-    if (!data.usuarioid) throw new Error('Usuário é obrigatório');
-    if (!data.quizid) throw new Error('Quiz é obrigatório');
-    return service.createQuizAvaliativo(data);
+  async registrar(payload: QuizAvaliativoCreate): Promise<QuizAvaliativoUsuario> {
+    if (!payload.usuarioid) throw new Error('Usuário é obrigatório');
+    if (!payload.quizid) throw new Error('Quiz é obrigatório');
+    const data = await service.createQuizAvaliativo(payload);
+    return QuizAvaliativoUsuario.fromApi(data);
   }
 }

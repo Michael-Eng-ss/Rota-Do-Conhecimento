@@ -1,27 +1,32 @@
 import * as service from '@/models/services/pergunta.service';
-import type { Pergunta, PerguntaCreate, PerguntaUpdate } from '@/models/types';
+import { Pergunta } from '@/entities';
+import type { PerguntaCreate, PerguntaUpdate } from '@/models/types';
 
 export class PerguntaController {
   async getByQuiz(quizId: number, categoriaId?: number, userId?: number, skip = 0, take = 20): Promise<Pergunta[]> {
     if (!quizId || quizId <= 0) throw new Error('ID do quiz inválido');
-    return service.getPerguntasByQuiz(quizId, categoriaId, userId, skip, take);
+    const data = await service.getPerguntasByQuiz(quizId, categoriaId, userId, skip, take);
+    return Pergunta.fromApiList(data);
   }
 
   async getById(id: number): Promise<Pergunta> {
     if (!id || id <= 0) throw new Error('ID da pergunta inválido');
-    return service.getPerguntaById(id);
+    const data = await service.getPerguntaById(id);
+    return Pergunta.fromApi(data);
   }
 
-  async create(data: PerguntaCreate): Promise<Pergunta> {
-    if (!data.conteudo?.trim()) throw new Error('Conteúdo da pergunta é obrigatório');
-    if (!data.perguntasnivelid) throw new Error('Nível é obrigatório');
-    if (!data.categoriasid) throw new Error('Categoria é obrigatória');
-    return service.createPergunta({ ...data, conteudo: data.conteudo.trim() });
+  async create(payload: PerguntaCreate): Promise<Pergunta> {
+    if (!payload.conteudo?.trim()) throw new Error('Conteúdo da pergunta é obrigatório');
+    if (!payload.perguntasnivelid) throw new Error('Nível é obrigatório');
+    if (!payload.categoriasid) throw new Error('Categoria é obrigatória');
+    const data = await service.createPergunta({ ...payload, conteudo: payload.conteudo.trim() });
+    return Pergunta.fromApi(data);
   }
 
   async update(id: number, updates: PerguntaUpdate): Promise<Pergunta> {
     if (!id || id <= 0) throw new Error('ID da pergunta inválido');
-    return service.updatePergunta(id, updates);
+    const data = await service.updatePergunta(id, updates);
+    return Pergunta.fromApi(data);
   }
 
   async delete(id: number): Promise<void> {

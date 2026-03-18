@@ -1,13 +1,15 @@
 import * as service from '@/models/services/campus.service';
-import type { Campus } from '@/models/types';
+import { Campus } from '@/entities';
 
 export class CampusController {
   async getAll(): Promise<Campus[]> {
-    return service.getCampusList();
+    const data = await service.getCampusList();
+    return Campus.fromApiList(data);
   }
 
   async getById(id: number): Promise<Campus> {
     if (!id || id <= 0) throw new Error('ID de campus inválido');
-    return service.getCampusById(id);
+    const data = await service.getCampusById(id);
+    return Campus.fromApi(data);
   }
 }
