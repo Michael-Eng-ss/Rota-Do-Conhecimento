@@ -57,7 +57,21 @@ Deno.serve(async (req) => {
   const rest = pathParts.slice(1);
 
   try {
-    // === GET routes (public) ===
+    // TEMP DEBUG endpoint
+    if (req.method === "GET" && rest[0] === "debug") {
+      const authH = req.headers.get("authorization");
+      const secret = Deno.env.get("JWT_SECRET");
+      const user = await verifyAuth(req);
+      return new Response(JSON.stringify({
+        hasAuth: !!authH,
+        authStart: authH?.substring(0, 40),
+        hasSecret: !!secret,
+        secretLen: secret?.length,
+        user,
+      }), { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
+
+
 
     if (req.method === "GET" && rest[0] === "completas" && rest[1]) {
       const categoriaId = parseInt(rest[1]);
