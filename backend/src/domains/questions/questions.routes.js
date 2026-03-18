@@ -97,7 +97,7 @@ router.post('/', requireAuth, requireRole(1), asyncHandler(async (req, res) => {
 }));
 
 // PUT /:id/status
-router.put('/:id/status', asyncHandler(async (req, res) => {
+router.put('/:id/status', requireAuth, requireRole(1), asyncHandler(async (req, res) => {
   const { rows: [existing] } = await pool.query('SELECT status FROM perguntas WHERE id=$1', [req.params.id]);
   if (!existing) return res.status(404).json({ message: 'Pergunta nao encontrada' });
   const { rows } = await pool.query('UPDATE perguntas SET status=$1 WHERE id=$2 RETURNING *', [!existing.status, req.params.id]);
