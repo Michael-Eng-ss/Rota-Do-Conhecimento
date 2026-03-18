@@ -1,10 +1,13 @@
 const router = require('express').Router();
 const { pool } = require('../../db');
-const { asyncHandler, requireAuth, requireRole } = require('../../middlewares');
+const { asyncHandler, requireAuth, requireRole, validateBody, AppError } = require('../../middlewares');
 
 // POST /
-router.post('/', requireAuth, requireRole(1), asyncHandler(async (req, res) => {
+router.post('/', requireAuth, requireRole(1), validateBody({ titulo: 'string' }), asyncHandler(async (req, res) => {
   const b = req.body;
+  if (!b.cursoid) throw new AppError('Campo cursoid é obrigatório', 400);
+  if (!b.usuarioid) throw new AppError('Campo usuarioid é obrigatório', 400);
+
   const { rows } = await pool.query(
     'INSERT INTO quiz (titulo,cursoid,imagem,status,avaliativo,usuarioid) VALUES ($1,$2,$3,$4,$5,$6) RETURNING *',
     [b.titulo, b.cursoid, b.imagem||'', b.status??true, b.avaliativo??false, b.usuarioid]
@@ -41,21 +44,24 @@ router.get('/:skip/:take', asyncHandler(async (req, res) => {
 // GET /:id
 router.get('/:id', asyncHandler(async (req, res) => {
   const { rows } = await pool.query('SELECT * FROM quiz WHERE id=$1', [req.params.id]);
-  if (!rows[0]) return res.status(404).json({ message: 'Quiz nao encontrado' });
+  if (!rows[0]) throw new AppError('Quiz nao encontrado', 404);
   res.json(rows[0]);
 }));
 
 // PUT /:id/status
 router.put('/:id/status', requireAuth, requireRole(1), asyncHandler(async (req, res) => {
   const { rows: [existing] } = await pool.query('SELECT status FROM quiz WHERE id=$1', [req.params.id]);
-  if (!existing) return res.status(404).json({ message: 'Quiz nao encontrado' });
+  if (!existing) throw new AppError('Quiz nao encontrado', 404);
   const { rows } = await pool.query('UPDATE quiz SET status=$1 WHERE id=$2 RETURNING *', [!existing.status, req.params.id]);
   res.json(rows[0]);
 }));
 
 // PUT /:id
 router.put('/:id', requireAuth, requireRole(1), asyncHandler(async (req, res) => {
-  const { rows } = await pool.query('UPDATE quiz SET titulo=$1, imagem=$2 WHERE id=$3 RETURNING *', [req.body.titulo, req.body.imagem, req.params.id]);
+  const b = req.body;
+  if (!b.titulo && !b.imagem) throw new AppError('Informe titulo ou imagem para atualizar', 400);
+  const { rows } = await pool.query('UPDATE quiz SET titulo=$1, imagem=$2 WHERE id=$3 RETURNING *', [b.titulo, b.imagem, req.params.id]);
+  if (!rows[0]) throw new AppError('Quiz nao encontrado', 404);
   res.json(rows[0]);
 }));
 

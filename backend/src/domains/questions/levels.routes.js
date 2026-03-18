@@ -1,6 +1,6 @@
 const router = require('express').Router();
 const { pool } = require('../../db');
-const { asyncHandler } = require('../../middlewares');
+const { asyncHandler, AppError } = require('../../middlewares');
 
 // GET /
 router.get('/', asyncHandler(async (req, res) => {
@@ -11,7 +11,7 @@ router.get('/', asyncHandler(async (req, res) => {
 // GET /:id
 router.get('/:id', asyncHandler(async (req, res) => {
   const { rows } = await pool.query('SELECT * FROM perguntasnivel WHERE id=$1', [req.params.id]);
-  if (!rows[0]) return res.status(404).json({ message: 'Nivel nao encontrado' });
+  if (!rows[0]) throw new AppError('Nivel nao encontrado', 404);
   res.json(rows[0]);
 }));
 

@@ -1,6 +1,6 @@
 const router = require('express').Router();
 const { pool } = require('../../db');
-const { asyncHandler, requireAuth, requireRole } = require('../../middlewares');
+const { asyncHandler, requireAuth, requireRole, validateBody, AppError } = require('../../middlewares');
 
 // GET /completas/:categoriaId
 router.get('/completas/:categoriaId', asyncHandler(async (req, res) => {
@@ -40,6 +40,8 @@ router.get('/todas', asyncHandler(async (req, res) => {
 router.get('/quiz/:quizId*', asyncHandler(async (req, res) => {
   const parts = req.path.split('/').filter(Boolean);
   const quizId = parseInt(parts[1]);
+  if (isNaN(quizId)) throw new AppError('quizId inválido', 400);
+
   let categoriaId, userId, skip = 0, take = 20;
 
   const catIdx = parts.indexOf('categoria');
@@ -73,15 +75,17 @@ router.get('/quiz/:quizId*', asyncHandler(async (req, res) => {
 
 // GET /:id
 router.get('/:id', asyncHandler(async (req, res) => {
-  if (isNaN(parseInt(req.params.id))) return res.status(404).json({ message: 'Not Found' });
+  if (isNaN(parseInt(req.params.id))) throw new AppError('ID inválido', 400);
   const { rows } = await pool.query('SELECT * FROM perguntas WHERE id=$1', [req.params.id]);
-  if (!rows[0]) return res.status(404).json({ message: 'Pergunta nao encontrada' });
+  if (!rows[0]) throw new AppError('Pergunta nao encontrada', 404);
   res.json(rows[0]);
 }));
 
 // POST /
-router.post('/', requireAuth, requireRole(1), asyncHandler(async (req, res) => {
+router.post('/', requireAuth, requireRole(1), validateBody({ conteudo: 'string' }), asyncHandler(async (req, res) => {
   const b = req.body;
+  if (!b.categoriasid) throw new AppError('Campo categoriasid é obrigatório', 400);
+
   const { rows } = await pool.query(
     'INSERT INTO perguntas (conteudo,perguntasnivelid,tempo,pathimage,status,categoriasid,quizid) VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING *',
     [b.conteudo, b.perguntasnivelid||1, b.tempo||30, b.pathimage||null, b.status??true, b.categoriasid, b.quizid||null]
@@ -99,7 +103,7 @@ router.post('/', requireAuth, requireRole(1), asyncHandler(async (req, res) => {
 // PUT /:id/status
 router.put('/:id/status', requireAuth, requireRole(1), asyncHandler(async (req, res) => {
   const { rows: [existing] } = await pool.query('SELECT status FROM perguntas WHERE id=$1', [req.params.id]);
-  if (!existing) return res.status(404).json({ message: 'Pergunta nao encontrada' });
+  if (!existing) throw new AppError('Pergunta nao encontrada', 404);
   const { rows } = await pool.query('UPDATE perguntas SET status=$1 WHERE id=$2 RETURNING *', [!existing.status, req.params.id]);
   res.json(rows[0]);
 }));
@@ -111,6 +115,8 @@ router.put('/:id', requireAuth, requireRole(1), asyncHandler(async (req, res) =>
   for (const k of ['conteudo','perguntasnivelid','tempo','pathimage','categoriasid','quizid','status']) {
     if (b[k] !== undefined) { fields.push(`${k}=$${i}`); vals.push(b[k]); i++; }
   }
+  if (fields.length === 0 && !b.alternativas) throw new AppError('Nada para atualizar', 400);
+
   if (fields.length > 0) {
     vals.push(req.params.id);
     await pool.query(`UPDATE perguntas SET ${fields.join(',')} WHERE id=$${i}`, vals);
@@ -123,11 +129,14 @@ router.put('/:id', requireAuth, requireRole(1), asyncHandler(async (req, res) =>
     }
   }
   const { rows } = await pool.query('SELECT * FROM perguntas WHERE id=$1', [req.params.id]);
+  if (!rows[0]) throw new AppError('Pergunta nao encontrada', 404);
   res.json(rows[0]);
 }));
 
 // DELETE /:id
 router.delete('/:id', requireAuth, requireRole(1), asyncHandler(async (req, res) => {
+  const { rowCount } = await pool.query('SELECT id FROM perguntas WHERE id=$1', [req.params.id]);
+  if (rowCount === 0) throw new AppError('Pergunta nao encontrada', 404);
   await pool.query('DELETE FROM alternativas WHERE perguntasid=$1', [req.params.id]);
   await pool.query('DELETE FROM perguntas WHERE id=$1', [req.params.id]);
   res.status(204).send();

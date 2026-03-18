@@ -1,19 +1,20 @@
 const router = require('express').Router();
 const { pool } = require('../../db');
-const { asyncHandler, requireAuth } = require('../../middlewares');
+const { asyncHandler, requireAuth, AppError } = require('../../middlewares');
 
 // POST /
 router.post('/', requireAuth, asyncHandler(async (req, res) => {
   const body = req.body;
   const items = Array.isArray(body) ? body : [body];
-  const userId = items[0].usuariosid;
+  if (!items[0].usuariosid || !items[0].perguntasid) throw new AppError('Campos usuariosid e perguntasid são obrigatórios', 400);
 
+  const userId = items[0].usuariosid;
   const { rows: existing } = await pool.query('SELECT perguntasid FROM progressoperguntas WHERE usuariosid=$1', [userId]);
   const existingIds = new Set(existing.map(p => p.perguntasid));
 
   const results = [];
   for (const item of items) {
-    if (existingIds.has(item.perguntasid)) return res.status(400).json({ message: 'Progresso ja existe' });
+    if (existingIds.has(item.perguntasid)) throw new AppError('Progresso ja existe para essa pergunta', 400);
     const { rows } = await pool.query(
       'INSERT INTO progressoperguntas (usuariosid,perguntasid) VALUES ($1,$2) RETURNING *',
       [item.usuariosid, item.perguntasid]
