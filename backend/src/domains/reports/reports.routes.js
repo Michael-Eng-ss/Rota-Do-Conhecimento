@@ -1,6 +1,6 @@
 const router = require('express').Router();
 const { pool } = require('../../db');
-const { asyncHandler } = require('../../middlewares');
+const { asyncHandler, requireAuth, requireRole } = require('../../middlewares');
 
 router.get('/', asyncHandler(async (req, res) => {
   const { rows: logs } = await pool.query("SELECT datalogin, usuariosid FROM logs WHERE datalogin >= '2024-08-01' AND datalogin <= '2024-08-31'");
