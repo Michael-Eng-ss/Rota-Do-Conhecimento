@@ -22,6 +22,16 @@ Deno.serve(async (req) => {
     if (req.method === "POST") {
       const body = await req.json();
 
+      // Validate required fields
+      const errors: string[] = [];
+      if (!body.descricao || typeof body.descricao !== "string") errors.push("Campo 'descricao' é obrigatório e deve ser string");
+      if (!body.cursoId || typeof body.cursoId !== "number") errors.push("Campo 'cursoId' é obrigatório e deve ser number");
+      if (errors.length > 0) {
+        return new Response(JSON.stringify({ status: "error", statusCode: 400, message: "Dados inválidos", errors }), {
+          status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
       // Check duplicate
       const { data: existing } = await supabase
         .from("categorias")
@@ -30,7 +40,7 @@ Deno.serve(async (req) => {
         .eq("cursoId", body.cursoId)
         .single();
       if (existing) {
-        return new Response(JSON.stringify({ message: "Categoria ja existe" }), {
+        return new Response(JSON.stringify({ status: "error", statusCode: 400, message: "Categoria ja existe" }), {
           status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }

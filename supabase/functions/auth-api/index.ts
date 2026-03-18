@@ -93,10 +93,15 @@ Deno.serve(async (req) => {
   );
 
   try {
-    const { email, senha } = await req.json();
+    const body = await req.json();
+    const { email, senha } = body;
 
-    if (!email || !senha) {
-      return new Response(JSON.stringify({ message: "Email e senha são obrigatórios" }), {
+    // Validate required fields
+    const errors: string[] = [];
+    if (!email || typeof email !== "string") errors.push("Campo 'email' é obrigatório e deve ser string");
+    if (!senha || typeof senha !== "string") errors.push("Campo 'senha' é obrigatório e deve ser string");
+    if (errors.length > 0) {
+      return new Response(JSON.stringify({ status: "error", statusCode: 400, message: "Dados inválidos", errors }), {
         status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
