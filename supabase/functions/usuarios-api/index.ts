@@ -16,21 +16,49 @@ function getSupabase() {
   return createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
 }
 
+function errorResponse(status: number, message: string, errors?: string[]) {
+  const body: Record<string, unknown> = { status: "error", statusCode: status, message };
+  if (errors) body.errors = errors;
+  return new Response(JSON.stringify(body), {
+    status, headers: { ...corsHeaders, "Content-Type": "application/json" },
+  });
+}
+
+async function verifyAuth(req: Request): Promise<Record<string, unknown> | null> {
+  const header = req.headers.get("authorization");
+  if (!header?.startsWith("Bearer ")) return null;
+  const token = header.split(" ")[1];
+  const secret = Deno.env.get("JWT_SECRET");
+  if (!secret) return null;
+  try {
+    const key = await crypto.subtle.importKey("raw", new TextEncoder().encode(secret), { name: "HMAC", hash: "SHA-256" }, false, ["verify"]);
+    const parts = token.split(".");
+    if (parts.length !== 3) return null;
+    const signingInput = `${parts[0]}.${parts[1]}`;
+    const signature = Uint8Array.from(atob(parts[2].replace(/-/g, "+").replace(/_/g, "/")), c => c.charCodeAt(0));
+    const valid = await crypto.subtle.verify("HMAC", key, signature, new TextEncoder().encode(signingInput));
+    if (!valid) return null;
+    const payload = JSON.parse(atob(parts[1].replace(/-/g, "+").replace(/_/g, "/")));
+    if (payload.exp && payload.exp < Math.floor(Date.now() / 1000)) return null;
+    return payload;
+  } catch {
+    return null;
+  }
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   const supabase = getSupabase();
   const url = new URL(req.url);
   const pathParts = url.pathname.split("/").filter(Boolean);
-  // pathParts: ["usuarios-api", ...rest]
   const rest = pathParts.slice(1);
 
   try {
-    // POST /usuarios-api - create user
+    // POST /usuarios-api - create user (public, no auth needed)
     if (req.method === "POST" && rest.length === 0) {
       const body = await req.json();
 
-      // Validate required fields
       const requiredFields = { nome: "string", email: "string", senha: "string" };
       const errors: string[] = [];
       for (const [field, type] of Object.entries(requiredFields)) {
@@ -42,56 +70,33 @@ Deno.serve(async (req) => {
         }
       }
       if (!body.cursoid) errors.push("Campo 'cursoid' é obrigatório");
-      if (errors.length > 0) {
-        return new Response(JSON.stringify({ status: "error", statusCode: 400, message: "Dados inválidos", errors }), {
-          status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
+      if (errors.length > 0) return errorResponse(400, "Dados inválidos", errors);
 
-      // Check email uniqueness
       const { data: existing } = await supabase.from("usuarios").select("id").eq("email", body.email).single();
-      if (existing) {
-        return new Response(JSON.stringify({ message: "Email ja cadastrado" }), {
-          status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
+      if (existing) return errorResponse(400, "Email ja cadastrado");
 
       const hashedPassword = await hashPassword(body.senha);
       const { data, error } = await supabase.from("usuarios").insert({
-        nome: body.nome,
-        email: body.email,
-        senha: hashedPassword,
-        telefone: body.telefone || "",
-        sexo: body.sexo || 0,
+        nome: body.nome, email: body.email, senha: hashedPassword,
+        telefone: body.telefone || "", sexo: body.sexo || 0,
         datanascimento: body.datanascimento || new Date().toISOString(),
-        role: body.role || 3,
-        uf: body.uf || "",
-        foto: body.foto || "",
-        pontuacao: body.pontuacao || 0,
-        status: body.status ?? true,
-        cidade: body.cidade || "",
-        turma: body.turma || null,
-        periodo: body.periodo || null,
-        cursoid: body.cursoid,
-        campusid: body.campusid || null,
+        role: body.role || 3, uf: body.uf || "", foto: body.foto || "",
+        pontuacao: body.pontuacao || 0, status: body.status ?? true,
+        cidade: body.cidade || "", turma: body.turma || null,
+        periodo: body.periodo || null, cursoid: body.cursoid, campusid: body.campusid || null,
       }).select().single();
-
       if (error) throw error;
-      // Remove senha from response
       const { senha: _, ...safeData } = data;
       return new Response(JSON.stringify(safeData), {
         status: 201, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    // GET /usuarios-api/ranking/:cursoId
+    // GET /usuarios-api/ranking/:cursoId (public)
     if (req.method === "GET" && rest[0] === "ranking" && rest[1]) {
       const cursoId = parseInt(rest[1]);
-      const { data, error } = await supabase
-        .from("usuarios")
-        .select("id, nome, foto, pontuacao")
-        .eq("cursoid", cursoId)
-        .eq("status", true)
+      const { data, error } = await supabase.from("usuarios")
+        .select("id, nome, foto, pontuacao").eq("cursoid", cursoId).eq("status", true)
         .order("pontuacao", { ascending: false });
       if (error) throw error;
       return new Response(JSON.stringify(data), {
@@ -99,15 +104,11 @@ Deno.serve(async (req) => {
       });
     }
 
-    // GET /usuarios-api/:id
-    if (req.method === "GET" && rest[0] && !isNaN(parseInt(rest[0]))) {
+    // GET /usuarios-api/:id (public)
+    if (req.method === "GET" && rest[0] && !isNaN(parseInt(rest[0])) && rest.length === 1) {
       const id = parseInt(rest[0]);
       const { data, error } = await supabase.from("usuarios").select("*").eq("id", id).single();
-      if (error || !data) {
-        return new Response(JSON.stringify({ message: "Usuario nao encontrado" }), {
-          status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
+      if (error || !data) return errorResponse(404, "Usuario nao encontrado");
       const { senha: _, ...safeData } = data;
       return new Response(JSON.stringify(safeData), {
         status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -119,49 +120,46 @@ Deno.serve(async (req) => {
       const cursoId = parseInt(rest[1]);
       const skip = parseInt(rest[2]);
       const take = parseInt(rest[3]);
-      const { data, error } = await supabase
-        .from("usuarios")
+      const { data, error } = await supabase.from("usuarios")
         .select("id, nome, email, telefone, sexo, datanascimento, role, uf, foto, pontuacao, status, cidade, turma, periodo, cursoid, campusid")
-        .eq("cursoid", cursoId)
-        .eq("status", true)
-        .range(skip, skip + take - 1);
+        .eq("cursoid", cursoId).eq("status", true).range(skip, skip + take - 1);
       if (error) throw error;
       return new Response(JSON.stringify(data), {
         status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
+    // === AUTHENTICATED ROUTES ===
+
     // PUT /usuarios-api/:id - update user
     if (req.method === "PUT" && rest[0] && !isNaN(parseInt(rest[0])) && rest.length === 1) {
+      const user = await verifyAuth(req);
+      if (!user) return errorResponse(401, "Token não fornecido ou inválido");
+
       const id = parseInt(rest[0]);
       const body = await req.json();
-
       const updateData: Record<string, unknown> = {};
-      if (body.nome !== undefined) updateData.nome = body.nome;
-      if (body.email !== undefined) updateData.email = body.email;
-      if (body.telefone !== undefined) updateData.telefone = body.telefone;
-      if (body.sexo !== undefined) updateData.sexo = body.sexo;
-      if (body.datanascimento !== undefined) updateData.datanascimento = body.datanascimento;
-      if (body.uf !== undefined) updateData.uf = body.uf;
-      if (body.foto !== undefined) updateData.foto = body.foto;
-      if (body.cidade !== undefined) updateData.cidade = body.cidade;
-      if (body.turma !== undefined) updateData.turma = body.turma;
-      if (body.periodo !== undefined) updateData.periodo = body.periodo;
-      if (body.cursoid !== undefined) updateData.cursoid = body.cursoid;
-      if (body.campusid !== undefined) updateData.campusid = body.campusid;
+      for (const k of ['nome','email','telefone','sexo','datanascimento','uf','foto','cidade','turma','periodo','cursoid','campusid']) {
+        if (body[k] !== undefined) updateData[k] = body[k];
+      }
+      if (Object.keys(updateData).length === 0) return errorResponse(400, "Nada para atualizar");
 
       const { data, error } = await supabase.from("usuarios").update(updateData).eq("id", id).select().single();
-      if (error) throw error;
+      if (error || !data) return errorResponse(404, "Usuario nao encontrado");
       const { senha: _, ...safeData } = data;
       return new Response(JSON.stringify(safeData), {
         status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    // PUT /usuarios-api/:id/senha - update password
+    // PUT /usuarios-api/:id/senha
     if (req.method === "PUT" && rest.length === 2 && rest[1] === "senha") {
+      const user = await verifyAuth(req);
+      if (!user) return errorResponse(401, "Token não fornecido ou inválido");
+
       const id = parseInt(rest[0]);
       const { senha } = await req.json();
+      if (!senha || typeof senha !== "string") return errorResponse(400, "Campo 'senha' é obrigatório");
       const hashed = await hashPassword(senha);
       const { error } = await supabase.from("usuarios").update({ senha: hashed }).eq("id", id);
       if (error) throw error;
@@ -170,17 +168,16 @@ Deno.serve(async (req) => {
       });
     }
 
-    // PUT /usuarios-api/:id/pontuacao - add score
+    // PUT /usuarios-api/:id/pontuacao
     if (req.method === "PUT" && rest.length === 2 && rest[1] === "pontuacao") {
+      const user = await verifyAuth(req);
+      if (!user) return errorResponse(401, "Token não fornecido ou inválido");
+
       const id = parseInt(rest[0]);
       const { pontuacao } = await req.json();
-      const { data: user } = await supabase.from("usuarios").select("pontuacao").eq("id", id).single();
-      if (!user) {
-        return new Response(JSON.stringify({ message: "Usuario nao encontrado" }), {
-          status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
-      const newPontuacao = (user.pontuacao || 0) + pontuacao;
+      const { data: existing } = await supabase.from("usuarios").select("pontuacao").eq("id", id).single();
+      if (!existing) return errorResponse(404, "Usuario nao encontrado");
+      const newPontuacao = (existing.pontuacao || 0) + pontuacao;
       const { data, error } = await supabase.from("usuarios").update({ pontuacao: newPontuacao }).eq("id", id).select().single();
       if (error) throw error;
       const { senha: _, ...safeData } = data;
@@ -189,12 +186,8 @@ Deno.serve(async (req) => {
       });
     }
 
-    return new Response(JSON.stringify({ message: "Not Found" }), {
-      status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    return errorResponse(404, "Not Found");
   } catch (e) {
-    return new Response(JSON.stringify({ message: e.message || "Internal Error" }), {
-      status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    return errorResponse(500, e.message || "Erro interno do servidor");
   }
 });
