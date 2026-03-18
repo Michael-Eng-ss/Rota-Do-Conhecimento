@@ -44,9 +44,17 @@ Deno.serve(async (req) => {
     // POST /campus-api
     if (req.method === "POST") {
       const body = await req.json();
+
+      // Validate required fields
+      if (!body.nomecampus || typeof body.nomecampus !== "string") {
+        return new Response(JSON.stringify({ status: "error", statusCode: 400, message: "Dados inválidos", errors: ["Campo 'nomecampus' é obrigatório e deve ser string"] }), {
+          status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
       const { data: existing } = await supabase.from("campus").select("id").eq("nomecampus", body.nomecampus);
       if (existing && existing.length > 0) {
-        return new Response(JSON.stringify({ message: "Campus ja existe" }), {
+        return new Response(JSON.stringify({ status: "error", statusCode: 400, message: "Campus ja existe" }), {
           status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
