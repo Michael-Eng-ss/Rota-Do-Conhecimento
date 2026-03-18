@@ -3,7 +3,7 @@ const { pool } = require('../../db');
 const { asyncHandler, requireAuth, requireRole } = require('../../middlewares');
 
 // POST /
-router.post('/', asyncHandler(async (req, res) => {
+router.post('/', requireAuth, requireRole(1), asyncHandler(async (req, res) => {
   const b = req.body;
   const { rows } = await pool.query(
     'INSERT INTO quiz (titulo,cursoid,imagem,status,avaliativo,usuarioid) VALUES ($1,$2,$3,$4,$5,$6) RETURNING *',
