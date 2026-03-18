@@ -1,6 +1,6 @@
 const router = require('express').Router();
 const { pool } = require('../../db');
-const { asyncHandler } = require('../../middlewares');
+const { asyncHandler, requireAuth, requireRole } = require('../../middlewares');
 
 // GET /pergunta/:perguntaId
 router.get('/pergunta/:perguntaId', asyncHandler(async (req, res) => {
