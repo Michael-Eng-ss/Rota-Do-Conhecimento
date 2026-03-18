@@ -2,7 +2,7 @@ const router = require('express').Router();
 const { pool } = require('../../db');
 const { asyncHandler, requireAuth, requireRole } = require('../../middlewares');
 
-router.post('/', asyncHandler(async (req, res) => {
+router.post('/', requireAuth, requireRole(1), asyncHandler(async (req, res) => {
   const b = req.body;
   const { rows: existing } = await pool.query('SELECT id FROM categorias WHERE descricao=$1 AND "cursoId"=$2', [b.descricao, b.cursoId]);
   if (existing.length > 0) return res.status(400).json({ message: 'Categoria ja existe' });
