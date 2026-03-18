@@ -1,9 +1,9 @@
 const router = require('express').Router();
 const { pool } = require('../../db');
-const { asyncHandler } = require('../../middlewares');
+const { asyncHandler, requireAuth, requireRole } = require('../../middlewares');
 
 // POST /
-router.post('/', asyncHandler(async (req, res) => {
+router.post('/', requireAuth, requireRole(1), asyncHandler(async (req, res) => {
   const b = req.body;
   const { rows } = await pool.query(
     'INSERT INTO quiz (titulo,cursoid,imagem,status,avaliativo,usuarioid) VALUES ($1,$2,$3,$4,$5,$6) RETURNING *',
@@ -46,7 +46,7 @@ router.get('/:id', asyncHandler(async (req, res) => {
 }));
 
 // PUT /:id/status
-router.put('/:id/status', asyncHandler(async (req, res) => {
+router.put('/:id/status', requireAuth, requireRole(1), asyncHandler(async (req, res) => {
   const { rows: [existing] } = await pool.query('SELECT status FROM quiz WHERE id=$1', [req.params.id]);
   if (!existing) return res.status(404).json({ message: 'Quiz nao encontrado' });
   const { rows } = await pool.query('UPDATE quiz SET status=$1 WHERE id=$2 RETURNING *', [!existing.status, req.params.id]);
@@ -54,7 +54,7 @@ router.put('/:id/status', asyncHandler(async (req, res) => {
 }));
 
 // PUT /:id
-router.put('/:id', asyncHandler(async (req, res) => {
+router.put('/:id', requireAuth, requireRole(1), asyncHandler(async (req, res) => {
   const { rows } = await pool.query('UPDATE quiz SET titulo=$1, imagem=$2 WHERE id=$3 RETURNING *', [req.body.titulo, req.body.imagem, req.params.id]);
   res.json(rows[0]);
 }));

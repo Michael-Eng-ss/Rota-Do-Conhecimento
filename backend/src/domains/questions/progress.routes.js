@@ -1,9 +1,9 @@
 const router = require('express').Router();
 const { pool } = require('../../db');
-const { asyncHandler } = require('../../middlewares');
+const { asyncHandler, requireAuth } = require('../../middlewares');
 
 // POST /
-router.post('/', asyncHandler(async (req, res) => {
+router.post('/', requireAuth, asyncHandler(async (req, res) => {
   const body = req.body;
   const items = Array.isArray(body) ? body : [body];
   const userId = items[0].usuariosid;

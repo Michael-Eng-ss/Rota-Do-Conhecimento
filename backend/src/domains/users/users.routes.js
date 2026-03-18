@@ -1,7 +1,7 @@
 const router = require('express').Router();
 const { pool } = require('../../db');
 const { hashPassword } = require('../../auth-utils');
-const { asyncHandler } = require('../../middlewares');
+const { asyncHandler, requireAuth } = require('../../middlewares');
 
 // POST / - create user
 router.post('/', asyncHandler(async (req, res) => {
@@ -48,7 +48,7 @@ router.get('/:id', asyncHandler(async (req, res) => {
 }));
 
 // PUT /:id
-router.put('/:id', asyncHandler(async (req, res) => {
+router.put('/:id', requireAuth, asyncHandler(async (req, res) => {
   const b = req.body;
   const fields = []; const vals = []; let i = 1;
   for (const k of ['nome','email','telefone','sexo','datanascimento','uf','foto','cidade','turma','periodo','cursoid','campusid']) {
@@ -62,14 +62,14 @@ router.put('/:id', asyncHandler(async (req, res) => {
 }));
 
 // PUT /:id/senha
-router.put('/:id/senha', asyncHandler(async (req, res) => {
+router.put('/:id/senha', requireAuth, asyncHandler(async (req, res) => {
   const hashed = hashPassword(req.body.senha);
   await pool.query('UPDATE usuarios SET senha=$1 WHERE id=$2', [hashed, req.params.id]);
   res.json({ message: 'success' });
 }));
 
 // PUT /:id/pontuacao
-router.put('/:id/pontuacao', asyncHandler(async (req, res) => {
+router.put('/:id/pontuacao', requireAuth, asyncHandler(async (req, res) => {
   const { rows: [user] } = await pool.query('SELECT pontuacao FROM usuarios WHERE id=$1', [req.params.id]);
   if (!user) return res.status(404).json({ message: 'Usuario nao encontrado' });
   const newPont = (user.pontuacao || 0) + req.body.pontuacao;

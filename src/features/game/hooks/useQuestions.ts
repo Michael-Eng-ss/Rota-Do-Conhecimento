@@ -38,7 +38,7 @@ interface RawPergunta {
   }>;
 }
 
-function callPerguntasApi(path: string, options?: { method?: string; body?: unknown }) {
+function callPerguntasApi(path: string, options?: { method?: string; body?: unknown; auth?: boolean }) {
   return callEdge('perguntas-api', path, options);
 }
 
@@ -248,6 +248,7 @@ export const useQuestions = () => {
   }) => {
     const res = await callPerguntasApi('', {
       method: 'POST',
+      auth: true,
       body: {
         conteudo: questionData.base_text,
         categoriasid: questionData.environment_id,
@@ -286,7 +287,7 @@ export const useQuestions = () => {
       }));
     }
 
-    const res = await callPerguntasApi(id, { method: 'PUT', body });
+    const res = await callPerguntasApi(id, { method: 'PUT', body, auth: true });
     if (!res.ok) {
       const err = await res.json();
       throw new Error(err.message || 'Erro ao atualizar pergunta');
@@ -296,7 +297,7 @@ export const useQuestions = () => {
 
   // Delete a question (and its alternatives)
   const deleteQuestion = async (id: string) => {
-    const res = await callPerguntasApi(id, { method: 'DELETE' });
+    const res = await callPerguntasApi(id, { method: 'DELETE', auth: true });
     if (!res.ok) {
       const err = await res.json();
       throw new Error(err.message || 'Erro ao excluir pergunta');

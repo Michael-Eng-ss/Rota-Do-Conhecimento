@@ -1,6 +1,6 @@
 const router = require('express').Router();
 const { pool } = require('../../db');
-const { asyncHandler } = require('../../middlewares');
+const { asyncHandler, requireAuth, requireRole } = require('../../middlewares');
 
 // GET /pergunta/:perguntaId
 router.get('/pergunta/:perguntaId', asyncHandler(async (req, res) => {
@@ -9,7 +9,7 @@ router.get('/pergunta/:perguntaId', asyncHandler(async (req, res) => {
 }));
 
 // POST /
-router.post('/', asyncHandler(async (req, res) => {
+router.post('/', requireAuth, requireRole(1), asyncHandler(async (req, res) => {
   const body = req.body;
   const items = Array.isArray(body) ? body : [body];
   const perguntaId = items[0].perguntasid;
@@ -34,7 +34,7 @@ router.post('/', asyncHandler(async (req, res) => {
 }));
 
 // PUT /:id
-router.put('/:id', asyncHandler(async (req, res) => {
+router.put('/:id', requireAuth, requireRole(1), asyncHandler(async (req, res) => {
   const b = req.body;
   const { rows } = await pool.query(
     'UPDATE alternativas SET conteudo=$1, imagem=$2, correta=$3 WHERE id=$4 RETURNING *',
@@ -44,7 +44,7 @@ router.put('/:id', asyncHandler(async (req, res) => {
 }));
 
 // DELETE /:id
-router.delete('/:id', asyncHandler(async (req, res) => {
+router.delete('/:id', requireAuth, requireRole(1), asyncHandler(async (req, res) => {
   await pool.query('DELETE FROM alternativas WHERE id=$1', [req.params.id]);
   res.status(204).send();
 }));

@@ -1,6 +1,6 @@
 const router = require('express').Router();
 const { pool } = require('../../db');
-const { asyncHandler } = require('../../middlewares');
+const { asyncHandler, requireAuth, requireRole } = require('../../middlewares');
 
 // GET /completas/:categoriaId
 router.get('/completas/:categoriaId', asyncHandler(async (req, res) => {
@@ -80,7 +80,7 @@ router.get('/:id', asyncHandler(async (req, res) => {
 }));
 
 // POST /
-router.post('/', asyncHandler(async (req, res) => {
+router.post('/', requireAuth, requireRole(1), asyncHandler(async (req, res) => {
   const b = req.body;
   const { rows } = await pool.query(
     'INSERT INTO perguntas (conteudo,perguntasnivelid,tempo,pathimage,status,categoriasid,quizid) VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING *',
@@ -97,7 +97,7 @@ router.post('/', asyncHandler(async (req, res) => {
 }));
 
 // PUT /:id/status
-router.put('/:id/status', asyncHandler(async (req, res) => {
+router.put('/:id/status', requireAuth, requireRole(1), asyncHandler(async (req, res) => {
   const { rows: [existing] } = await pool.query('SELECT status FROM perguntas WHERE id=$1', [req.params.id]);
   if (!existing) return res.status(404).json({ message: 'Pergunta nao encontrada' });
   const { rows } = await pool.query('UPDATE perguntas SET status=$1 WHERE id=$2 RETURNING *', [!existing.status, req.params.id]);
@@ -105,7 +105,7 @@ router.put('/:id/status', asyncHandler(async (req, res) => {
 }));
 
 // PUT /:id
-router.put('/:id', asyncHandler(async (req, res) => {
+router.put('/:id', requireAuth, requireRole(1), asyncHandler(async (req, res) => {
   const b = req.body;
   const fields = []; const vals = []; let i = 1;
   for (const k of ['conteudo','perguntasnivelid','tempo','pathimage','categoriasid','quizid','status']) {
@@ -127,7 +127,7 @@ router.put('/:id', asyncHandler(async (req, res) => {
 }));
 
 // DELETE /:id
-router.delete('/:id', asyncHandler(async (req, res) => {
+router.delete('/:id', requireAuth, requireRole(1), asyncHandler(async (req, res) => {
   await pool.query('DELETE FROM alternativas WHERE perguntasid=$1', [req.params.id]);
   await pool.query('DELETE FROM perguntas WHERE id=$1', [req.params.id]);
   res.status(204).send();
