@@ -1,7 +1,7 @@
 const router = require('express').Router();
 const { pool } = require('../../db');
 const { hashPassword } = require('../../auth-utils');
-const { asyncHandler } = require('../../middlewares');
+const { asyncHandler, requireAuth } = require('../../middlewares');
 
 // POST / - create user
 router.post('/', asyncHandler(async (req, res) => {
