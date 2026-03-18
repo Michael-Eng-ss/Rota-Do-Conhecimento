@@ -37,6 +37,14 @@ Deno.serve(async (req) => {
 
       // Check if it's a batch insert (array)
       if (Array.isArray(body)) {
+        // Validate required fields in batch
+        for (const item of body) {
+          if (!item.perguntasid || typeof item.perguntasid !== "number") {
+            return new Response(JSON.stringify({ status: "error", statusCode: 400, message: "Dados inválidos", errors: ["Campo 'perguntasid' é obrigatório e deve ser number em todos os itens"] }), {
+              status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+            });
+          }
+        }
         // Validate limit per pergunta
         const perguntaId = body[0]?.perguntasid;
         const { data: existing } = await supabase
