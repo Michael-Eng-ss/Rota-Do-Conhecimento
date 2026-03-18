@@ -4,7 +4,7 @@ import GameBackground from '@/shared/components/GameBackground';
 import GameHeader from '@/shared/components/GameHeader';
 import GameButton from '@/shared/components/GameButton';
 import GameFormCard from '@/shared/components/GameFormCard';
-import { apiGetRanking } from '@/lib/api';
+import { apiGetRanking } from '@/features/profile/services/user.service';
 
 interface RankingScreenProps {
   onBack: () => void;

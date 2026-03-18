@@ -2,7 +2,8 @@ import { useState } from 'react';
 import { ArrowLeft, Trophy, Star, Target, CheckCircle, Lock, Pencil, X, Check } from 'lucide-react';
 import { environmentConfigs, TOTAL_ENVIRONMENTS, type EnvironmentId } from '@/features/game/config/environments';
 import { useToast } from '@/hooks/use-toast';
-import { apiUpdateUser, type AppUser } from '@/lib/api';
+import { type AppUser } from '@/lib/api-client';
+import { apiUpdateUser } from '@/features/profile/services/user.service';
 
 // Avatares disponíveis
 import claraImage from '@/assets/characters/clara.png';
