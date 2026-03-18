@@ -1,6 +1,6 @@
 const router = require('express').Router();
 const { pool } = require('../../db');
-const { asyncHandler } = require('../../middlewares');
+const { asyncHandler, requireAuth } = require('../../middlewares');
 
 // POST /
 router.post('/', asyncHandler(async (req, res) => {
