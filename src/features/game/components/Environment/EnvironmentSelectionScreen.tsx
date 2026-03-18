@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Lock } from 'lucide-react';
 import patioEscolaImage from '@/assets/backgrounds/patio-escola.png';
-import { isFinalBossUnlocked, type EnvironmentId } from '@/config/environments';
+import { isFinalBossUnlocked, type EnvironmentId } from '@/features/game/config/environments';
 
 // Preview images for each environment
 import auditorioImage from '@/assets/backgrounds/auditorio.png';

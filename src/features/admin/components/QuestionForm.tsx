@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Plus, Trash2, Check, X } from 'lucide-react';
-import { Question, Alternative, subjectsByEnvironment, getEnvironmentName } from '@/types/questions';
-import GameButton from '@/components/Game/GameButton';
+import { Question, Alternative, subjectsByEnvironment, getEnvironmentName } from '@/features/game/types/questions';
+import GameButton from '@/shared/components/GameButton';
 
 interface QuestionFormProps {
   initialData?: Question | null;

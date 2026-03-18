@@ -1,5 +1,5 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
-import { SoundSettings } from '@/types/game';
+import { SoundSettings } from '@/features/game/types/game';
 
 const DEFAULT_SETTINGS: SoundSettings = {
   volume: 50,

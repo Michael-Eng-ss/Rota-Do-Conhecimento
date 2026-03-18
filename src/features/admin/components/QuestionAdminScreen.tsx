@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
-import GameBackground from '@/components/Game/GameBackground';
-import GameButton from '@/components/Game/GameButton';
-import QuestionForm from '@/components/Admin/QuestionForm';
-import QuestionList from '@/components/Admin/QuestionList';
-import { Question, getEnvironmentName } from '@/types/questions';
-import { useQuestions, DbQuestion } from '@/hooks/useQuestions';
+import GameBackground from '@/shared/components/GameBackground';
+import GameButton from '@/shared/components/GameButton';
+import QuestionForm from '@/features/admin/components/QuestionForm';
+import QuestionList from '@/features/admin/components/QuestionList';
+import { Question, getEnvironmentName } from '@/features/game/types/questions';
+import { useQuestions, DbQuestion } from '@/features/game/hooks/useQuestions';
 import { Plus, LogOut, Filter } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 

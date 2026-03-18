@@ -1,6 +1,6 @@
 // Sistema de perguntas de múltipla escolha
 
-import { environmentConfigs, type EnvironmentId } from '@/config/environments';
+import { environmentConfigs, type EnvironmentId } from '@/features/game/config/environments';
 
 // Matérias disponíveis por ambiente
 export const subjectsByEnvironment: Record<EnvironmentId, string[]> = {

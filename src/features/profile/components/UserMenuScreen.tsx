@@ -1,6 +1,6 @@
-import GameBackground from '@/components/Game/GameBackground';
-import GameHeader from '@/components/Game/GameHeader';
-import GameButton from '@/components/Game/GameButton';
+import GameBackground from '@/shared/components/GameBackground';
+import GameHeader from '@/shared/components/GameHeader';
+import GameButton from '@/shared/components/GameButton';
 
 interface UserMenuScreenProps {
   onStart: () => void;
