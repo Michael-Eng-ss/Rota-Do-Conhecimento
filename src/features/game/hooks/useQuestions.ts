@@ -1,56 +1,5 @@
 import { useState, useCallback } from 'react';
-
-const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
-const SUPABASE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
-
-// Types matching the multiple-choice structure
-export interface DbAlternative {
-  id: string;
-  text: string;
-  isCorrect: boolean;
-}
-
-export interface DbQuestion {
-  id: string;
-  environment_id: number;
-  subject: string;
-  base_text: string;
-  alternatives: DbAlternative[];
-  is_active: boolean;
-  created_at: string;
-  updated_at: string;
-}
-
-// Raw types from perguntas-api
-interface RawPergunta {
-  id: number;
-  conteudo: string | null;
-  perguntasnivelid: number;
-  tempo: number;
-  pathimage: string | null;
-  status: boolean;
-  categoriasid: number;
-  quizid: number | null;
-  alternativas?: Array<{
-    id: number;
-    conteudo: string | null;
-    imagem: string | null;
-    correta: boolean;
-    perguntasid: number;
-  }>;
-}
-
-async function callPerguntasApi(path: string, options?: { method?: string; body?: unknown }): Promise<Response> {
-  const { method = 'GET', body } = options || {};
-  return fetch(`${SUPABASE_URL}/functions/v1/perguntas-api/${path}`, {
-    method,
-    headers: {
-      'Content-Type': 'application/json',
-      'apikey': SUPABASE_KEY,
-    },
-    body: body ? JSON.stringify(body) : undefined,
-  });
-}
+import { callEdge } from '@/lib/api-client';
 
 // Map raw perguntas to DbQuestion format used by the game
 function mapPerguntaToDbQuestion(p: RawPergunta): DbQuestion {
