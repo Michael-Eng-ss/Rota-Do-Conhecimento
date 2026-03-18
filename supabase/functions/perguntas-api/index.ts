@@ -46,6 +46,11 @@ function requireAdmin(user: Record<string, unknown> | null): Response | null {
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
+  // DEBUG: log auth header presence and JWT_SECRET availability
+  const debugAuthHeader = req.headers.get("authorization");
+  const debugSecret = Deno.env.get("JWT_SECRET");
+  console.log("DEBUG auth:", { hasAuth: !!debugAuthHeader, authStart: debugAuthHeader?.substring(0, 30), hasSecret: !!debugSecret, secretLen: debugSecret?.length });
+
   const supabase = getSupabase();
   const url = new URL(req.url);
   const pathParts = url.pathname.split("/").filter(Boolean);
