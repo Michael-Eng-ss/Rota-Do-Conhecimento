@@ -29,7 +29,7 @@ router.get('/:id', asyncHandler(async (req, res) => {
   res.json(rows[0]);
 }));
 
-router.put('/:id/status', asyncHandler(async (req, res) => {
+router.put('/:id/status', requireAuth, requireRole(1), asyncHandler(async (req, res) => {
   const { rows: [existing] } = await pool.query('SELECT status FROM categorias WHERE id=$1', [req.params.id]);
   if (!existing) return res.status(404).json({ message: 'Categoria nao encontrada' });
   const { rows } = await pool.query('UPDATE categorias SET status=$1 WHERE id=$2 RETURNING *', [!existing.status, req.params.id]);
