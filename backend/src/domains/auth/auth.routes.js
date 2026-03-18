@@ -1,19 +1,18 @@
 const router = require('express').Router();
 const { pool } = require('../../db');
 const { hashPassword, createToken } = require('../../auth-utils');
-const { asyncHandler } = require('../../middlewares');
+const { asyncHandler, validateBody, AppError } = require('../../middlewares');
 
 // POST / - Login
-router.post('/', asyncHandler(async (req, res) => {
+router.post('/', validateBody({ email: 'string', senha: 'string' }), asyncHandler(async (req, res) => {
   const { email, senha } = req.body;
-  if (!email || !senha) return res.status(400).json({ message: 'Email e senha são obrigatórios' });
 
   const { rows } = await pool.query('SELECT * FROM usuarios WHERE email = $1', [email]);
   const user = rows[0];
-  if (!user) return res.status(401).json({ message: 'Email e/ou Senha Incorretos' });
+  if (!user) throw new AppError('Email e/ou Senha Incorretos', 401);
 
   const hashed = hashPassword(senha);
-  if (user.senha !== hashed) return res.status(401).json({ message: 'Email e/ou Senha Incorretos' });
+  if (user.senha !== hashed) throw new AppError('Email e/ou Senha Incorretos', 401);
 
   const token = createToken({ id: user.id, name: user.nome, role: user.role });
   await pool.query('INSERT INTO logs (usuariosid, descricao) VALUES ($1, $2)', [user.id, 'Login successfully']);
