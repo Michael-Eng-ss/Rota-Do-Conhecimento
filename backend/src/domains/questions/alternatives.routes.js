@@ -9,7 +9,7 @@ router.get('/pergunta/:perguntaId', asyncHandler(async (req, res) => {
 }));
 
 // POST /
-router.post('/', asyncHandler(async (req, res) => {
+router.post('/', requireAuth, requireRole(1), asyncHandler(async (req, res) => {
   const body = req.body;
   const items = Array.isArray(body) ? body : [body];
   const perguntaId = items[0].perguntasid;
