@@ -90,7 +90,7 @@ const ProfileScreen = ({
     // Update in backend
     if (user) {
       try {
-        await apiUpdateUser(user.id, { nome: editName.trim() } as any);
+        await usuarioCtrl.update(user.id, { nome: editName.trim() });
       } catch (err: any) {
         toast({ title: 'Erro ao salvar perfil', description: err.message, variant: 'destructive' });
         return;

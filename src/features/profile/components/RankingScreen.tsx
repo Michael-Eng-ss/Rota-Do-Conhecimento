@@ -28,7 +28,7 @@ const RankingScreen = ({ onBack, cursoId = 1 }: RankingScreenProps) => {
     const fetchRanking = async () => {
       setLoading(true);
       try {
-        const data = await apiGetRanking(cursoId);
+        const data = await usuarioCtrl.getRanking(cursoId);
         setRanking(data.map((p, i) => ({
           position: i + 1,
           name: p.nome,
