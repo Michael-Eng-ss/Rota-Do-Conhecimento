@@ -218,6 +218,7 @@ Deno.serve(async (req) => {
 
     return errorResponse(404, "Not Found");
   } catch (e) {
+    console.error("perguntas-api error:", e);
     return errorResponse(500, e.message || "Erro interno do servidor");
   }
 });
