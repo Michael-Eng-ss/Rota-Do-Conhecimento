@@ -1,10 +1,9 @@
 const router = require('express').Router();
-const { pool } = require('../../db');
+const cursoController = require('../../controllers/curso.controller');
 const { asyncHandler } = require('../../middlewares');
 
 router.get('/', asyncHandler(async (req, res) => {
-  const { rows } = await pool.query('SELECT * FROM curso');
-  res.json(rows);
+  res.json(await cursoController.getAll());
 }));
 
 module.exports = router;
