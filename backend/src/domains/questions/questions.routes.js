@@ -105,7 +105,7 @@ router.put('/:id/status', requireAuth, requireRole(1), asyncHandler(async (req, 
 }));
 
 // PUT /:id
-router.put('/:id', asyncHandler(async (req, res) => {
+router.put('/:id', requireAuth, requireRole(1), asyncHandler(async (req, res) => {
   const b = req.body;
   const fields = []; const vals = []; let i = 1;
   for (const k of ['conteudo','perguntasnivelid','tempo','pathimage','categoriasid','quizid','status']) {
