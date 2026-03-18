@@ -52,7 +52,6 @@ Deno.serve(async (req) => {
   const rest = pathParts.slice(1);
 
   try {
-    // === GET routes (public) ===
 
     if (req.method === "GET" && rest[0] === "completas" && rest[1]) {
       const categoriaId = parseInt(rest[1]);
