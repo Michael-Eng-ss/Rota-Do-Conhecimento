@@ -13,7 +13,7 @@ router.get('/:id', asyncHandler(async (req, res) => {
   res.json(rows[0]);
 }));
 
-router.post('/', asyncHandler(async (req, res) => {
+router.post('/', requireAuth, requireRole(1), asyncHandler(async (req, res) => {
   const { rows: existing } = await pool.query('SELECT id FROM campus WHERE nomecampus=$1', [req.body.nomecampus]);
   if (existing.length > 0) return res.status(400).json({ message: 'Campus ja existe' });
   const { rows } = await pool.query('INSERT INTO campus (nomecampus) VALUES ($1) RETURNING *', [req.body.nomecampus]);
