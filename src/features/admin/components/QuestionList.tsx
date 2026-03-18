@@ -1,5 +1,5 @@
 import { Edit, Trash2, CheckCircle } from 'lucide-react';
-import { Question, getEnvironmentName } from '@/types/questions';
+import { Question, getEnvironmentName } from '@/features/game/types/questions';
 
 interface QuestionListProps {
   questions: Question[];

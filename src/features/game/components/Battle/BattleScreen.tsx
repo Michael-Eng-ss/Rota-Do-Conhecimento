@@ -1,17 +1,17 @@
 import { useState, useCallback, useEffect } from 'react';
-import { useSoundSystem } from '@/hooks/useSoundSystem';
-import { useQuestions } from '@/hooks/useQuestions';
-import { useSoundEffects } from '@/hooks/useSoundEffects';
-import { environmentConfigs, MIN_PASS_PERCENTAGE, getDamagePercentage, type EnvironmentId } from '@/config/environments';
-import HealthBar from '@/components/Environment/HealthBar';
+import { useSoundSystem } from '@/features/game/hooks/useSoundSystem';
+import { useQuestions } from '@/features/game/hooks/useQuestions';
+import { useSoundEffects } from '@/features/game/hooks/useSoundEffects';
+import { environmentConfigs, MIN_PASS_PERCENTAGE, getDamagePercentage, type EnvironmentId } from '@/features/game/config/environments';
+import HealthBar from '@/features/game/components/Environment/HealthBar';
 import BossHealthBar from './BossHealthBar';
-import SoundButton from '@/components/Environment/SoundButton';
-import EnvironmentMenu from '@/components/Environment/EnvironmentMenu';
-import ProfileAvatar from '@/components/Environment/ProfileAvatar';
+import SoundButton from '@/features/game/components/Environment/SoundButton';
+import EnvironmentMenu from '@/features/game/components/Environment/EnvironmentMenu';
+import ProfileAvatar from '@/features/game/components/Environment/ProfileAvatar';
 import MultipleChoiceCard from './MultipleChoiceCard';
 import VictoryScreen from './VictoryScreen';
 import DefeatScreen from './DefeatScreen';
-import DialogBox from '@/components/VisualNovel/DialogBox';
+import DialogBox from '@/features/game/components/VisualNovel/DialogBox';
 import FeedbackOverlay from './FeedbackOverlay';
 
 // Import backgrounds

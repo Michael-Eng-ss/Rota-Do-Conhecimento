@@ -1,17 +1,17 @@
 import { useState, useEffect } from 'react';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '@/features/auth/hooks/useAuth';
 import { apiUpdateScore, apiUpdateUser, setSavedUser, type AppUser } from '@/lib/api';
-import LoginScreen from '@/components/Screens/LoginScreen';
-import UserMenuScreen from '@/components/Screens/UserMenuScreen';
-import RegisterScreen from '@/components/Screens/RegisterScreen';
-import ResetPasswordScreen from '@/components/Screens/ResetPasswordScreen';
-import RankingScreen from '@/components/Screens/RankingScreen';
-import ProfileScreen from '@/components/Screens/ProfileScreen';
-import AdminLoginScreen from '@/components/Screens/AdminLoginScreen';
-import QuestionAdminScreen from '@/components/Screens/QuestionAdminScreen';
-import VisualNovelGame from '@/components/VisualNovel/VisualNovelGame';
-import EnvironmentScreen from '@/components/Environment/EnvironmentScreen';
-import EnvironmentSelectionScreen from '@/components/Environment/EnvironmentSelectionScreen';
+import LoginScreen from '@/features/auth/components/LoginScreen';
+import UserMenuScreen from '@/features/profile/components/UserMenuScreen';
+import RegisterScreen from '@/features/auth/components/RegisterScreen';
+import ResetPasswordScreen from '@/features/auth/components/ResetPasswordScreen';
+import RankingScreen from '@/features/profile/components/RankingScreen';
+import ProfileScreen from '@/features/profile/components/ProfileScreen';
+import AdminLoginScreen from '@/features/auth/components/AdminLoginScreen';
+import QuestionAdminScreen from '@/features/admin/components/QuestionAdminScreen';
+import VisualNovelGame from '@/features/game/components/VisualNovel/VisualNovelGame';
+import EnvironmentScreen from '@/features/game/components/Environment/EnvironmentScreen';
+import EnvironmentSelectionScreen from '@/features/game/components/Environment/EnvironmentSelectionScreen';
 
 type GameScreen = 
   | 'login' 

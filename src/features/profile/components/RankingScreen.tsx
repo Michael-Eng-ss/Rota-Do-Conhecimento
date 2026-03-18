@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
 import { ArrowLeft, Trophy, Medal, Award } from 'lucide-react';
-import GameBackground from '../Game/GameBackground';
-import GameHeader from '../Game/GameHeader';
-import GameButton from '../Game/GameButton';
-import GameFormCard from '../Game/GameFormCard';
+import GameBackground from '@/shared/components/GameBackground';
+import GameHeader from '@/shared/components/GameHeader';
+import GameButton from '@/shared/components/GameButton';
+import GameFormCard from '@/shared/components/GameFormCard';
 import { apiGetRanking } from '@/lib/api';
 
 interface RankingScreenProps {

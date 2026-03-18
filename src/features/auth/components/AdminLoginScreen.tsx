@@ -1,8 +1,8 @@
 import { useState } from 'react';
-import GameBackground from '@/components/Game/GameBackground';
-import GameHeader from '@/components/Game/GameHeader';
-import GameInput from '@/components/Game/GameInput';
-import GameButton from '@/components/Game/GameButton';
+import GameBackground from '@/shared/components/GameBackground';
+import GameHeader from '@/shared/components/GameHeader';
+import GameInput from '@/shared/components/GameInput';
+import GameButton from '@/shared/components/GameButton';
 import { Shield, ArrowLeft } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 

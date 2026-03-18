@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { ArrowLeft, Trophy, Star, Target, CheckCircle, Lock, Pencil, X, Check } from 'lucide-react';
-import { environmentConfigs, TOTAL_ENVIRONMENTS, type EnvironmentId } from '@/config/environments';
+import { environmentConfigs, TOTAL_ENVIRONMENTS, type EnvironmentId } from '@/features/game/config/environments';
 import { useToast } from '@/hooks/use-toast';
 import { apiUpdateUser, type AppUser } from '@/lib/api';
 

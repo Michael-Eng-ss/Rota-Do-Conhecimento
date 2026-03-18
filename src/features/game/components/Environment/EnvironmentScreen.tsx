@@ -1,13 +1,13 @@
 import { useState } from 'react';
-import { useSoundSystem } from '@/hooks/useSoundSystem';
-import { environmentConfigs as envConfigsFromFile, type EnvironmentId } from '@/config/environments';
+import { useSoundSystem } from '@/features/game/hooks/useSoundSystem';
+import { environmentConfigs as envConfigsFromFile, type EnvironmentId } from '@/features/game/config/environments';
 import HealthBar from './HealthBar';
 import SoundButton from './SoundButton';
 import EnvironmentMenu from './EnvironmentMenu';
 import ProfileAvatar from './ProfileAvatar';
-import DialogBox from '@/components/VisualNovel/DialogBox';
-import CharacterSprite from '@/components/VisualNovel/CharacterSprite';
-import BattleScreen from '@/components/Battle/BattleScreen';
+import DialogBox from '@/features/game/components/VisualNovel/DialogBox';
+import CharacterSprite from '@/features/game/components/VisualNovel/CharacterSprite';
+import BattleScreen from '@/features/game/components/Battle/BattleScreen';
 
 // Import backgrounds
 import auditorioImage from '@/assets/backgrounds/auditorio.png';
