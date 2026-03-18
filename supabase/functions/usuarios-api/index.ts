@@ -30,6 +30,24 @@ Deno.serve(async (req) => {
     if (req.method === "POST" && rest.length === 0) {
       const body = await req.json();
 
+      // Validate required fields
+      const requiredFields = { nome: "string", email: "string", senha: "string" };
+      const errors: string[] = [];
+      for (const [field, type] of Object.entries(requiredFields)) {
+        const value = body[field];
+        if (value === undefined || value === null || value === "") {
+          errors.push(`Campo '${field}' é obrigatório`);
+        } else if (typeof value !== type) {
+          errors.push(`Campo '${field}' deve ser do tipo ${type}`);
+        }
+      }
+      if (!body.cursoid) errors.push("Campo 'cursoid' é obrigatório");
+      if (errors.length > 0) {
+        return new Response(JSON.stringify({ status: "error", statusCode: 400, message: "Dados inválidos", errors }), {
+          status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
       // Check email uniqueness
       const { data: existing } = await supabase.from("usuarios").select("id").eq("email", body.email).single();
       if (existing) {
