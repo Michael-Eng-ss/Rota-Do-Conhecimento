@@ -38,7 +38,7 @@ interface RawPergunta {
   }>;
 }
 
-function callPerguntasApi(path: string, options?: { method?: string; body?: unknown }) {
+function callPerguntasApi(path: string, options?: { method?: string; body?: unknown; auth?: boolean }) {
   return callEdge('perguntas-api', path, options);
 }
 
