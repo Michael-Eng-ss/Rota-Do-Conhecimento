@@ -1,62 +1,58 @@
-version: "3.8"
+version: '3.8'
 
 services:
-  # ---- PostgreSQL Local ----
+
   db:
-    image: postgres:17
-    container_name: quizgame-db
-    restart: unless-stopped
+    image: postgres:15
+    container_name: quiz-db
+    restart: always
+    environment:
+      POSTGRES_USER: ${DB_USER:-quizgame}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-quizgame123}
+      POSTGRES_DB: ${DB_NAME:-quizgame}
     ports:
       - "5432:5432"
-    environment:
-      POSTGRES_USER: ${POSTGRES_USER:-quizgame}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-quizgame123}
-      POSTGRES_DB: ${POSTGRES_DB:-quizgame}
     volumes:
-      - pgdata:/var/lib/postgresql/data
+      - postgres_data:/var/lib/postgresql/data
       - ./docker/init.sql:/docker-entrypoint-initdb.d/init.sql
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U quizgame"]
-      interval: 5s
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-quizgame} -d ${DB_NAME:-quizgame}"]
+      interval: 10s
       timeout: 5s
       retries: 5
 
-  # ---- Backend API (Express) ----
   backend:
-    build:
-      context: ./backend
-      dockerfile: Dockerfile
-    container_name: quizgame-backend
-    restart: unless-stopped
+    build: ./backend
+    container_name: quiz-back
+    restart: always
     ports:
       - "4000:4000"
     environment:
-      PORT: 4000
       DB_HOST: db
       DB_PORT: 5432
-      DB_USER: ${POSTGRES_USER:-quizgame}
-      DB_PASSWORD: ${POSTGRES_PASSWORD:-quizgame123}
-      DB_NAME: ${POSTGRES_DB:-quizgame}
-      JWT_SECRET: ${JWT_SECRET:-3099708496ef917af0b641323143ba7a}
+      DB_USER: ${DB_USER:-quizgame}
+      DB_PASSWORD: ${DB_PASSWORD:-quizgame123}
+      DB_NAME: ${DB_NAME:-quizgame}
+      JWT_SECRET: ${JWT_SECRET:-changeme}
+      PORT: 4000
     depends_on:
       db:
         condition: service_healthy
 
-  # ---- Frontend (React/Vite) ----
   frontend:
     build:
-      context: .
-      dockerfile: Dockerfile
+      context: ./frontend
       args:
-        VITE_SUPABASE_URL: ${VITE_SUPABASE_URL:-http://localhost:4000}
-        VITE_SUPABASE_PUBLISHABLE_KEY: ${VITE_SUPABASE_PUBLISHABLE_KEY:-local}
-        VITE_SUPABASE_PROJECT_ID: ${VITE_SUPABASE_PROJECT_ID:-local}
-    container_name: quizgame-frontend
-    restart: unless-stopped
+        VITE_API_URL: ${VITE_API_URL:-http://localhost:4000}
+        VITE_SUPABASE_URL: ${VITE_SUPABASE_URL:-}
+        VITE_SUPABASE_PUBLISHABLE_KEY: ${VITE_SUPABASE_PUBLISHABLE_KEY:-}
+        VITE_SUPABASE_PROJECT_ID: ${VITE_SUPABASE_PROJECT_ID:-}
+    container_name: quiz-front
+    restart: always
     ports:
-      - "3000:80"
+      - "80:80"
     depends_on:
       - backend
 
 volumes:
-  pgdata:
+  postgres_data:

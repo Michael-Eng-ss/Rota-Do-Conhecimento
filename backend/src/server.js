@@ -3,7 +3,14 @@ const express = require('express');
 const cors = require('cors');
 
 const app = express();
-app.use(cors());
+
+// Restringe CORS à origem configurada em CORS_ORIGIN (dotenv)
+const corsOrigin = process.env.CORS_ORIGIN || 'http://localhost:5173';
+app.use(cors({
+  origin: corsOrigin,
+  credentials: true,
+}));
+
 app.use(express.json());
 
 // Middlewares globais
@@ -18,19 +25,19 @@ const { quizRoutes, quizAvalRoutes } = require('./domains/quiz');
 const { campusRoutes, cursoRoutes, categoriasRoutes } = require('./domains/catalog');
 const reportsRoutes = require('./domains/reports/reports.routes');
 
-// Mount routes
-app.use('/functions/v1/auth-api', authRoutes);
-app.use('/functions/v1/usuarios-api', usersRoutes);
-app.use('/functions/v1/perguntas-api', questionsRoutes);
-app.use('/functions/v1/alternativas-api', alternativesRoutes);
-app.use('/functions/v1/campus-api', campusRoutes);
-app.use('/functions/v1/curso-api', cursoRoutes);
-app.use('/functions/v1/categorias-api', categoriasRoutes);
-app.use('/functions/v1/quiz-api', quizRoutes);
-app.use('/functions/v1/perguntas-nivel-api', levelsRoutes);
-app.use('/functions/v1/progresso-perguntas-api', progressRoutes);
-app.use('/functions/v1/quiz-avaliativo-api', quizAvalRoutes);
-app.use('/functions/v1/relatorios-api', reportsRoutes);
+// Mount routes — paths simples sem acoplamento à convenção Supabase
+app.use('/auth', authRoutes);
+app.use('/usuarios', usersRoutes);
+app.use('/perguntas', questionsRoutes);
+app.use('/alternativas', alternativesRoutes);
+app.use('/campus', campusRoutes);
+app.use('/curso', cursoRoutes);
+app.use('/categorias', categoriasRoutes);
+app.use('/quiz', quizRoutes);
+app.use('/perguntas-nivel', levelsRoutes);
+app.use('/progresso-perguntas', progressRoutes);
+app.use('/quiz-avaliativo', quizAvalRoutes);
+app.use('/relatorios', reportsRoutes);
 
 // 404 handler (após todas as rotas)
 app.use(notFoundHandler);
