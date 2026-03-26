@@ -198,6 +198,7 @@ export const useQuestions = () => {
 
   // Fetch active questions with alternatives for battle
   const fetchBattleQuestions = useCallback(async (environmentId: number) => {
+    if (!environmentId || isNaN(environmentId)) return [];
     try {
       const res = await callPerguntasApi(`completas/${environmentId}`);
       if (!res.ok) throw new Error('Erro ao buscar perguntas');

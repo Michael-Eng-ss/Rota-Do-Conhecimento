@@ -5,7 +5,8 @@ const cors = require('cors');
 const app = express();
 
 // Restringe CORS à origem configurada em CORS_ORIGIN (dotenv)
-const corsOrigin = process.env.CORS_ORIGIN || 'http://localhost:5173';
+const defaultOrigins = ['http://localhost:8080', 'http://localhost:5173', 'http://localhost'];
+const corsOrigin = process.env.CORS_ORIGIN ? process.env.CORS_ORIGIN.split(',') : defaultOrigins;
 app.use(cors({
   origin: corsOrigin,
   credentials: true,

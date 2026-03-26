@@ -4,8 +4,12 @@ const { asyncHandler, requireAuth, requireRole, validateBody } = require('../../
 
 // GET /completas/:categoriaId
 router.get('/completas/:categoriaId', asyncHandler(async (req, res) => {
+  const catId = parseInt(req.params.categoriaId);
+  if (isNaN(catId)) {
+    throw new AppError('Categoria ID inválido', 400);
+  }
   const activeOnly = req.query.active !== 'false';
-  res.json(await perguntaController.getCompletas(req.params.categoriaId, activeOnly));
+  res.json(await perguntaController.getCompletas(catId, activeOnly));
 }));
 
 // GET /todas

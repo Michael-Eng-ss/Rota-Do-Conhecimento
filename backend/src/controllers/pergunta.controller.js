@@ -50,6 +50,7 @@ class PerguntaController {
   }
 
   async update(id, data) {
+    if (isNaN(parseInt(id))) throw new AppError('ID inválido', 400);
     const fields = {};
     for (const k of ['conteudo','perguntasnivelid','tempo','pathimage','categoriasid','quizid','status']) {
       if (data[k] !== undefined) fields[k] = data[k];
@@ -79,12 +80,14 @@ class PerguntaController {
   }
 
   async toggleStatus(id) {
+    if (isNaN(parseInt(id))) throw new AppError('ID inválido', 400);
     const row = await perguntaModel.toggleStatus(id);
     if (!row) throw new AppError('Pergunta nao encontrada', 404);
     return Pergunta.fromRow(row);
   }
 
   async delete(id) {
+    if (isNaN(parseInt(id))) throw new AppError('ID inválido', 400);
     const ok = await perguntaModel.delete(id);
     if (!ok) throw new AppError('Pergunta nao encontrada', 404);
   }

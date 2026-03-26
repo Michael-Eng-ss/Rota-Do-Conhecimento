@@ -148,3 +148,10 @@ INSERT INTO perguntasnivel (nivel, pontuacao, tempo) VALUES
   (2, 20, 25),
   (3, 30, 20)
 ON CONFLICT DO NOTHING;
+
+-- Categorias (Ambientes do jogo)
+INSERT INTO categorias (id, descricao, "cursoId") VALUES
+  (1, 'Ambiente 1', 1),
+  (2, 'Ambiente 2', 1),
+  (3, 'Ambiente 3', 1)
+ON CONFLICT DO NOTHING;
