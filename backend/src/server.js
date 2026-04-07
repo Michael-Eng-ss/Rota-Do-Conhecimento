@@ -6,11 +6,26 @@ const app = express();
 
 // Restringe CORS à origem configurada em CORS_ORIGIN (dotenv)
 const defaultOrigins = ['http://localhost:8080', 'http://localhost:5173', 'http://localhost'];
-const corsOrigin = process.env.CORS_ORIGIN ? process.env.CORS_ORIGIN.split(',') : defaultOrigins;
-app.use(cors({
-  origin: corsOrigin,
+const corsOrigin = process.env.CORS_ORIGIN ? process.env.CORS_ORIGIN.split(',').map(o => o.trim()) : defaultOrigins;
+
+const corsOptions = {
+  origin: function (origin, callback) {
+    // Permite requisições sem origin (ex: Postman, chamadas server-side)
+    if (!origin) return callback(null, true);
+    if (corsOrigin.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error(`CORS: origin '${origin}' não permitida`));
+    }
+  },
   credentials: true,
-}));
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+};
+
+// Responde a TODOS os preflight OPTIONS antes das rotas
+app.options('*', cors(corsOptions));
+app.use(cors(corsOptions));
 
 app.use(express.json());
 
