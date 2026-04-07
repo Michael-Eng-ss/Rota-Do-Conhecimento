@@ -4,11 +4,12 @@ const cors = require('cors');
 
 const app = express();
 
-// Restringe CORS à origem configurada em CORS_ORIGIN (dotenv)
-const defaultOrigins = ['http://localhost:8080', 'http://localhost:5173', 'http://localhost'];
-const corsOrigin = process.env.CORS_ORIGIN ? process.env.CORS_ORIGIN.split(',') : defaultOrigins;
+// Configuração de CORS flexível para suportar URLs dinâmicas da Vercel e localhost
 app.use(cors({
-  origin: corsOrigin,
+  origin: function(origin, callback) {
+    // Reflete o origin da requisição (permite qualquer um), necessário para credentials: true
+    callback(null, origin || '*');
+  },
   credentials: true,
 }));
 
