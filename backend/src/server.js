@@ -4,6 +4,7 @@ const cors = require('cors');
 
 const app = express();
 
+<<<<<<< HEAD
 // Restringe CORS à origem configurada em CORS_ORIGIN (dotenv)
 const defaultOrigins = ['http://localhost:8080', 'http://localhost:5173', 'http://localhost'];
 const corsOrigin = process.env.CORS_ORIGIN ? process.env.CORS_ORIGIN.split(',').map(o => o.trim()) : defaultOrigins;
@@ -17,6 +18,13 @@ const corsOptions = {
     } else {
       callback(new Error(`CORS: origin '${origin}' não permitida`));
     }
+=======
+// Configuração de CORS flexível para suportar URLs dinâmicas da Vercel e localhost
+app.use(cors({
+  origin: function(origin, callback) {
+    // Reflete o origin da requisição (permite qualquer um), necessário para credentials: true
+    callback(null, origin || '*');
+>>>>>>> 5c2de5b754f6fb210558a001fcc23a02e0c2ae10
   },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
