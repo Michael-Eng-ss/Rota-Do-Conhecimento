@@ -9,12 +9,12 @@ services:
     ports:
       - "5432:5432"
     environment:
-      POSTGRES_USER: ${POSTGRES_USER:-quizgame}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-quizgame123}
-      POSTGRES_DB: ${POSTGRES_DB:-quizgame}
+      POSTGRES_USER: ${DB_USER:-quizgame}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-quizgame123}
+      POSTGRES_DB: ${DB_NAME:-quizgame}
     volumes:
       - pgdata:/var/lib/postgresql/data
-      - ./docker/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ../docker/init.sql:/docker-entrypoint-initdb.d/init.sql
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U quizgame"]
       interval: 5s
@@ -34,9 +34,9 @@ services:
       PORT: 4000
       DB_HOST: db
       DB_PORT: 5432
-      DB_USER: ${POSTGRES_USER:-quizgame}
-      DB_PASSWORD: ${POSTGRES_PASSWORD:-quizgame123}
-      DB_NAME: ${POSTGRES_DB:-quizgame}
+      DB_USER: ${DB_USER:-quizgame}
+      DB_PASSWORD: ${DB_PASSWORD:-quizgame123}
+      DB_NAME: ${DB_NAME:-quizgame}
       JWT_SECRET: ${JWT_SECRET:-3099708496ef917af0b641323143ba7a}
     depends_on:
       db:
@@ -48,9 +48,10 @@ services:
       context: .
       dockerfile: Dockerfile
       args:
-        VITE_SUPABASE_URL: ${VITE_SUPABASE_URL:-http://localhost:4000}
-        VITE_SUPABASE_PUBLISHABLE_KEY: ${VITE_SUPABASE_PUBLISHABLE_KEY:-local}
-        VITE_SUPABASE_PROJECT_ID: ${VITE_SUPABASE_PROJECT_ID:-local}
+        VITE_API_URL: ${VITE_API_URL:-http://localhost:4000}
+        VITE_SUPABASE_URL: ${VITE_SUPABASE_URL:-}
+        VITE_SUPABASE_PUBLISHABLE_KEY: ${VITE_SUPABASE_PUBLISHABLE_KEY:-}
+        VITE_SUPABASE_PROJECT_ID: ${VITE_SUPABASE_PROJECT_ID:-}
     container_name: quizgame-frontend
     restart: unless-stopped
     ports:

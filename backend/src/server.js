@@ -5,13 +5,19 @@ const cors = require('cors');
 const app = express();
 
 // Configuração de CORS flexível para suportar URLs dinâmicas da Vercel e localhost
-app.use(cors({
+const corsOptions = {
   origin: function(origin, callback) {
     // Reflete o origin da requisição (permite qualquer um), necessário para credentials: true
     callback(null, origin || '*');
   },
   credentials: true,
-}));
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+};
+
+// Responde a TODOS os preflight OPTIONS antes das rotas
+app.options('*', cors(corsOptions));
+app.use(cors(corsOptions));
 
 app.use(express.json());
 
