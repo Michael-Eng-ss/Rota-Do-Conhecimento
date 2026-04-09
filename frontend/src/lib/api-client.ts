@@ -1,12 +1,19 @@
-// Shared API client – handles local (Docker/Express) vs cloud (Supabase Edge Functions) routing
+// Shared API client – handles Express backend (Render) vs Supabase Edge Functions routing
+//
+// Prioridade:
+//   1. VITE_API_URL definido → usa backend Express (Render em produção, localhost:4000 em dev local)
+//   2. VITE_API_URL vazio + VITE_SUPABASE_URL definido → usa Supabase Edge Functions (legado)
+//   3. Nenhum → usa /api (proxy Nginx, apenas para deploy Docker full-stack)
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 const SUPABASE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
-const LOCAL_API_URL = import.meta.env.VITE_API_URL; // ex: http://localhost:4000
+const EXPRESS_URL = import.meta.env.VITE_API_URL; // ex: https://rota-do-conhecimento.onrender.com
 
-const isLocal = !!LOCAL_API_URL;
+// VITE_API_URL tem prioridade — se definido, SEMPRE usa o backend Express
+const useExpress = !!EXPRESS_URL || !SUPABASE_URL;
+const expressBaseUrl = EXPRESS_URL || '/api'; // /api para fallback Docker Nginx
 
-// Mapeamento para o backend Express local (paths sem prefixo Supabase)
+// Mapeamento de nomes de edge function → paths do backend Express
 const edgeFnToLocalPath: Record<string, string> = {
   'auth-api': '/auth',
   'usuarios-api': '/usuarios',
@@ -30,17 +37,17 @@ export async function callEdge(
   const { method = 'GET', body, auth = false } = options;
   const headers: Record<string, string> = { 'Content-Type': 'application/json' };
 
-  if (isLocal) {
-    // Modo local: chama o backend Express sem qualquer prefixo Supabase
+  if (useExpress) {
+    // Backend Express: Render (produção) ou localhost:4000 (dev local)
     const basePath = edgeFnToLocalPath[fnName] || `/${fnName}`;
-    const url = `${LOCAL_API_URL}${basePath}${path ? '/' + path : ''}`;
+    const url = `${expressBaseUrl}${basePath}${path ? '/' + path : ''}`;
     if (auth) {
       const token = getToken();
       if (token) headers['Authorization'] = `Bearer ${token}`;
     }
     return fetch(url, { method, headers, body: body ? JSON.stringify(body) : undefined });
   } else {
-    // Modo cloud: chama Supabase Edge Functions
+    // Supabase Edge Functions (modo legado / fallback)
     headers['apikey'] = SUPABASE_KEY;
     if (auth) {
       const token = getToken();
@@ -50,6 +57,8 @@ export async function callEdge(
     return fetch(url, { method, headers, body: body ? JSON.stringify(body) : undefined });
   }
 }
+
+
 
 // --- Token / session helpers ---
 

@@ -47,7 +47,7 @@ CREATE TABLE IF NOT EXISTS categorias (
   descricao TEXT NOT NULL,
   imagem TEXT NOT NULL DEFAULT '',
   status BOOLEAN NOT NULL DEFAULT true,
-  "cursoId" INTEGER NOT NULL REFERENCES curso(id)
+  cursoid INTEGER NOT NULL REFERENCES curso(id)
 );
 
 -- Tabela: perguntasnivel
@@ -119,25 +119,30 @@ CREATE TABLE IF NOT EXISTS logs (
 -- Dados iniciais
 -- ============================================
 
+-- Campus padrão
+INSERT INTO campus (id, nomecampus) VALUES (1, 'Campus Padrão') ON CONFLICT DO NOTHING;
+
 -- Curso padrão
-INSERT INTO curso (nome, imagem) VALUES ('Curso Padrão', '') ON CONFLICT DO NOTHING;
+INSERT INTO curso (id, nome, imagem) VALUES (1, 'Engenharia de Software', '') ON CONFLICT DO NOTHING;
 
 -- Usuário admin (senha: admin123 em SHA-256)
-INSERT INTO usuarios (nome, email, senha, cursoid, role)
+INSERT INTO usuarios (nome, email, senha, cursoid, campusid, role)
 VALUES (
   'Administrador',
   'admin123@teste.com',
   encode(digest('admin123', 'sha256'), 'hex'),
   1,
+  1,
   1
 ) ON CONFLICT (email) DO NOTHING;
 
 -- Usuário jogador (senha: jogador123 em SHA-256)
-INSERT INTO usuarios (nome, email, senha, cursoid, role)
+INSERT INTO usuarios (nome, email, senha, cursoid, campusid, role)
 VALUES (
   'Jogador Teste',
   'jogador@teste.com',
   encode(digest('jogador123', 'sha256'), 'hex'),
+  1,
   1,
   3
 ) ON CONFLICT (email) DO NOTHING;
@@ -149,9 +154,9 @@ INSERT INTO perguntasnivel (nivel, pontuacao, tempo) VALUES
   (3, 30, 20)
 ON CONFLICT DO NOTHING;
 
--- Categorias (Ambientes do jogo)
-INSERT INTO categorias (id, descricao, "cursoId") VALUES
-  (1, 'Ambiente 1', 1),
-  (2, 'Ambiente 2', 1),
-  (3, 'Ambiente 3', 1)
+-- Categorias (Ambientes do jogo) - cursoid em minúsculo (sem aspas)
+INSERT INTO categorias (id, descricao, cursoid) VALUES
+  (1, 'Ambiente 1 - Auditório', 1),
+  (2, 'Ambiente 2 - Biblioteca', 1),
+  (3, 'Boss Final', 1)
 ON CONFLICT DO NOTHING;

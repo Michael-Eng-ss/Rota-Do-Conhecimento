@@ -43,7 +43,9 @@ services:
     build:
       context: ./frontend
       args:
-        VITE_API_URL: ${VITE_API_URL:-http://localhost:4000}
+        # Em produção com Docker, deixe VITE_API_URL vazio — o Nginx faz proxy de /api/ para o backend.
+        # Para dev local sem Docker, defina VITE_API_URL=http://localhost:4000 no .env da raiz.
+        VITE_API_URL: ${VITE_API_URL:-}
         VITE_SUPABASE_URL: ${VITE_SUPABASE_URL:-}
         VITE_SUPABASE_PUBLISHABLE_KEY: ${VITE_SUPABASE_PUBLISHABLE_KEY:-}
         VITE_SUPABASE_PROJECT_ID: ${VITE_SUPABASE_PROJECT_ID:-}

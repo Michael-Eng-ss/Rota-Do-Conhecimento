@@ -60,115 +60,6 @@ function mapPerguntaToDbQuestion(p: RawPergunta): DbQuestion {
   };
 }
 
-// Fallback hardcoded questions (multiple choice)
-const fallbackQuestions: Record<number, Array<{ baseText: string; subject: string; alternatives: DbAlternative[] }>> = {
-  1: [
-    {
-      baseText: 'Quem escreveu a obra "Dom Casmurro"?',
-      subject: 'Literatura',
-      alternatives: [
-        { id: 'f1_a', text: 'José de Alencar', isCorrect: false },
-        { id: 'f1_b', text: 'Machado de Assis', isCorrect: true },
-        { id: 'f1_c', text: 'Carlos Drummond de Andrade', isCorrect: false },
-        { id: 'f1_d', text: 'Guimarães Rosa', isCorrect: false },
-      ],
-    },
-    {
-      baseText: 'Qual é a soma dos ângulos internos de um triângulo?',
-      subject: 'Matemática',
-      alternatives: [
-        { id: 'f1_e', text: '90°', isCorrect: false },
-        { id: 'f1_f', text: '180°', isCorrect: true },
-        { id: 'f1_g', text: '360°', isCorrect: false },
-        { id: 'f1_h', text: '270°', isCorrect: false },
-      ],
-    },
-    {
-      baseText: 'Quantos estados possui o Brasil?',
-      subject: 'Geografia',
-      alternatives: [
-        { id: 'f1_i', text: '24', isCorrect: false },
-        { id: 'f1_j', text: '25', isCorrect: false },
-        { id: 'f1_k', text: '26', isCorrect: true },
-        { id: 'f1_l', text: '27', isCorrect: false },
-      ],
-    },
-    {
-      baseText: 'Em que ano ocorreu a Revolução Francesa?',
-      subject: 'História',
-      alternatives: [
-        { id: 'f1_m', text: '1776', isCorrect: false },
-        { id: 'f1_n', text: '1789', isCorrect: true },
-        { id: 'f1_o', text: '1822', isCorrect: false },
-        { id: 'f1_p', text: '1848', isCorrect: false },
-      ],
-    },
-  ],
-  2: [
-    {
-      baseText: 'Qual organela celular é responsável pela produção de energia (ATP) nas células eucarióticas?',
-      subject: 'Biologia',
-      alternatives: [
-        { id: 'f2_a', text: 'Ribossomo', isCorrect: false },
-        { id: 'f2_b', text: 'Mitocôndria', isCorrect: true },
-        { id: 'f2_c', text: 'Complexo de Golgi', isCorrect: false },
-        { id: 'f2_d', text: 'Lisossomo', isCorrect: false },
-      ],
-    },
-    {
-      baseText: 'Qual é o símbolo químico do elemento Ouro na tabela periódica?',
-      subject: 'Química',
-      alternatives: [
-        { id: 'f2_e', text: 'Ag', isCorrect: false },
-        { id: 'f2_f', text: 'Fe', isCorrect: false },
-        { id: 'f2_g', text: 'Au', isCorrect: true },
-        { id: 'f2_h', text: 'Or', isCorrect: false },
-      ],
-    },
-    {
-      baseText: 'A velocidade é uma grandeza escalar ou vetorial?',
-      subject: 'Física',
-      alternatives: [
-        { id: 'f2_i', text: 'Escalar', isCorrect: false },
-        { id: 'f2_j', text: 'Vetorial', isCorrect: true },
-        { id: 'f2_k', text: 'Nenhuma das anteriores', isCorrect: false },
-        { id: 'f2_l', text: 'Ambas', isCorrect: false },
-      ],
-    },
-    {
-      baseText: 'Qual classe gramatical tem a função de modificar o substantivo, atribuindo-lhe qualidade ou característica?',
-      subject: 'Língua Portuguesa',
-      alternatives: [
-        { id: 'f2_m', text: 'Advérbio', isCorrect: false },
-        { id: 'f2_n', text: 'Adjetivo', isCorrect: true },
-        { id: 'f2_o', text: 'Pronome', isCorrect: false },
-        { id: 'f2_p', text: 'Conjunção', isCorrect: false },
-      ],
-    },
-  ],
-  3: [
-    {
-      baseText: 'Qual molécula contém as informações genéticas dos seres vivos?',
-      subject: 'Biologia',
-      alternatives: [
-        { id: 'f3_a', text: 'RNA', isCorrect: false },
-        { id: 'f3_b', text: 'DNA', isCorrect: true },
-        { id: 'f3_c', text: 'ATP', isCorrect: false },
-        { id: 'f3_d', text: 'Proteína', isCorrect: false },
-      ],
-    },
-    {
-      baseText: 'What is the past tense of "go"?',
-      subject: 'Língua Inglesa',
-      alternatives: [
-        { id: 'f3_e', text: 'Goed', isCorrect: false },
-        { id: 'f3_f', text: 'Went', isCorrect: true },
-        { id: 'f3_g', text: 'Gone', isCorrect: false },
-        { id: 'f3_h', text: 'Going', isCorrect: false },
-      ],
-    },
-  ],
-};
 
 export const useQuestions = () => {
   const [questions, setQuestions] = useState<DbQuestion[]>([]);
@@ -217,25 +108,12 @@ export const useQuestions = () => {
           })),
         }));
 
-      // If no questions in DB, use fallback
-      if (parsed.length === 0) {
-        return (fallbackQuestions[environmentId] || []).map((q, i) => ({
-          id: `fallback_${environmentId}_${i}`,
-          baseText: q.baseText,
-          subject: q.subject,
-          alternatives: q.alternatives,
-        }));
-      }
-
+      // Se não há perguntas cadastradas no banco, retorna vazio (não usar fallback)
       return parsed;
     } catch (err) {
       console.error('Error fetching battle questions:', err);
-      return (fallbackQuestions[environmentId] || []).map((q, i) => ({
-        id: `fallback_${environmentId}_${i}`,
-        baseText: q.baseText,
-        subject: q.subject,
-        alternatives: q.alternatives,
-      }));
+      // Em caso de erro de rede, também retorna vazio para não exibir perguntas falsas
+      return [];
     }
   }, []);
 
