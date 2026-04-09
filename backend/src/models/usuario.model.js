@@ -20,7 +20,7 @@ class UsuarioModel {
        VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16) RETURNING *`,
       [data.nome, data.email, data.senha, data.telefone||'', data.sexo||0, data.datanascimento||new Date().toISOString(),
        data.role||3, data.uf||'', data.foto||'', data.pontuacao||0, data.status??true, data.cidade||'',
-       data.turma||null, data.periodo||null, data.cursoid, data.campusid||null]
+       data.turma||null, data.periodo||null, data.cursoid||null, data.campusid||null]
     );
     return rows[0];
   }
