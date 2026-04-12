@@ -1,4 +1,8 @@
 const nodemailer = require('nodemailer');
+const dns = require('dns');
+
+// FORÇAR o Node.js a ignorar o IPv6 completamente para evitar timeout do Render
+dns.setDefaultResultOrder('ipv4first');
 
 /** Cria o transporte SMTP a partir das variáveis de ambiente */
 function createTransport() {
