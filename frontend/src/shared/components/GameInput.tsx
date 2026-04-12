@@ -6,6 +6,7 @@ interface GameInputProps {
   placeholder?: string;
   value?: string;
   onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onKeyDown?: (e: React.KeyboardEvent<HTMLInputElement>) => void;
   className?: string;
 }
 
@@ -15,6 +16,7 @@ const GameInput = ({
   placeholder, 
   value, 
   onChange,
+  onKeyDown,
   className = ''
 }: GameInputProps) => {
   return (
@@ -29,6 +31,7 @@ const GameInput = ({
         placeholder={placeholder}
         value={value}
         onChange={onChange}
+        onKeyDown={onKeyDown}
         className="w-full bg-white/90 border-2 border-white/50 rounded-xl px-4 py-3 text-foreground placeholder:text-muted-foreground shadow-lg focus:ring-2 focus:ring-primary"
       />
     </div>

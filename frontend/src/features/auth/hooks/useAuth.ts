@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { getToken, clearAuth, getSavedUser, setToken, setSavedUser, type AppUser } from '@/lib/api-client';
-import { login as apiLogin } from '@/models/services/auth.service';
+import { login as apiLogin, forgotPassword as apiForgotPassword, resetPassword as apiResetPassword, confirmEmail as apiConfirmEmail } from '@/models/services/auth.service';
 import { createUsuario as apiRegisterUser } from '@/models/services/usuario.service';
 
 export const useAuth = () => {
@@ -80,5 +80,32 @@ export const useAuth = () => {
     }
   }, [user]);
 
-  return { user, setUser, loading, isAdmin, signIn, signUp, signOut, checkAdminRole };
+  const forgotPassword = useCallback(async (email: string) => {
+    try {
+      await apiForgotPassword(email);
+      return { error: null };
+    } catch (err: any) {
+      return { error: { message: err.message } };
+    }
+  }, []);
+
+  const resetPassword = useCallback(async (token: string, novaSenha: string) => {
+    try {
+      await apiResetPassword(token, novaSenha);
+      return { error: null };
+    } catch (err: any) {
+      return { error: { message: err.message } };
+    }
+  }, []);
+
+  const confirmEmail = useCallback(async (token: string) => {
+    try {
+      await apiConfirmEmail(token);
+      return { error: null };
+    } catch (err: any) {
+      return { error: { message: err.message } };
+    }
+  }, []);
+
+  return { user, setUser, loading, isAdmin, signIn, signUp, signOut, checkAdminRole, forgotPassword, resetPassword, confirmEmail };
 };

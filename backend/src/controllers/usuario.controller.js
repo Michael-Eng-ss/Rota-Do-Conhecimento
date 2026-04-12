@@ -2,6 +2,8 @@ const { hashPassword } = require('../auth-utils');
 const usuarioModel = require('../models/usuario.model');
 const Usuario = require('../entities/usuario.entity');
 const { AppError } = require('../middlewares');
+const emailTokensModel = require('../models/email_tokens.model');
+const { sendEmailConfirmation } = require('../services/email.service');
 
 class UsuarioController {
   async getById(id) {
@@ -16,6 +18,12 @@ class UsuarioController {
     if (existing) throw new AppError('Email ja cadastrado', 400);
 
     const row = await usuarioModel.create({ ...data, senha: hashPassword(data.senha) });
+
+    // Dispara e-mail de confirmação de cadastro em background (não bloqueia a resposta)
+    emailTokensModel.create(row.id, 'confirm_email', 1440)
+      .then(token => sendEmailConfirmation(row.email, row.nome, token))
+      .catch(err => console.error('[Email] Falha ao enviar confirmação:', err));
+
     return Usuario.fromRow(row).toSafeJSON();
   }
 

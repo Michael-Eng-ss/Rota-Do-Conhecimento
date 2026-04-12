@@ -41,6 +41,10 @@ class UsuarioModel {
     return rowCount > 0;
   }
 
+  async markEmailVerified(id) {
+    await pool.query('UPDATE usuarios SET email_verified=true WHERE id=$1', [id]);
+  }
+
   async updateScore(id, newScore) {
     const { rows } = await pool.query('UPDATE usuarios SET pontuacao=$1 WHERE id=$2 RETURNING *', [newScore, id]);
     return rows[0] || null;

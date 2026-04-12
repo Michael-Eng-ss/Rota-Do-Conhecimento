@@ -4,7 +4,6 @@ import { setSavedUser, updateUserScore as apiUpdateScore, type AppUser } from '@
 import LoginScreen from '@/features/auth/components/LoginScreen';
 import UserMenuScreen from '@/features/profile/components/UserMenuScreen';
 import RegisterScreen from '@/features/auth/components/RegisterScreen';
-import ResetPasswordScreen from '@/features/auth/components/ResetPasswordScreen';
 import RankingScreen from '@/features/profile/components/RankingScreen';
 import ProfileScreen from '@/features/profile/components/ProfileScreen';
 import AdminLoginScreen from '@/features/auth/components/AdminLoginScreen';
@@ -12,12 +11,17 @@ import QuestionAdminScreen from '@/features/admin/components/QuestionAdminScreen
 import VisualNovelGame from '@/features/game/components/VisualNovel/VisualNovelGame';
 import EnvironmentScreen from '@/features/game/components/Environment/EnvironmentScreen';
 import EnvironmentSelectionScreen from '@/features/game/components/Environment/EnvironmentSelectionScreen';
+import ForgotPasswordScreen from '@/features/auth/components/ForgotPasswordScreen';
+import NewPasswordScreen from '@/features/auth/components/NewPasswordScreen';
+import EmailConfirmScreen from '@/features/auth/components/EmailConfirmScreen';
 
 type GameScreen =
-  | 'login' 
-  | 'menu' 
-  | 'register' 
-  | 'resetPassword' 
+  | 'login'
+  | 'menu'
+  | 'register'
+  | 'forgotPassword'
+  | 'newPassword'
+  | 'emailConfirm'
   | 'ranking'
   | 'profile'
   | 'cutscene'
@@ -27,7 +31,7 @@ type GameScreen =
   | 'questionAdmin';
 
 const GameManager = () => {
-  const { user, setUser, isAdmin, signIn, signUp, signOut, checkAdminRole } = useAuth();
+  const { user, setUser, isAdmin, signIn, signUp, signOut, checkAdminRole, forgotPassword, resetPassword, confirmEmail } = useAuth();
   const [currentScreen, setCurrentScreen] = useState<GameScreen>('login');
   const [previousScreen, setPreviousScreen] = useState<GameScreen>('menu');
   const [currentEnvironment, setCurrentEnvironment] = useState<1 | 2 | 3>(1);
@@ -35,6 +39,21 @@ const GameManager = () => {
   const [playerName, setPlayerName] = useState<string>('Jogador');
   const [playerAvatar, setPlayerAvatar] = useState<string>('clara');
   const [totalScore, setTotalScore] = useState<number>(0);
+  const [urlToken, setUrlToken] = useState<string>('');
+
+  // Detecta tokens na URL para confirmar email ou redefinir senha
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const token = params.get('token');
+    const path = window.location.pathname;
+    if (token && path.includes('confirmar-email')) {
+      setUrlToken(token);
+      setCurrentScreen('emailConfirm');
+    } else if (token && path.includes('nova-senha')) {
+      setUrlToken(token);
+      setCurrentScreen('newPassword');
+    }
+  }, []);
 
   // Load profile from user data when logged in
   useEffect(() => {
@@ -97,9 +116,35 @@ const GameManager = () => {
           <LoginScreen
             onLogin={() => setCurrentScreen('menu')}
             onRegister={() => setCurrentScreen('register')}
-            onForgotPassword={() => setCurrentScreen('resetPassword')}
+            onForgotPassword={() => setCurrentScreen('forgotPassword')}
             onAdminLogin={() => setCurrentScreen('adminLogin')}
             signIn={signIn}
+          />
+        );
+
+      case 'forgotPassword':
+        return (
+          <ForgotPasswordScreen
+            onBack={() => setCurrentScreen('login')}
+            forgotPassword={forgotPassword}
+          />
+        );
+
+      case 'newPassword':
+        return (
+          <NewPasswordScreen
+            token={urlToken}
+            onSuccess={() => setCurrentScreen('login')}
+            resetPassword={resetPassword}
+          />
+        );
+
+      case 'emailConfirm':
+        return (
+          <EmailConfirmScreen
+            token={urlToken}
+            onGoToLogin={() => setCurrentScreen('login')}
+            confirmEmail={confirmEmail}
           />
         );
       
@@ -143,13 +188,7 @@ const GameManager = () => {
           />
         );
       
-      case 'resetPassword':
-        return (
-          <ResetPasswordScreen
-            onReset={() => setCurrentScreen('login')}
-            onBackToLogin={() => setCurrentScreen('login')}
-          />
-        );
+
       
       case 'cutscene':
         return (
