@@ -7,10 +7,9 @@ dns.setDefaultResultOrder('ipv4first');
 /** Cria o transporte SMTP a partir das variáveis de ambiente */
 function createTransport() {
   return nodemailer.createTransport({
-    host: 'smtp.gmail.com',
-    port: 465,
-    secure: true, // Força uso do 465 (SMTPS), bypassando o bloqueio de spam do Render
-    family: 4, // 🔌 OBRIGA o servidor a criar o Socket TCP exclusivamente em IPv4
+    host: process.env.EMAIL_HOST || 'smtp.gmail.com',
+    port: parseInt(process.env.EMAIL_PORT || '587'),
+    secure: process.env.EMAIL_PORT === '465',
     auth: {
       user: process.env.EMAIL_USER,
       pass: process.env.EMAIL_PASS,
