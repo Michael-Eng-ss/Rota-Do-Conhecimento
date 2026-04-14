@@ -5,7 +5,7 @@ class EmailTokensModel {
   /**
    * Gera um token único e salva no banco.
    * @param {number} usuarioId
-   * @param {'confirm_email'|'reset_password'} tipo
+   * @param {'reset_password'} tipo
    * @param {number} expiresInMinutes
    */
   async create(usuarioId, tipo, expiresInMinutes = 60) {
@@ -29,7 +29,7 @@ class EmailTokensModel {
   /**
    * Busca e valida um token. Retorna null se inválido/expirado/já usado.
    * @param {string} token
-   * @param {'confirm_email'|'reset_password'} tipo
+   * @param {'reset_password'} tipo
    */
   async findValid(token, tipo) {
     const { rows } = await pool.query(

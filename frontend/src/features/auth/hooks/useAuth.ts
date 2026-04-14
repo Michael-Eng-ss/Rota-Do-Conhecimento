@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { getToken, clearAuth, getSavedUser, setToken, setSavedUser, type AppUser } from '@/lib/api-client';
-import { login as apiLogin, forgotPassword as apiForgotPassword, resetPassword as apiResetPassword, confirmEmail as apiConfirmEmail } from '@/models/services/auth.service';
+import { login as apiLogin, forgotPassword as apiForgotPassword, resetPassword as apiResetPassword } from '@/models/services/auth.service';
 import { createUsuario as apiRegisterUser, getUsuarioById } from '@/models/services/usuario.service';
 
 export const useAuth = () => {
@@ -97,14 +97,6 @@ export const useAuth = () => {
     }
   }, []);
 
-  const confirmEmail = useCallback(async (token: string) => {
-    try {
-      await apiConfirmEmail(token);
-      return { error: null };
-    } catch (err: any) {
-      return { error: { message: err.message } };
-    }
-  }, []);
 
-  return { user, setUser, loading, isAdmin, signIn, signUp, signOut, checkAdminRole, forgotPassword, resetPassword, confirmEmail };
+  return { user, setUser, loading, isAdmin, signIn, signUp, signOut, checkAdminRole, forgotPassword, resetPassword };
 };

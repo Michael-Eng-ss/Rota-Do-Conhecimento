@@ -39,7 +39,7 @@ const RegisterScreen = ({ onRegister, onBackToLogin, signUp }: RegisterScreenPro
     if (error) {
       toast({ title: 'Erro ao cadastrar', description: error.message, variant: 'destructive' });
     } else {
-      toast({ title: 'Conta criada!', description: 'Verifique seu email para confirmar o cadastro.' });
+      toast({ title: 'Conta criada!', description: 'Faça login para começar a jogar.' });
       onRegister();
     }
   };
