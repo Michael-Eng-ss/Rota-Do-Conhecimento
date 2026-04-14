@@ -284,8 +284,6 @@ const BattleScreen = ({ environmentId, onBackToPatio, onProfile, onVictory }: Ba
   const handleFeedbackEnd = useCallback(() => {
     if (!pendingResult) return;
     
-    const { newPlayerHealth, newBossHealth, damageDealt } = pendingResult;
-    
     // Trigger shake on the character that took damage
     if (pendingResult.isCorrect) {
       setShakeBoss(true);
@@ -295,11 +293,7 @@ const BattleScreen = ({ environmentId, onBackToPatio, onProfile, onVictory }: Ba
       setTimeout(() => setShakeClara(false), 500);
     }
 
-    setScore(prev => prev + (pendingResult.isCorrect ? 1 : 0));
-    setBossHealth(newBossHealth);
-    setPlayerHealth(newPlayerHealth);
-    setTotalDamageDealt(prev => prev + damageDealt);
-
+    // ✅ NÃO atualiza score/health aqui — tudo é feito em handleReviewContinue
     setFeedback(null);
     setLastFeedback(pendingResult.isCorrect ? 'correct' : 'wrong');
     setPhase('review');
@@ -308,8 +302,9 @@ const BattleScreen = ({ environmentId, onBackToPatio, onProfile, onVictory }: Ba
   const handleReviewContinue = useCallback(() => {
     if (!pendingResult) return;
 
-    const { newPlayerHealth, newBossHealth, damageDealt } = pendingResult;
-    const newScore = score + (pendingResult.isCorrect ? 1 : 0);
+    const { isCorrect, newPlayerHealth, newBossHealth, damageDealt } = pendingResult;
+    // ✅ score e totalDamageDealt ainda estão no valor ANTERIOR (não foram alterados em handleFeedbackEnd)
+    const newScore       = score + (isCorrect ? 1 : 0);
     const newTotalDamage = totalDamageDealt + damageDealt;
 
     setPendingResult(null);
@@ -324,9 +319,6 @@ const BattleScreen = ({ environmentId, onBackToPatio, onProfile, onVictory }: Ba
       setPhase('defeat');
       return;
     }
-
-    // ❌ Removido: vitória imediata quando bossHealth chega a 0
-    // A decisão de vitória/derrota só ocorre ao terminar TODAS as perguntas
 
     // Última pergunta respondida → decide o resultado
     if (isLastQuestion) {
