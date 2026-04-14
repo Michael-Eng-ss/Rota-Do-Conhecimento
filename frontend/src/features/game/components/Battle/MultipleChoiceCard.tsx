@@ -19,6 +19,13 @@ interface MultipleChoiceCardProps {
   onContinue?: () => void;
 }
 
+/** Classifica o texto para adaptar tamanho de fonte e layout */
+function getTextSize(text: string): 'short' | 'medium' | 'long' {
+  if (text.length <= 80)  return 'short';
+  if (text.length <= 220) return 'medium';
+  return 'long';
+}
+
 const MultipleChoiceCard = ({
   questionNumber,
   totalQuestions,
@@ -32,58 +39,86 @@ const MultipleChoiceCard = ({
 }: MultipleChoiceCardProps) => {
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
-  // Reset selection when question changes
   useEffect(() => {
     setSelectedId(null);
   }, [questionNumber]);
 
   const handleConfirm = () => {
-    if (selectedId && !disabled) {
-      onConfirm(selectedId);
-    }
+    if (selectedId && !disabled) onConfirm(selectedId);
   };
 
   const displaySelectedId = reviewMode ? reviewSelectedId : selectedId;
+  const questionSize   = getTextSize(baseText);
+  const hasLongAlts    = alternatives.some(a => a.text.length > 120);
+  const hasShortAlts   = alternatives.every(a => a.text.length <= 50);
+
+  // Tamanho de fonte do enunciado baseado no tamanho do texto
+  const questionFontClass =
+    questionSize === 'short'  ? 'text-base md:text-lg lg:text-xl' :
+    questionSize === 'medium' ? 'text-sm  md:text-base'           :
+                                'text-xs  md:text-sm';
+
+  // Tamanho de fonte das alternativas
+  const altFontClass = hasLongAlts
+    ? 'text-xs md:text-sm'
+    : hasShortAlts
+    ? 'text-sm md:text-base lg:text-lg'
+    : 'text-sm md:text-base';
+
+  // Grid 2 colunas somente se alternativas forem curtas
+  const altGridClass = hasShortAlts && alternatives.length <= 4
+    ? 'grid grid-cols-2 gap-2'
+    : 'flex flex-col gap-2';
 
   return (
-    <div className="absolute inset-0 flex flex-col items-center justify-center z-30 pointer-events-none px-4 py-8 overflow-auto">
-      {/* Question Counter */}
-      <div className="bg-blue-600 text-white px-4 py-2 rounded-full mb-4 shadow-lg pointer-events-auto flex-shrink-0">
-        <span className="font-bold">Questão {questionNumber} de {totalQuestions}</span>
+    <div className="absolute inset-0 flex flex-col items-center justify-center z-30 pointer-events-none px-2 sm:px-4 py-2 sm:py-4">
+
+      {/* Contador flutuante */}
+      <div className="bg-blue-600 text-white px-3 py-1.5 rounded-full mb-2 shadow-lg pointer-events-auto flex-shrink-0 text-sm font-bold">
+        Questão {questionNumber} de {totalQuestions}
       </div>
 
-      {/* Question Card */}
-      <div className="bg-white/95 backdrop-blur-sm rounded-2xl shadow-2xl border-4 border-blue-400 pointer-events-auto max-w-3xl w-full mx-auto overflow-hidden flex-shrink-0 max-h-[75vh] overflow-y-auto">
-        {/* Base Text */}
-        <div className="p-4 md:p-6 bg-blue-50 border-b-2 border-blue-200 max-h-[200px] overflow-y-auto">
-          <p className="text-gray-800 text-sm md:text-base leading-relaxed whitespace-pre-wrap">
+      {/* Card principal — cresce com o conteúdo até o limite da tela */}
+      <div
+        className="
+          bg-white/97 backdrop-blur-sm rounded-2xl shadow-2xl border-4 border-blue-400
+          pointer-events-auto w-full mx-auto flex flex-col
+          max-w-3xl
+          max-h-[88dvh] sm:max-h-[82dvh]
+          overflow-hidden
+        "
+      >
+        {/* ── Enunciado ── */}
+        <div
+          className={`
+            px-4 sm:px-6 py-3 sm:py-4 bg-blue-50 border-b-2 border-blue-200
+            overflow-y-auto flex-shrink-0
+            ${questionSize === 'long' ? 'max-h-[35%]' : questionSize === 'medium' ? 'max-h-[30%]' : ''}
+          `}
+        >
+          <p className={`text-gray-800 leading-relaxed whitespace-pre-wrap ${questionFontClass}`}>
             {baseText}
           </p>
         </div>
 
-        {/* Instructions */}
-        <div className="px-4 md:px-6 py-2 bg-gray-100 border-b border-gray-200">
-          <p className="text-gray-600 text-sm font-medium">
-            Selecione a alternativa correta:
+        {/* ── Label ── */}
+        <div className="px-4 sm:px-6 py-1.5 bg-gray-100 border-b border-gray-200 flex-shrink-0">
+          <p className="text-gray-500 text-xs font-medium tracking-wide uppercase">
+            Selecione a alternativa correta
           </p>
         </div>
 
-        {/* Alternatives */}
-        <div className="p-4 md:p-6 space-y-3">
+        {/* ── Alternativas — scroll quando necessário ── */}
+        <div className={`px-4 sm:px-6 py-3 sm:py-4 overflow-y-auto flex-1 ${altGridClass}`}>
           {alternatives.map((alt, index) => {
-            const letter = String.fromCharCode(65 + index);
+            const letter     = String.fromCharCode(65 + index);
             const isSelected = displaySelectedId === alt.id;
 
-            // Determine styling
             let bgClass = 'bg-gray-50 border border-gray-200 hover:bg-blue-50 hover:border-blue-300';
             if (reviewMode) {
-              if (alt.isCorrect) {
-                bgClass = 'bg-green-100 border-2 border-green-400';
-              } else if (isSelected && !alt.isCorrect) {
-                bgClass = 'bg-red-100 border-2 border-red-400';
-              } else {
-                bgClass = 'bg-gray-50 border border-gray-200 opacity-60';
-              }
+              if (alt.isCorrect)                  bgClass = 'bg-green-100 border-2 border-green-400';
+              else if (isSelected && !alt.isCorrect) bgClass = 'bg-red-100 border-2 border-red-400';
+              else                                bgClass = 'bg-gray-50 border border-gray-200 opacity-50';
             } else if (isSelected) {
               bgClass = 'bg-blue-100 border-2 border-blue-500 shadow-md';
             }
@@ -94,46 +129,50 @@ const MultipleChoiceCard = ({
                 type="button"
                 onClick={() => !disabled && !reviewMode && setSelectedId(alt.id)}
                 disabled={disabled || reviewMode}
-                className={`w-full flex items-center gap-3 p-3 md:p-4 rounded-xl text-left transition-all ${bgClass} ${
-                  disabled || reviewMode ? 'cursor-default' : 'cursor-pointer'
-                }`}
+                className={`
+                  flex items-center gap-2 sm:gap-3 p-2.5 sm:p-3 rounded-xl text-left
+                  transition-all duration-150
+                  ${bgClass}
+                  ${disabled || reviewMode ? 'cursor-default' : 'cursor-pointer active:scale-[0.98]'}
+                `}
               >
-                {/* Letter circle */}
-                <span className={`flex-shrink-0 w-9 h-9 rounded-full flex items-center justify-center font-bold text-sm transition-all ${
-                  reviewMode && alt.isCorrect
-                    ? 'bg-green-500 text-white'
-                    : reviewMode && isSelected && !alt.isCorrect
-                    ? 'bg-red-500 text-white'
-                    : isSelected
-                    ? 'bg-blue-500 text-white'
-                    : 'bg-gray-200 text-gray-700'
-                }`}>
+                {/* Letra */}
+                <span className={`
+                  flex-shrink-0 w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center
+                  font-bold text-xs sm:text-sm transition-all
+                  ${reviewMode && alt.isCorrect                  ? 'bg-green-500 text-white'
+                  : reviewMode && isSelected && !alt.isCorrect  ? 'bg-red-500 text-white'
+                  : isSelected                                   ? 'bg-blue-500 text-white'
+                  :                                               'bg-gray-200 text-gray-700'}
+                `}>
                   {letter}
                 </span>
 
-                {/* Text */}
-                <span className="flex-1 text-gray-800 text-sm md:text-base leading-relaxed">
+                {/* Texto */}
+                <span className={`flex-1 text-gray-800 leading-snug ${altFontClass}`}>
                   {alt.text}
                 </span>
 
-                {/* Review icons */}
+                {/* Ícones review */}
                 {reviewMode && alt.isCorrect && (
-                  <CheckCircle className="w-6 h-6 text-green-600 flex-shrink-0" />
+                  <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0" />
                 )}
                 {reviewMode && isSelected && !alt.isCorrect && (
-                  <XCircle className="w-6 h-6 text-red-600 flex-shrink-0" />
+                  <XCircle className="w-5 h-5 text-red-600 flex-shrink-0" />
                 )}
               </button>
             );
           })}
         </div>
 
-        {/* Confirm / Continue Button */}
-        <div className="p-4 md:p-6 bg-gray-50 border-t border-gray-200">
+        {/* ── Botão ── */}
+        <div className="px-4 sm:px-6 py-3 bg-gray-50 border-t border-gray-200 flex-shrink-0">
           {reviewMode ? (
             <button
               onClick={onContinue}
-              className="w-full py-4 rounded-xl text-xl font-bold transition-all duration-300 shadow-xl bg-blue-500 hover:bg-blue-600 text-white hover:scale-[1.02]"
+              className="w-full py-2.5 sm:py-3 rounded-xl text-base sm:text-lg font-bold
+                         transition-all duration-200 bg-blue-500 hover:bg-blue-600
+                         text-white active:scale-[0.98] shadow-lg"
             >
               Continuar ➜
             </button>
@@ -141,11 +180,13 @@ const MultipleChoiceCard = ({
             <button
               onClick={handleConfirm}
               disabled={!selectedId || disabled}
-              className={`w-full py-4 rounded-xl text-xl font-bold transition-all duration-300 shadow-xl ${
-                selectedId && !disabled
-                  ? 'bg-green-500 hover:bg-green-600 text-white scale-100 hover:scale-[1.02]'
-                  : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-              }`}
+              className={`
+                w-full py-2.5 sm:py-3 rounded-xl text-base sm:text-lg font-bold
+                transition-all duration-200 shadow-lg
+                ${selectedId && !disabled
+                  ? 'bg-green-500 hover:bg-green-600 text-white active:scale-[0.98]'
+                  : 'bg-gray-300 text-gray-500 cursor-not-allowed'}
+              `}
             >
               {selectedId ? 'Confirmar Resposta' : 'Selecione uma alternativa'}
             </button>
