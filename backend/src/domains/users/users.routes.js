@@ -21,26 +21,38 @@ router.get('/curso/:cursoId/:skip/:take', asyncHandler(async (req, res) => {
   res.json(users);
 }));
 
-// GET /:id
-router.get('/:id', asyncHandler(async (req, res) => {
+// GET /:id — requer autenticação (usuários autenticados podem ver qualquer perfil)
+router.get('/:id', requireAuth, asyncHandler(async (req, res) => {
   const user = await usuarioController.getById(req.params.id);
   res.json(user);
 }));
 
-// PUT /:id
+// PUT /:id — apenas o próprio usuário ou um admin pode atualizar
 router.put('/:id', requireAuth, asyncHandler(async (req, res) => {
+  const targetId = parseInt(req.params.id);
+  if (req.user.id !== targetId && req.user.role !== 1) {
+    return res.status(403).json({ message: 'Sem permissão para editar este perfil' });
+  }
   const user = await usuarioController.update(req.params.id, req.body);
   res.json(user);
 }));
 
-// PUT /:id/senha
+// PUT /:id/senha — apenas o próprio usuário ou um admin pode alterar a senha
 router.put('/:id/senha', requireAuth, validateBody({ senha: 'string' }), asyncHandler(async (req, res) => {
+  const targetId = parseInt(req.params.id);
+  if (req.user.id !== targetId && req.user.role !== 1) {
+    return res.status(403).json({ message: 'Sem permissão para alterar esta senha' });
+  }
   const result = await usuarioController.updatePassword(req.params.id, req.body.senha);
   res.json(result);
 }));
 
-// PUT /:id/pontuacao
+// PUT /:id/pontuacao — apenas o próprio usuário ou um admin pode atualizar a pontuação
 router.put('/:id/pontuacao', requireAuth, asyncHandler(async (req, res) => {
+  const targetId = parseInt(req.params.id);
+  if (req.user.id !== targetId && req.user.role !== 1) {
+    return res.status(403).json({ message: 'Sem permissão para atualizar esta pontuação' });
+  }
   const user = await usuarioController.updateScore(req.params.id, req.body.pontuacao);
   res.json(user);
 }));

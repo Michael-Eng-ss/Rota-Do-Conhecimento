@@ -18,7 +18,7 @@ class AuthController {
     const token = createToken({ id: user.id, name: user.nome, role: user.role });
     await logModel.create(user.id, 'Login successfully');
 
-    return { token, id: user.id, role: user.role };
+    return { token, id: user.id, role: user.role, user: user.toSafeJSON() };
   }
 
   /** Gera token e envia e-mail de confirmação de cadastro */

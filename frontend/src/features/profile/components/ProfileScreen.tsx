@@ -73,8 +73,8 @@ const ProfileScreen = ({
   const [editAvatar, setEditAvatar] = useState(playerAvatar);
   const { toast } = useToast();
 
-  const effectiveName = playerName;
-  const effectiveAvatar = playerAvatar;
+  const effectiveName = playerName || user?.nome || 'Jogador';
+  const effectiveAvatar = playerAvatar || user?.foto || 'clara';
   const effectiveScore = totalScore || (user?.pontuacao ?? 0);
   const effectiveCompleted = completedEnvironments;
 
@@ -85,10 +85,13 @@ const ProfileScreen = ({
   const handleSave = async () => {
     if (!editName.trim()) return;
 
-    // Update in backend
+    // Update in backend — nome e foto (avatar)
     if (user) {
       try {
-        await apiUpdateUser(user.id, { nome: editName.trim() });
+        await apiUpdateUser(user.id, { nome: editName.trim(), foto: editAvatar });
+        // Atualiza o usuário no localStorage para persistir o avatar
+        const { setSavedUser } = await import('@/lib/api-client');
+        setSavedUser({ ...user, nome: editName.trim(), foto: editAvatar });
       } catch (err: any) {
         toast({ title: 'Erro ao salvar perfil', description: err.message, variant: 'destructive' });
         return;

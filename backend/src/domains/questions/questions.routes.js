@@ -2,14 +2,15 @@ const router = require('express').Router();
 const perguntaController = require('../../controllers/pergunta.controller');
 const { asyncHandler, requireAuth, requireRole, validateBody } = require('../../middlewares');
 
-// GET /completas/:categoriaId
+// GET /completas/:categoriaId?active=false&random=true
 router.get('/completas/:categoriaId', asyncHandler(async (req, res) => {
   const catId = parseInt(req.params.categoriaId);
   if (isNaN(catId)) {
     throw new AppError('Categoria ID inválido', 400);
   }
   const activeOnly = req.query.active !== 'false';
-  res.json(await perguntaController.getCompletas(catId, activeOnly));
+  const random = req.query.random === 'true';
+  res.json(await perguntaController.getCompletas(catId, activeOnly, random));
 }));
 
 // GET /todas

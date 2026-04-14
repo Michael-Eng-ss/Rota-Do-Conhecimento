@@ -58,8 +58,11 @@ const GameManager = () => {
   // Load profile from user data when logged in
   useEffect(() => {
     if (!user) return;
-    setPlayerName(user.nome);
-    setTotalScore(user.pontuacao);
+    // Guarda contra nome vazio (sessão antiga antes do fix do login)
+    if (user.nome) setPlayerName(user.nome);
+    setTotalScore(user.pontuacao ?? 0);
+    // Usa foto como ID de avatar, com fallback para 'clara'
+    if (user.foto) setPlayerAvatar(user.foto);
   }, [user]);
 
   const handleUpdateProfile = (name: string, avatarId: string) => {

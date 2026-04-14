@@ -60,6 +60,15 @@ function mapPerguntaToDbQuestion(p: RawPergunta): DbQuestion {
   };
 }
 
+/** Fisher-Yates shuffle — embaralha um array sem mutação */
+function shuffle<T>(array: T[]): T[] {
+  const arr = [...array];
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
 
 export const useQuestions = () => {
   const [questions, setQuestions] = useState<DbQuestion[]>([]);
@@ -87,11 +96,12 @@ export const useQuestions = () => {
     }
   }, []);
 
-  // Fetch active questions with alternatives for battle
+  // Fetch active questions with alternatives for battle — sempre em ordem aleatória
   const fetchBattleQuestions = useCallback(async (environmentId: number) => {
     if (!environmentId || isNaN(environmentId)) return [];
     try {
-      const res = await callPerguntasApi(`completas/${environmentId}`);
+      // ?random=true → ORDER BY RANDOM() no banco (1ª camada)
+      const res = await callPerguntasApi(`completas/${environmentId}?random=true`);
       if (!res.ok) throw new Error('Erro ao buscar perguntas');
       const data: RawPergunta[] = await res.json();
 
@@ -101,18 +111,22 @@ export const useQuestions = () => {
           id: String(p.id),
           baseText: p.conteudo || '',
           subject: '',
-          alternatives: (p.alternativas || []).map(a => ({
-            id: String(a.id),
-            text: a.conteudo || '',
-            isCorrect: a.correta,
-          })),
+          // Embaralha as alternativas de cada pergunta (2ª camada)
+          // garante que a resposta correta não fique sempre na mesma posição
+          alternatives: shuffle(
+            (p.alternativas || []).map(a => ({
+              id: String(a.id),
+              text: a.conteudo || '',
+              isCorrect: a.correta,
+            }))
+          ),
         }));
 
-      // Se não há perguntas cadastradas no banco, retorna vazio (não usar fallback)
-      return parsed;
+      // Fisher-Yates no array de perguntas (3ª camada — garante ordem diferente
+      // a cada batalha mesmo que o banco retorne com cache)
+      return shuffle(parsed);
     } catch (err) {
       console.error('Error fetching battle questions:', err);
-      // Em caso de erro de rede, também retorna vazio para não exibir perguntas falsas
       return [];
     }
   }, []);
