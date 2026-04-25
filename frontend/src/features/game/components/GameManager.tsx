@@ -11,6 +11,7 @@ import QuestionAdminScreen from '@/features/admin/components/QuestionAdminScreen
 import VisualNovelGame from '@/features/game/components/VisualNovel/VisualNovelGame';
 import EnvironmentScreen from '@/features/game/components/Environment/EnvironmentScreen';
 import EnvironmentSelectionScreen from '@/features/game/components/Environment/EnvironmentSelectionScreen';
+import EndingScreen from '@/features/game/components/Ending/EndingScreen';
 import ForgotPasswordScreen from '@/features/auth/components/ForgotPasswordScreen';
 import NewPasswordScreen from '@/features/auth/components/NewPasswordScreen';
 import EmailConfirmScreen from '@/features/auth/components/EmailConfirmScreen';
@@ -27,6 +28,7 @@ type GameScreen =
   | 'cutscene'
   | 'environmentSelection'
   | 'environment'
+  | 'ending'
   | 'adminLogin'
   | 'questionAdmin';
 
@@ -83,6 +85,11 @@ const GameManager = () => {
         console.error('Failed to update score:', err);
         setTotalScore(prev => prev + score);
       }
+    }
+
+    // Se concluiu os 3 ambientes, dispara o final da história
+    if (newCompleted.length >= 3) {
+      setCurrentScreen('ending');
     }
   };
 
@@ -217,7 +224,15 @@ const GameManager = () => {
             onEnvironmentComplete={handleEnvironmentComplete}
           />
         );
-      
+
+      case 'ending':
+        return (
+          <EndingScreen
+            onBack={() => setCurrentScreen('menu')}
+            onEndingComplete={() => setCurrentScreen('menu')}
+          />
+        );
+
       case 'adminLogin':
         return (
           <AdminLoginScreen

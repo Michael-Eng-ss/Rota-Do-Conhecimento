@@ -209,6 +209,28 @@
   .animate-pulse-soft {
     animation: pulseSoft 2s ease-in-out infinite;
   }
+
+  .animate-character-exit-left {
+    animation: characterExitLeft 0.35s ease-in forwards;
+  }
+
+  .animate-character-exit-right {
+    animation: characterExitRight 0.35s ease-in forwards;
+  }
+
+  .animate-character-exit-center {
+    animation: characterExitCenter 0.3s ease-in forwards;
+  }
+
+  .vn-speaker-active {
+    filter: brightness(1.1) drop-shadow(0 0 18px hsl(var(--primary) / 0.45));
+    transition: filter 0.35s ease-out;
+  }
+
+  .vn-speaker-inactive {
+    filter: brightness(0.6) saturate(0.7);
+    transition: filter 0.35s ease-out;
+  }
 }
 
 @keyframes characterEnterLeft {
@@ -279,5 +301,38 @@
   }
   to {
     width: 100%;
+  }
+}
+
+@keyframes characterExitLeft {
+  0% {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(-80px) scale(0.92);
+  }
+}
+
+@keyframes characterExitRight {
+  0% {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(80px) scale(0.92);
+  }
+}
+
+@keyframes characterExitCenter {
+  0% {
+    opacity: 1;
+    transform: translate(-50%, 0) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, 20px) scale(0.94);
   }
 }
