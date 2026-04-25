@@ -11,9 +11,10 @@ class PerguntaModel {
     return rows;
   }
 
-  async findByCategoria(categoriaId, activeOnly = true) {
+  async findByCategoria(categoriaId, activeOnly = true, random = false) {
     let q = 'SELECT * FROM perguntas WHERE categoriasid=$1';
     if (activeOnly) q += ' AND status=true';
+    q += random ? ' ORDER BY RANDOM()' : ' ORDER BY id ASC';
     const { rows } = await pool.query(q, [categoriaId]);
     return rows;
   }

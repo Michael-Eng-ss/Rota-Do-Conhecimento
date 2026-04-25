@@ -17,8 +17,8 @@ class PerguntaController {
     return this._attachAlternativas(rows);
   }
 
-  async getCompletas(categoriaId, activeOnly) {
-    const rows = await perguntaModel.findByCategoria(categoriaId, activeOnly);
+  async getCompletas(categoriaId, activeOnly, random = false) {
+    const rows = await perguntaModel.findByCategoria(categoriaId, activeOnly, random);
     return this._attachAlternativas(rows);
   }
 

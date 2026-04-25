@@ -21,9 +21,3 @@ export async function resetPassword(token: string, senha: string): Promise<void>
   const data = await res.json();
   if (!res.ok) throw new Error(data.message || 'Link inválido ou expirado');
 }
-
-export async function confirmEmail(token: string): Promise<void> {
-  const res = await callEdge(FN, `confirmar-email?token=${token}`, { method: 'GET' });
-  const data = await res.json();
-  if (!res.ok) throw new Error(data.message || 'Link inválido ou expirado');
-}

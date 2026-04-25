@@ -26,6 +26,12 @@ interface TrueFalseCardProps {
   onContinue?: () => void;
 }
 
+function getTextSize(text: string): 'short' | 'medium' | 'long' {
+  if (text.length <= 80)  return 'short';
+  if (text.length <= 220) return 'medium';
+  return 'long';
+}
+
 const TrueFalseCard = ({
   questionNumber,
   totalQuestions,
@@ -39,7 +45,6 @@ const TrueFalseCard = ({
 }: TrueFalseCardProps) => {
   const [answers, setAnswers] = useState<Record<string, boolean>>({});
 
-  // Reset answers when question changes
   useEffect(() => {
     setAnswers({});
   }, [questionNumber]);
@@ -50,44 +55,78 @@ const TrueFalseCard = ({
   };
 
   const allAnswered = statements.every(s => answers[s.id] !== undefined);
+  const answeredCount = statements.filter(s => answers[s.id] !== undefined).length;
 
   const handleConfirm = () => {
-    if (allAnswered && !disabled) {
-      onConfirm(answers);
-    }
+    if (allAnswered && !disabled) onConfirm(answers);
   };
 
+  const questionSize = getTextSize(baseText);
+  const hasLongStatements = statements.some(s => s.text.length > 100);
+
+  const questionFontClass =
+    questionSize === 'short'  ? 'text-base md:text-lg lg:text-xl' :
+    questionSize === 'medium' ? 'text-sm  md:text-base'           :
+                                'text-xs  md:text-sm';
+
+  const statementFontClass = hasLongStatements
+    ? 'text-xs md:text-sm'
+    : 'text-sm md:text-base';
+
   return (
-    <div className="absolute inset-0 flex flex-col items-center justify-center z-30 pointer-events-none px-4 py-8 overflow-auto">
-      {/* Question Counter */}
-      <div className="bg-blue-600 text-white px-4 py-2 rounded-full mb-4 shadow-lg pointer-events-auto flex-shrink-0">
-        <span className="font-bold">Questão {questionNumber} de {totalQuestions}</span>
+    <div className="absolute inset-0 flex flex-col items-center justify-center z-30 pointer-events-none px-2 sm:px-4 py-2 sm:py-4">
+
+      {/* Contador flutuante */}
+      <div className="bg-blue-600 text-white px-3 py-1.5 rounded-full mb-2 shadow-lg pointer-events-auto flex-shrink-0 text-sm font-bold">
+        Questão {questionNumber} de {totalQuestions}
       </div>
 
-      {/* Question Card */}
-      <div className="bg-white/95 backdrop-blur-sm rounded-2xl shadow-2xl border-4 border-blue-400 pointer-events-auto max-w-4xl w-full mx-auto overflow-hidden flex-shrink-0 max-h-[75vh] overflow-y-auto">
-        {/* Base Text - scrollable if too long */}
-        <div className="p-4 md:p-6 bg-blue-50 border-b-2 border-blue-200 max-h-[200px] overflow-y-auto">
-          <p className="text-gray-800 text-sm md:text-base leading-relaxed whitespace-pre-wrap">
+      {/* Card principal */}
+      <div
+        className="
+          bg-white/97 backdrop-blur-sm rounded-2xl shadow-2xl border-4 border-blue-400
+          pointer-events-auto w-full mx-auto flex flex-col
+          max-w-3xl
+          max-h-[88dvh] sm:max-h-[82dvh]
+          overflow-hidden
+        "
+      >
+        {/* ── Enunciado ── */}
+        <div
+          className={`
+            px-4 sm:px-6 py-3 sm:py-4 bg-blue-50 border-b-2 border-blue-200
+            overflow-y-auto flex-shrink-0
+            ${questionSize === 'long' ? 'max-h-[32%]' : questionSize === 'medium' ? 'max-h-[28%]' : ''}
+          `}
+        >
+          <p className={`text-gray-800 leading-relaxed whitespace-pre-wrap ${questionFontClass}`}>
             {baseText}
           </p>
         </div>
 
-        {/* Instructions */}
-        <div className="px-4 md:px-6 py-2 bg-gray-100 border-b border-gray-200">
-          <p className="text-gray-600 text-sm font-medium">
-            Assinale V (verdadeiro) ou F (falso) para as alternativas de acordo com o texto:
+        {/* ── Label + progresso de respostas ── */}
+        <div className="px-4 sm:px-6 py-1.5 bg-gray-100 border-b border-gray-200 flex-shrink-0 flex items-center justify-between">
+          <p className="text-gray-500 text-xs font-medium tracking-wide uppercase">
+            Verdadeiro ou Falso
           </p>
+          {!reviewMode && (
+            <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${
+              allAnswered ? 'bg-green-100 text-green-700' : 'bg-gray-200 text-gray-500'
+            }`}>
+              {answeredCount}/{statements.length}
+            </span>
+          )}
         </div>
 
-        {/* Statements */}
-        <div className="p-4 md:p-6 space-y-4">
+        {/* ── Afirmações — scroll quando necessário ── */}
+        <div className="px-4 sm:px-6 py-3 sm:py-4 overflow-y-auto flex-1 flex flex-col gap-2 sm:gap-3">
           {statements.map((statement, index) => {
-            const letter = String.fromCharCode(65 + index); // A, B, C, D
+            const letter        = String.fromCharCode(65 + index);
             const currentAnswer = answers[statement.id];
-            const reviewResult = reviewMode ? reviewResults.find(r => r.statementId === statement.id) : null;
-            
-            // Determine background color based on mode
+            const reviewResult  = reviewMode
+              ? reviewResults.find(r => r.statementId === statement.id)
+              : null;
+
             let bgClass = 'bg-gray-50 border border-gray-200';
             if (reviewMode && reviewResult) {
               bgClass = reviewResult.isCorrect
@@ -95,41 +134,39 @@ const TrueFalseCard = ({
                 : 'bg-red-100 border-2 border-red-400';
             } else if (currentAnswer !== undefined) {
               bgClass = currentAnswer
-                ? 'bg-green-50 border border-green-200'
-                : 'bg-red-50 border border-red-200';
+                ? 'bg-green-50 border border-green-300'
+                : 'bg-red-50 border border-red-300';
             }
 
             return (
-              <div 
-                key={statement.id} 
-                className={`flex gap-3 p-3 rounded-lg transition-all ${bgClass}`}
+              <div
+                key={statement.id}
+                className={`flex items-center gap-2 sm:gap-3 p-2.5 sm:p-3 rounded-xl transition-all ${bgClass}`}
               >
-                {/* Letter */}
-                <span className="flex-shrink-0 w-8 h-8 flex items-center justify-center bg-blue-500 text-white font-bold rounded-full text-sm">
+                {/* Letra */}
+                <span className="flex-shrink-0 w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center bg-blue-500 text-white font-bold rounded-full text-xs sm:text-sm">
                   {letter}
                 </span>
 
-                {/* Statement Text */}
-                <p className="flex-1 text-gray-800 text-sm md:text-base leading-relaxed">
+                {/* Texto da afirmação */}
+                <p className={`flex-1 text-gray-800 leading-snug ${statementFontClass}`}>
                   {statement.text}
                 </p>
 
-                {/* Review Mode: show result icons */}
+                {/* Modo review: ícone de resultado */}
                 {reviewMode && reviewResult ? (
-                  <div className="flex items-center gap-2 flex-shrink-0">
-                    {/* What user answered */}
-                    <span className={`text-xs font-bold px-2 py-1 rounded ${
+                  <div className="flex items-center gap-1 flex-shrink-0">
+                    <span className={`text-xs font-bold px-1.5 py-0.5 rounded ${
                       reviewResult.userAnswer ? 'bg-green-200 text-green-800' : 'bg-red-200 text-red-800'
                     }`}>
                       {reviewResult.userAnswer ? 'V' : 'F'}
                     </span>
-                    {/* Correct/Wrong icon */}
                     {reviewResult.isCorrect ? (
-                      <CheckCircle className="w-6 h-6 text-green-600" />
+                      <CheckCircle className="w-5 h-5 text-green-600" />
                     ) : (
                       <div className="flex items-center gap-1">
-                        <XCircle className="w-6 h-6 text-red-600" />
-                        <span className={`text-xs font-bold px-2 py-1 rounded ${
+                        <XCircle className="w-5 h-5 text-red-600" />
+                        <span className={`text-xs font-bold px-1.5 py-0.5 rounded ${
                           statement.isTrue ? 'bg-green-200 text-green-800' : 'bg-red-200 text-red-800'
                         }`}>
                           {statement.isTrue ? 'V' : 'F'}
@@ -138,31 +175,37 @@ const TrueFalseCard = ({
                     )}
                   </div>
                 ) : (
-                  /* Normal Mode: V/F Buttons */
-                  <div className="flex gap-2 flex-shrink-0">
+                  /* Modo normal: botões V / F */
+                  <div className="flex gap-1.5 sm:gap-2 flex-shrink-0">
                     <button
                       type="button"
                       onClick={() => handleAnswerChange(statement.id, true)}
                       disabled={disabled}
-                      className={`w-10 h-10 rounded-lg flex items-center justify-center font-bold text-lg transition-all ${
-                        currentAnswer === true
-                          ? 'bg-green-500 text-white shadow-lg scale-110 ring-2 ring-green-300'
-                          : 'bg-gray-200 text-gray-600 hover:bg-green-100 hover:text-green-700'
-                      } ${disabled ? 'cursor-not-allowed opacity-50' : ''}`}
+                      className={`
+                        w-9 h-9 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center
+                        font-bold text-sm sm:text-base transition-all
+                        ${currentAnswer === true
+                          ? 'bg-green-500 text-white shadow-md scale-110 ring-2 ring-green-300'
+                          : 'bg-gray-200 text-gray-600 hover:bg-green-100 hover:text-green-700'}
+                        ${disabled ? 'cursor-not-allowed opacity-50' : 'active:scale-95'}
+                      `}
                     >
-                      V
+                      <Check className="w-4 h-4" />
                     </button>
                     <button
                       type="button"
                       onClick={() => handleAnswerChange(statement.id, false)}
                       disabled={disabled}
-                      className={`w-10 h-10 rounded-lg flex items-center justify-center font-bold text-lg transition-all ${
-                        currentAnswer === false
-                          ? 'bg-red-500 text-white shadow-lg scale-110 ring-2 ring-red-300'
-                          : 'bg-gray-200 text-gray-600 hover:bg-red-100 hover:text-red-700'
-                      } ${disabled ? 'cursor-not-allowed opacity-50' : ''}`}
+                      className={`
+                        w-9 h-9 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center
+                        font-bold text-sm sm:text-base transition-all
+                        ${currentAnswer === false
+                          ? 'bg-red-500 text-white shadow-md scale-110 ring-2 ring-red-300'
+                          : 'bg-gray-200 text-gray-600 hover:bg-red-100 hover:text-red-700'}
+                        ${disabled ? 'cursor-not-allowed opacity-50' : 'active:scale-95'}
+                      `}
                     >
-                      F
+                      <X className="w-4 h-4" />
                     </button>
                   </div>
                 )}
@@ -171,12 +214,14 @@ const TrueFalseCard = ({
           })}
         </div>
 
-        {/* Confirm / Continue Button */}
-        <div className="p-4 md:p-6 bg-gray-50 border-t border-gray-200">
+        {/* ── Botão ── */}
+        <div className="px-4 sm:px-6 py-3 bg-gray-50 border-t border-gray-200 flex-shrink-0">
           {reviewMode ? (
             <button
               onClick={onContinue}
-              className="w-full py-4 rounded-xl text-xl font-bold transition-all duration-300 shadow-xl bg-blue-500 hover:bg-blue-600 text-white hover:scale-[1.02]"
+              className="w-full py-2.5 sm:py-3 rounded-xl text-base sm:text-lg font-bold
+                         transition-all duration-200 bg-blue-500 hover:bg-blue-600
+                         text-white active:scale-[0.98] shadow-lg"
             >
               Continuar ➜
             </button>
@@ -184,13 +229,17 @@ const TrueFalseCard = ({
             <button
               onClick={handleConfirm}
               disabled={!allAnswered || disabled}
-              className={`w-full py-4 rounded-xl text-xl font-bold transition-all duration-300 shadow-xl ${
-                allAnswered && !disabled
-                  ? 'bg-green-500 hover:bg-green-600 text-white scale-100 hover:scale-[1.02]'
-                  : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-              }`}
+              className={`
+                w-full py-2.5 sm:py-3 rounded-xl text-base sm:text-lg font-bold
+                transition-all duration-200 shadow-lg
+                ${allAnswered && !disabled
+                  ? 'bg-green-500 hover:bg-green-600 text-white active:scale-[0.98]'
+                  : 'bg-gray-300 text-gray-500 cursor-not-allowed'}
+              `}
             >
-              {allAnswered ? 'Confirmar Respostas' : `Responda todas as ${statements.length} afirmações`}
+              {allAnswered
+                ? 'Confirmar Respostas'
+                : `Responda todas (${answeredCount}/${statements.length})`}
             </button>
           )}
         </div>

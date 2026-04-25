@@ -14,7 +14,7 @@ import EnvironmentSelectionScreen from '@/features/game/components/Environment/E
 import EndingScreen from '@/features/game/components/Ending/EndingScreen';
 import ForgotPasswordScreen from '@/features/auth/components/ForgotPasswordScreen';
 import NewPasswordScreen from '@/features/auth/components/NewPasswordScreen';
-import EmailConfirmScreen from '@/features/auth/components/EmailConfirmScreen';
+
 
 type GameScreen =
   | 'login'
@@ -22,7 +22,7 @@ type GameScreen =
   | 'register'
   | 'forgotPassword'
   | 'newPassword'
-  | 'emailConfirm'
+
   | 'ranking'
   | 'profile'
   | 'cutscene'
@@ -33,7 +33,7 @@ type GameScreen =
   | 'questionAdmin';
 
 const GameManager = () => {
-  const { user, setUser, isAdmin, signIn, signUp, signOut, checkAdminRole, forgotPassword, resetPassword, confirmEmail } = useAuth();
+  const { user, setUser, isAdmin, signIn, signUp, signOut, checkAdminRole, forgotPassword, resetPassword } = useAuth();
   const [currentScreen, setCurrentScreen] = useState<GameScreen>('login');
   const [previousScreen, setPreviousScreen] = useState<GameScreen>('menu');
   const [currentEnvironment, setCurrentEnvironment] = useState<1 | 2 | 3>(1);
@@ -43,15 +43,12 @@ const GameManager = () => {
   const [totalScore, setTotalScore] = useState<number>(0);
   const [urlToken, setUrlToken] = useState<string>('');
 
-  // Detecta tokens na URL para confirmar email ou redefinir senha
+  // Detecta token na URL para redefinir senha
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const token = params.get('token');
     const path = window.location.pathname;
-    if (token && path.includes('confirmar-email')) {
-      setUrlToken(token);
-      setCurrentScreen('emailConfirm');
-    } else if (token && path.includes('nova-senha')) {
+    if (token && path.includes('nova-senha')) {
       setUrlToken(token);
       setCurrentScreen('newPassword');
     }
@@ -60,8 +57,11 @@ const GameManager = () => {
   // Load profile from user data when logged in
   useEffect(() => {
     if (!user) return;
-    setPlayerName(user.nome);
-    setTotalScore(user.pontuacao);
+    // Guarda contra nome vazio (sessão antiga antes do fix do login)
+    if (user.nome) setPlayerName(user.nome);
+    setTotalScore(user.pontuacao ?? 0);
+    // Usa foto como ID de avatar, com fallback para 'clara'
+    if (user.foto) setPlayerAvatar(user.foto);
   }, [user]);
 
   const handleUpdateProfile = (name: string, avatarId: string) => {
@@ -146,14 +146,6 @@ const GameManager = () => {
           />
         );
 
-      case 'emailConfirm':
-        return (
-          <EmailConfirmScreen
-            token={urlToken}
-            onGoToLogin={() => setCurrentScreen('login')}
-            confirmEmail={confirmEmail}
-          />
-        );
       
       case 'menu':
         return (

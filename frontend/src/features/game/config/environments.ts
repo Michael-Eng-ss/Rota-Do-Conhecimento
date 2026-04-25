@@ -21,10 +21,10 @@ export const environmentConfigs: Record<EnvironmentId, EnvironmentConfig> = {
     name: 'Auditório',
     subjects: ['Literatura', 'Matemática', 'Língua Inglesa', 'Geografia', 'História'],
     questionCounts: { 'Literatura': 4, 'Matemática': 4, 'Língua Inglesa': 4, 'Geografia': 4, 'História': 4 },
-    maxHealth: 40,
-    minHealthToPass: 32,  // 80% de 40
-    pointsPerQuestion: 2,
-    totalQuestions: 20,
+    maxHealth: 100,
+    minHealthToPass: 80,  // 80% de 100 = 8 em 10 perguntas
+    pointsPerQuestion: 10,
+    totalQuestions: 10,
     isFinalBoss: false,
     requiresAllCompleted: false,
   },
@@ -33,10 +33,10 @@ export const environmentConfigs: Record<EnvironmentId, EnvironmentConfig> = {
     name: 'Biblioteca',
     subjects: ['Biologia', 'Química', 'Física', 'Língua Portuguesa'],
     questionCounts: { 'Biologia': 5, 'Química': 5, 'Física': 5, 'Língua Portuguesa': 5 },
-    maxHealth: 40,
-    minHealthToPass: 32,  // 80% de 40
-    pointsPerQuestion: 2,
-    totalQuestions: 20,
+    maxHealth: 100,
+    minHealthToPass: 80,  // 80% de 100 = 8 em 10 perguntas
+    pointsPerQuestion: 10,
+    totalQuestions: 10,
     isFinalBoss: false,
     requiresAllCompleted: false,
   },
@@ -51,20 +51,20 @@ export const environmentConfigs: Record<EnvironmentId, EnvironmentConfig> = {
       'Literatura': 4, 'Matemática': 4, 'Língua Inglesa': 4, 'Geografia': 4, 'História': 4,
       'Biologia': 5, 'Química': 5, 'Física': 5, 'Língua Portuguesa': 5
     },
-    maxHealth: 80,
-    minHealthToPass: 64,  // 80% de 80
-    pointsPerQuestion: 2,
-    totalQuestions: 40,
+    maxHealth: 100,
+    minHealthToPass: 80,  // 80% de 100 = 16 em 20 perguntas
+    pointsPerQuestion: 5,
+    totalQuestions: 20,
     isFinalBoss: true,
     requiresAllCompleted: true,
   },
 };
 
 // Total de pontos possíveis
-export const TOTAL_MAX_SCORE = 80;
-export const TOTAL_MIN_SCORE = 64;
+export const TOTAL_MAX_SCORE = 300; // 100 por ambiente
+export const TOTAL_MIN_SCORE = 240; // 80 por ambiente
 
-// Percentual mínimo para passar de qualquer chefão
+// Percentual mínimo de acertos para vencer
 export const MIN_PASS_PERCENTAGE = 0.80;
 
 // Número total de ambientes

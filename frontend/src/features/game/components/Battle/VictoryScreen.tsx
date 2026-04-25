@@ -11,14 +11,19 @@ interface VictoryScreenProps {
 const VictoryScreen = ({ 
   score, 
   totalQuestions, 
-  damageDealt,
-  maxBossHealth,
   onBackToPatio, 
   bossName,
   isFinalBoss = false
 }: VictoryScreenProps) => {
-  const damagePercentage = Math.round((damageDealt / maxBossHealth) * 100);
-  
+  const hitPercentage  = totalQuestions > 0 ? Math.round((score / totalQuestions) * 100) : 0;
+  const wrongAnswers   = totalQuestions - score;
+
+  // Cor do badge de porcentagem
+  const pctColor =
+    hitPercentage === 100 ? 'text-purple-600 bg-purple-50' :
+    hitPercentage >= 90   ? 'text-green-600  bg-green-50'  :
+                            'text-yellow-600 bg-yellow-50';
+
   return (
     <div className="absolute inset-0 flex flex-col items-center justify-center z-40 bg-black/40">
       {/* Victory Banner */}
@@ -47,29 +52,38 @@ const VictoryScreen = ({
       </div>
 
       {/* Score Card */}
-      <div className="bg-white/95 backdrop-blur-sm rounded-2xl p-6 shadow-xl mb-8 text-center min-w-[280px]">
-        <p className="text-gray-600 text-lg mb-2">Você derrotou</p>
-        <p className={`text-2xl font-bold mb-4 ${isFinalBoss ? 'text-purple-600' : 'text-purple-600'}`}>
-          {bossName}
-        </p>
-        
-        {/* Porcentagem de dano */}
-        <div className="mb-4 p-3 bg-green-50 rounded-lg">
-          <p className="text-sm text-gray-500 mb-1">Dano causado</p>
-          <div className="text-4xl font-black text-green-600">
-            {damagePercentage}%
+      <div className="bg-white/95 backdrop-blur-sm rounded-2xl p-6 shadow-xl mb-8 text-center min-w-[300px]">
+        <p className="text-gray-600 text-lg mb-1">Você derrotou</p>
+        <p className="text-2xl font-bold mb-5 text-purple-600">{bossName}</p>
+
+        {/* Porcentagem de acertos — destaque principal */}
+        <div className={`mb-4 p-4 rounded-xl ${pctColor}`}>
+          <p className="text-xs font-semibold uppercase tracking-widest mb-1 opacity-70">
+            Aproveitamento
+          </p>
+          <div className="text-5xl font-black leading-none">
+            {hitPercentage}%
           </div>
-          <p className="text-xs text-gray-400 mt-1">
-            {damageDealt} / {maxBossHealth} pontos
+          <p className="text-sm mt-2 font-medium">
+            {score} acerto{score !== 1 ? 's' : ''} de {totalQuestions} pergunta{totalQuestions !== 1 ? 's' : ''}
           </p>
         </div>
 
-        {/* Acertos */}
-        <div className="flex items-center justify-center gap-2 text-xl font-bold text-blue-600">
-          <span>Acertos:</span>
-          <span>{score}/{totalQuestions}</span>
+        {/* Mini breakdown: acertos / erros */}
+        <div className="flex gap-3 justify-center text-sm font-semibold">
+          <span className="flex items-center gap-1.5 bg-green-100 text-green-700 px-3 py-1.5 rounded-full">
+            ✅ {score} certo{score !== 1 ? 's' : ''}
+          </span>
+          <span className="flex items-center gap-1.5 bg-red-100 text-red-700 px-3 py-1.5 rounded-full">
+            ❌ {wrongAnswers} erro{wrongAnswers !== 1 ? 's' : ''}
+          </span>
         </div>
-        
+
+        {/* Mínimo atingido */}
+        <p className="mt-3 text-xs text-gray-400">
+          Mínimo necessário: 80% ({Math.ceil(totalQuestions * 0.8)}/{totalQuestions})
+        </p>
+
         {/* Mensagem especial para Boss Final */}
         {isFinalBoss && (
           <p className="mt-4 text-sm text-purple-600 font-medium">

@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { getToken, clearAuth, getSavedUser, setToken, setSavedUser, type AppUser } from '@/lib/api-client';
-import { login as apiLogin, forgotPassword as apiForgotPassword, resetPassword as apiResetPassword, confirmEmail as apiConfirmEmail } from '@/models/services/auth.service';
-import { createUsuario as apiRegisterUser } from '@/models/services/usuario.service';
+import { login as apiLogin, forgotPassword as apiForgotPassword, resetPassword as apiResetPassword } from '@/models/services/auth.service';
+import { createUsuario as apiRegisterUser, getUsuarioById } from '@/models/services/usuario.service';
 
 export const useAuth = () => {
   const [user, setUser] = useState<AppUser | null>(null);
@@ -13,8 +13,24 @@ export const useAuth = () => {
     const token = getToken();
     const saved = getSavedUser();
     if (token && saved) {
-      setUser(saved);
-      setIsAdmin(saved.role === 1);
+      // Se o nome estiver vazio (sessão antiga incompleta), re-busca o usuário no backend
+      if (!saved.nome) {
+        getUsuarioById(saved.id)
+          .then(fresh => {
+            const updated = fresh as AppUser;
+            setSavedUser(updated);
+            setUser(updated);
+            setIsAdmin(updated.role === 1);
+          })
+          .catch(() => {
+            // Se falhar, usa o que tem (evita logout forçado)
+            setUser(saved);
+            setIsAdmin(saved.role === 1);
+          });
+      } else {
+        setUser(saved);
+        setIsAdmin(saved.role === 1);
+      }
     }
     setLoading(false);
   }, []);
@@ -23,27 +39,10 @@ export const useAuth = () => {
     try {
       const result = await apiLogin({ email, senha: password });
       
-      // Armazena no localStorage
       setToken(result.token);
-      
-      const appUser: AppUser = {
-        id: result.id,
-        nome: '', // Será preenchido num fetch real depois
-        email,
-        role: result.role,
-        pontuacao: 0,
-        foto: '',
-        cursoid: 1,
-        campusid: null,
-        cidade: '',
-        uf: '',
-        telefone: '',
-        sexo: 0,
-        turma: null,
-        periodo: null,
-        datanascimento: '',
-        status: true,
-      };
+
+      // Usa o objeto completo retornado pelo backend (sem senha)
+      const appUser: AppUser = result.user as AppUser;
       
       setSavedUser(appUser);
       setUser(appUser);
@@ -98,14 +97,6 @@ export const useAuth = () => {
     }
   }, []);
 
-  const confirmEmail = useCallback(async (token: string) => {
-    try {
-      await apiConfirmEmail(token);
-      return { error: null };
-    } catch (err: any) {
-      return { error: { message: err.message } };
-    }
-  }, []);
 
-  return { user, setUser, loading, isAdmin, signIn, signUp, signOut, checkAdminRole, forgotPassword, resetPassword, confirmEmail };
+  return { user, setUser, loading, isAdmin, signIn, signUp, signOut, checkAdminRole, forgotPassword, resetPassword };
 };

@@ -121,8 +121,9 @@ const BattleScreen = ({ environmentId, onBackToPatio, onProfile, onVictory }: Ba
   }, [environmentId, fetchBattleQuestions]);
 
   const currentQuestion = questions[currentQuestionIndex];
-  const damagePerWrongAnswer = questions.length > 0 ? Math.ceil(100 / questions.length) : 50;
-  const damagePerCorrectAnswer = questions.length > 0 ? Math.ceil(envConfig.maxHealth / questions.length) : 50;
+  // 10 pontos por acerto (100 / 10 perguntas). Dano ao jogador igual por erro.
+  const pointsPerHit = questions.length > 0 ? Math.floor(100 / questions.length) : 10;
+  const isLastQuestion = currentQuestionIndex === questions.length - 1;
   
   const bossNameByEnv: Record<EnvironmentId, string> = {
     1: 'Professor do Auditório',
@@ -267,13 +268,13 @@ const BattleScreen = ({ environmentId, onBackToPatio, onProfile, onVictory }: Ba
     if (!settings.isMuted) {
       playSound(isCorrect ? 'correct' : 'wrong');
     }
-    
-    const damageDealt = isCorrect ? damagePerCorrectAnswer : 0;
-    const playerDamage = isCorrect ? 0 : damagePerWrongAnswer;
-    
-    const newBossHealth = Math.max(0, bossHealth - damageDealt);
+
+    const damageDealt  = isCorrect ? pointsPerHit : 0;  // acerto tira vida do chefão
+    const playerDamage = isCorrect ? 0 : pointsPerHit;  // erro tira vida do jogador
+
+    const newBossHealth   = Math.max(0, bossHealth   - damageDealt);
     const newPlayerHealth = Math.max(0, playerHealth - playerDamage);
-    
+
     setReviewSelectedId(selectedAlternativeId);
     setPendingResult({ isCorrect, newPlayerHealth, newBossHealth, damageDealt });
     setFeedback(isCorrect ? 'correct' : 'wrong');
@@ -282,8 +283,6 @@ const BattleScreen = ({ environmentId, onBackToPatio, onProfile, onVictory }: Ba
 
   const handleFeedbackEnd = useCallback(() => {
     if (!pendingResult) return;
-    
-    const { newPlayerHealth, newBossHealth, damageDealt } = pendingResult;
     
     // Trigger shake on the character that took damage
     if (pendingResult.isCorrect) {
@@ -294,11 +293,7 @@ const BattleScreen = ({ environmentId, onBackToPatio, onProfile, onVictory }: Ba
       setTimeout(() => setShakeClara(false), 500);
     }
 
-    setScore(prev => prev + (pendingResult.isCorrect ? 1 : 0));
-    setBossHealth(newBossHealth);
-    setPlayerHealth(newPlayerHealth);
-    setTotalDamageDealt(prev => prev + damageDealt);
-
+    // ✅ NÃO atualiza score/health aqui — tudo é feito em handleReviewContinue
     setFeedback(null);
     setLastFeedback(pendingResult.isCorrect ? 'correct' : 'wrong');
     setPhase('review');
@@ -306,21 +301,35 @@ const BattleScreen = ({ environmentId, onBackToPatio, onProfile, onVictory }: Ba
 
   const handleReviewContinue = useCallback(() => {
     if (!pendingResult) return;
-    
-    const { newPlayerHealth, newBossHealth, damageDealt } = pendingResult;
+
+    const { isCorrect, newPlayerHealth, newBossHealth, damageDealt } = pendingResult;
+    // ✅ score e totalDamageDealt ainda estão no valor ANTERIOR (não foram alterados em handleFeedbackEnd)
+    const newScore       = score + (isCorrect ? 1 : 0);
+    const newTotalDamage = totalDamageDealt + damageDealt;
 
     setPendingResult(null);
     setReviewSelectedId(undefined);
 
+    // Verifica derrota por vida zerada
     if (newPlayerHealth <= 0) {
+      setBossHealth(newBossHealth);
+      setPlayerHealth(0);
+      setScore(newScore);
+      setTotalDamageDealt(newTotalDamage);
       setPhase('defeat');
       return;
     }
 
-    if (newBossHealth <= 0) {
-      const finalDamage = totalDamageDealt + damageDealt;
-      const damagePercentage = finalDamage / envConfig.maxHealth;
-      if (damagePercentage >= MIN_PASS_PERCENTAGE) {
+    // Última pergunta respondida → decide o resultado
+    if (isLastQuestion) {
+      setBossHealth(newBossHealth);
+      setPlayerHealth(newPlayerHealth);
+      setScore(newScore);
+      setTotalDamageDealt(newTotalDamage);
+
+      // Vitória se acertou ≥ 80% das perguntas
+      const hitRate = newScore / questions.length;
+      if (hitRate >= MIN_PASS_PERCENTAGE) {
         setPhase('victory');
       } else {
         setPhase('defeat');
@@ -328,10 +337,14 @@ const BattleScreen = ({ environmentId, onBackToPatio, onProfile, onVictory }: Ba
       return;
     }
 
-    const nextIndex = (currentQuestionIndex + 1) % questions.length;
-    setCurrentQuestionIndex(nextIndex);
+    // Próxima pergunta
+    setBossHealth(newBossHealth);
+    setPlayerHealth(newPlayerHealth);
+    setScore(newScore);
+    setTotalDamageDealt(newTotalDamage);
+    setCurrentQuestionIndex(prev => prev + 1);
     setPhase('question');
-  }, [pendingResult, currentQuestionIndex, questions.length, totalDamageDealt, envConfig.maxHealth]);
+  }, [pendingResult, score, totalDamageDealt, isLastQuestion, questions.length]);
 
   useEffect(() => {
     if (settings.isMuted) return;
@@ -469,6 +482,8 @@ const BattleScreen = ({ environmentId, onBackToPatio, onProfile, onVictory }: Ba
         <DefeatScreen
           onBackToPatio={onBackToPatio}
           onRestart={handleRestart}
+          score={score}
+          totalQuestions={questions.length}
         />
       )}
     </div>

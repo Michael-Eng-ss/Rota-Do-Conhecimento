@@ -8,22 +8,6 @@ router.post('/', validateBody({ email: 'string', senha: 'string' }), asyncHandle
   res.json(result);
 }));
 
-// Reenviar e-mail de confirmação de cadastro
-router.post('/confirmar-email/enviar', validateBody({ email: 'string' }), asyncHandler(async (req, res) => {
-  const result = await authController.sendEmailConfirmation(req.body.email);
-  res.json(result);
-}));
-
-// Confirmar e-mail via token (acessado pelo link do e-mail)
-router.get('/confirmar-email', asyncHandler(async (req, res) => {
-  const { token } = req.query;
-  if (!token) {
-    return res.status(400).json({ message: 'Token não informado' });
-  }
-  const result = await authController.confirmEmail(token);
-  res.json(result);
-}));
-
 // Solicitar recuperação de senha (esqueci minha senha)
 router.post('/esqueci-senha', validateBody({ email: 'string' }), asyncHandler(async (req, res) => {
   const result = await authController.forgotPassword(req.body.email);

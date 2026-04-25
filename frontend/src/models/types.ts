@@ -214,4 +214,5 @@ export interface LoginResponse {
   token: string;
   id: number;
   role: number;
+  user: UsuarioPublico;
 }
