@@ -228,7 +228,7 @@
   }
 
   .vn-speaker-inactive {
-    filter: brightness(0.6) saturate(0.7);
+    filter: brightness(0.78) saturate(0.85);
     transition: filter 0.35s ease-out;
   }
 }

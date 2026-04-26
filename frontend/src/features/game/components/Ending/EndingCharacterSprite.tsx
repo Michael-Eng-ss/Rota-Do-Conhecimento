@@ -14,8 +14,7 @@ interface EndingCharacterSpriteProps {
 
 /**
  * Sprite de personagem específico do Ending.
- * Suporta animações de entrada, saída e destaque do speaker
- * para dar uma sensação mais fluida de visual novel.
+ * Suporta animações de entrada, saída e destaque do speaker.
  */
 const EndingCharacterSprite = ({
   character,
@@ -25,9 +24,9 @@ const EndingCharacterSprite = ({
   hasActiveSpeaker = false,
 }: EndingCharacterSpriteProps) => {
   const positionClasses = {
-    left: 'left-0 md:left-8',
+    left: 'left-0 md:left-4',
     center: 'left-1/2 -translate-x-1/2',
-    right: 'right-0 md:right-8',
+    right: 'right-0 md:right-4',
   };
 
   const enterClass = {
@@ -59,7 +58,7 @@ const EndingCharacterSprite = ({
       <img
         src={character.image}
         alt={character.name}
-        className={`h-[60vh] md:h-[70vh] object-contain drop-shadow-2xl animate-float ${speakerClass}`}
+        className={`max-h-[75vh] max-w-[38vw] w-auto object-contain drop-shadow-2xl animate-float ${speakerClass}`}
         style={{ animationDelay: character.position === 'right' ? '0.5s' : '0s' }}
       />
     </div>
