@@ -18,7 +18,7 @@ import NewPasswordScreen from '@/features/auth/components/NewPasswordScreen';
 import NotFound from '@/pages/NotFound';
 
 const GameManager = () => {
-  const { user, setUser, isAdmin, signIn, signUp, signOut, checkAdminRole, forgotPassword, resetPassword } = useAuth();
+  const { user, loading, setUser, isAdmin, signIn, signUp, signOut, checkAdminRole, forgotPassword, resetPassword } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -81,123 +81,167 @@ const GameManager = () => {
     navigate('/login');
   };
 
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-black/90">
+        <div className="animate-spin w-12 h-12 border-4 border-primary border-t-transparent rounded-full" />
+      </div>
+    );
+  }
+
+  const ProtectedRoute = ({ children }: { children: JSX.Element }) => {
+    if (!user) return <Navigate to="/login" replace />;
+    return children;
+  };
+
+  const PublicOnlyRoute = ({ children }: { children: JSX.Element }) => {
+    if (user) return <Navigate to="/menu" replace />;
+    return children;
+  };
+
   return (
     <div className="w-full min-h-screen">
       <Routes>
-        <Route path="/" element={<Navigate to="/login" replace />} />
+        <Route path="/" element={<Navigate to={user ? "/menu" : "/login"} replace />} />
         
         <Route path="/login" element={
-          <LoginScreen
-            onLogin={() => navigate('/menu')}
-            onRegister={() => navigate('/register')}
-            onForgotPassword={() => navigate('/forgotPassword')}
-            onAdminLogin={() => navigate('/adminLogin')}
-            signIn={signIn}
-          />
+          <PublicOnlyRoute>
+            <LoginScreen
+              onLogin={() => navigate('/menu')}
+              onRegister={() => navigate('/register')}
+              onForgotPassword={() => navigate('/forgotPassword')}
+              onAdminLogin={() => navigate('/adminLogin')}
+              signIn={signIn}
+            />
+          </PublicOnlyRoute>
         } />
 
         <Route path="/forgotPassword" element={
-          <ForgotPasswordScreen
-            onBack={() => navigate(-1)}
-            forgotPassword={forgotPassword}
-          />
+          <PublicOnlyRoute>
+            <ForgotPasswordScreen
+              onBack={() => navigate(-1)}
+              forgotPassword={forgotPassword}
+            />
+          </PublicOnlyRoute>
         } />
 
         <Route path="/nova-senha" element={
-          <NewPasswordScreen
-            token={urlToken}
-            onSuccess={() => navigate('/login')}
-            resetPassword={resetPassword}
-          />
+          <PublicOnlyRoute>
+            <NewPasswordScreen
+              token={urlToken}
+              onSuccess={() => navigate('/login')}
+              resetPassword={resetPassword}
+            />
+          </PublicOnlyRoute>
         } />
       
         <Route path="/menu" element={
-          <UserMenuScreen
-            onStart={() => navigate('/cutscene')}
-            onRanking={() => navigate('/ranking')}
-            onProfile={() => navigate('/profile')}
-            onBack={handleLogout}
-          />
+          <ProtectedRoute>
+            <UserMenuScreen
+              onStart={() => navigate('/cutscene')}
+              onRanking={() => navigate('/ranking')}
+              onProfile={() => navigate('/profile')}
+              onBack={handleLogout}
+            />
+          </ProtectedRoute>
         } />
       
         <Route path="/ranking" element={
-          <RankingScreen
-            onBack={() => navigate(-1)}
-            cursoId={user?.cursoid || 1}
-          />
+          <ProtectedRoute>
+            <RankingScreen
+              onBack={() => navigate(-1)}
+              cursoId={user?.cursoid || 1}
+            />
+          </ProtectedRoute>
         } />
       
         <Route path="/profile" element={
-          <ProfileScreen
-            onBack={() => navigate(-1)}
-            playerName={playerName}
-            playerAvatar={playerAvatar}
-            totalScore={totalScore}
-            completedEnvironments={completedEnvironments}
-            onUpdateProfile={handleUpdateProfile}
-            user={user}
-          />
+          <ProtectedRoute>
+            <ProfileScreen
+              onBack={() => navigate(-1)}
+              playerName={playerName}
+              playerAvatar={playerAvatar}
+              totalScore={totalScore}
+              completedEnvironments={completedEnvironments}
+              onUpdateProfile={handleUpdateProfile}
+              user={user}
+            />
+          </ProtectedRoute>
         } />
       
         <Route path="/register" element={
-          <RegisterScreen
-            onRegister={() => navigate('/login')}
-            onBackToLogin={() => navigate(-1)}
-            signUp={signUp}
-          />
+          <PublicOnlyRoute>
+            <RegisterScreen
+              onRegister={() => navigate('/login')}
+              onBackToLogin={() => navigate(-1)}
+              signUp={signUp}
+            />
+          </PublicOnlyRoute>
         } />
       
         <Route path="/cutscene" element={
-          <VisualNovelGame
-            onBack={() => navigate('/menu')}
-            onCutsceneEnd={() => navigate('/environmentSelection')}
-          />
+          <ProtectedRoute>
+            <VisualNovelGame
+              onBack={() => navigate('/menu')}
+              onCutsceneEnd={() => navigate('/environmentSelection')}
+            />
+          </ProtectedRoute>
         } />
       
         <Route path="/environmentSelection" element={
-          <EnvironmentSelectionScreen
-            onSelectEnvironment={(envId: 1 | 2 | 3) => {
-              setCurrentEnvironment(envId);
-              navigate('/environment');
-            }}
-            onBack={() => navigate('/menu')}
-            completedEnvironments={completedEnvironments}
-            isAdmin={isAdmin}
-          />
+          <ProtectedRoute>
+            <EnvironmentSelectionScreen
+              onSelectEnvironment={(envId: 1 | 2 | 3) => {
+                setCurrentEnvironment(envId);
+                navigate('/environment');
+              }}
+              onBack={() => navigate('/menu')}
+              completedEnvironments={completedEnvironments}
+              isAdmin={isAdmin}
+            />
+          </ProtectedRoute>
         } />
       
         <Route path="/environment" element={
-          <EnvironmentScreen
-            environmentId={currentEnvironment}
-            onBackToPatio={() => navigate('/environmentSelection')}
-            onProfile={() => navigate('/profile')}
-            onEnvironmentComplete={handleEnvironmentComplete}
-          />
+          <ProtectedRoute>
+            <EnvironmentScreen
+              environmentId={currentEnvironment}
+              onBackToPatio={() => navigate('/environmentSelection')}
+              onProfile={() => navigate('/profile')}
+              onEnvironmentComplete={handleEnvironmentComplete}
+            />
+          </ProtectedRoute>
         } />
 
         <Route path="/ending" element={
-          <EndingScreen
-            onBack={() => navigate('/menu')}
-            onEndingComplete={() => navigate('/menu')}
-          />
+          <ProtectedRoute>
+            <EndingScreen
+              onBack={() => navigate('/menu')}
+              onEndingComplete={() => navigate('/menu')}
+            />
+          </ProtectedRoute>
         } />
       
         <Route path="/adminLogin" element={
-          <AdminLoginScreen
-            onLogin={() => navigate('/questionAdmin')}
-            onBack={() => navigate('/login')}
-            signIn={signIn}
-            checkAdminRole={checkAdminRole}
-          />
+          <PublicOnlyRoute>
+            <AdminLoginScreen
+              onLogin={() => navigate('/questionAdmin')}
+              onBack={() => navigate('/login')}
+              signIn={signIn}
+              checkAdminRole={checkAdminRole}
+            />
+          </PublicOnlyRoute>
         } />
       
         <Route path="/questionAdmin" element={
-          <QuestionAdminScreen
-            onBack={() => {
-              handleLogout();
-              navigate('/login');
-            }}
-          />
+          <ProtectedRoute>
+            <QuestionAdminScreen
+              onBack={() => {
+                handleLogout();
+                navigate('/login');
+              }}
+            />
+          </ProtectedRoute>
         } />
       
         <Route path="*" element={<NotFound />} />
