@@ -9,12 +9,14 @@ interface MenuButtonProps {
 const MenuButton = ({ onClick, onExit }: MenuButtonProps) => {
   const [isOpen, setIsOpen] = useState(false);
 
-  const handleToggle = () => {
+  const handleToggle = (e: React.MouseEvent) => {
+    e.stopPropagation();
     setIsOpen(!isOpen);
     onClick?.();
   };
 
-  const handleExit = () => {
+  const handleExit = (e: React.MouseEvent) => {
+    e.stopPropagation();
     setIsOpen(false);
     onExit?.();
   };

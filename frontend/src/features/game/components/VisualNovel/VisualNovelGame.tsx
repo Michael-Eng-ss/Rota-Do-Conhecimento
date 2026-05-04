@@ -16,6 +16,7 @@ import patioEscolaImage from '@/assets/backgrounds/patio-escola.png';
 import claraImage from '@/assets/characters/clara.png';
 import maeImage from '@/assets/characters/mae-clara.png';
 import paiImage from '@/assets/characters/pai-clara.png';
+import paisImage from '@/assets/characters/pais-clara.png';
 import claraAnimadaImage from '@/assets/characters/clara-animada.png';
 import claraDuvidaImage from '@/assets/characters/clara-duvida.png';
 import claraEspantoImage from '@/assets/characters/clara-espanto.png';
@@ -79,8 +80,7 @@ const scenes: Scene[] = [
     id: 5,
     background: backgroundImage,
     characters: [
-      { id: 'pai', name: 'Pai da Clara', image: paiImage, position: 'left' },
-      { id: 'mae', name: 'Mãe da Clara', image: maeImage, position: 'left' },
+      { id: 'pais', name: 'Pais da Clara', image: paisImage, position: 'left' },
       { id: 'clara-animada', name: 'Clara', image: claraAnimadaImage, position: 'right' },
     ],
     speaker: 'Clara',
@@ -220,20 +220,14 @@ const VisualNovelGame = ({ onBack, onCutsceneEnd }: VisualNovelGameProps) => {
   // Special positioning for scene 5 (family scene)
   const renderCharacters = () => {
     if (currentScene.id === 5) {
-      // Custom rendering for family scene
+      // Custom rendering for family scene using the new parents together image
       return (
         <>
           <div className="absolute bottom-0 left-0 md:left-4 flex">
             <img
-              src={paiImage}
-              alt="Pai da Clara"
-              className="max-h-[75vh] max-w-[22vw] w-auto object-contain drop-shadow-2xl animate-float"
-            />
-            <img
-              src={maeImage}
-              alt="Mãe da Clara"
-              className="max-h-[75vh] max-w-[22vw] w-auto object-contain drop-shadow-2xl animate-float -ml-12"
-              style={{ animationDelay: '0.3s' }}
+              src={paisImage}
+              alt="Pais da Clara"
+              className="max-h-[75vh] max-w-[40vw] w-auto object-contain drop-shadow-2xl animate-float"
             />
           </div>
           <div className="absolute bottom-0 right-0 md:right-4 animate-character-enter-right">
@@ -281,7 +275,10 @@ const VisualNovelGame = ({ onBack, onCutsceneEnd }: VisualNovelGameProps) => {
       {/* Navigation Arrows */}
       <div className="absolute bottom-1/2 left-4 z-30">
         <button
-          onClick={isFirstScene ? handleGoToLast : handlePrevious}
+          onClick={(e) => {
+            e.stopPropagation();
+            isFirstScene ? handleGoToLast() : handlePrevious();
+          }}
           className="p-2 rounded-full bg-white/20 backdrop-blur-sm hover:bg-white/40 transition-all duration-200 hover:scale-110"
           title={isFirstScene ? "Ir para última cena" : "Cena anterior"}
         >
@@ -291,7 +288,10 @@ const VisualNovelGame = ({ onBack, onCutsceneEnd }: VisualNovelGameProps) => {
       
       <div className="absolute bottom-1/2 right-4 z-30">
         <button
-          onClick={isLastScene ? handleGoToFirst : handleAdvance}
+          onClick={(e) => {
+            e.stopPropagation();
+            isLastScene ? handleGoToFirst() : handleAdvance();
+          }}
           className="p-2 rounded-full bg-white/20 backdrop-blur-sm hover:bg-white/40 transition-all duration-200 hover:scale-110"
           title={isLastScene ? "Ir para primeira cena" : "Próxima cena"}
         >
