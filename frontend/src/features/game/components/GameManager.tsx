@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Routes, Route, useNavigate, Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/features/auth/hooks/useAuth';
 import { setSavedUser, updateUserScore as apiUpdateScore, type AppUser } from '@/lib/api-client';
 import LoginScreen from '@/features/auth/components/LoginScreen';
@@ -13,27 +14,13 @@ import EnvironmentScreen from '@/features/game/components/Environment/Environmen
 import EnvironmentSelectionScreen from '@/features/game/components/Environment/EnvironmentSelectionScreen';
 import ForgotPasswordScreen from '@/features/auth/components/ForgotPasswordScreen';
 import NewPasswordScreen from '@/features/auth/components/NewPasswordScreen';
-
-
-type GameScreen =
-  | 'login'
-  | 'menu'
-  | 'register'
-  | 'forgotPassword'
-  | 'newPassword'
-
-  | 'ranking'
-  | 'profile'
-  | 'cutscene'
-  | 'environmentSelection'
-  | 'environment'
-  | 'adminLogin'
-  | 'questionAdmin';
+import NotFound from '@/pages/NotFound';
 
 const GameManager = () => {
   const { user, setUser, isAdmin, signIn, signUp, signOut, checkAdminRole, forgotPassword, resetPassword } = useAuth();
-  const [currentScreen, setCurrentScreen] = useState<GameScreen>('login');
-  const [previousScreen, setPreviousScreen] = useState<GameScreen>('menu');
+  const navigate = useNavigate();
+  const location = useLocation();
+
   const [currentEnvironment, setCurrentEnvironment] = useState<1 | 2 | 3>(1);
   const [completedEnvironments, setCompletedEnvironments] = useState<number[]>([]);
   const [playerName, setPlayerName] = useState<string>('Jogador');
@@ -48,17 +35,14 @@ const GameManager = () => {
     const path = window.location.pathname;
     if (token && path.includes('nova-senha')) {
       setUrlToken(token);
-      setCurrentScreen('newPassword');
     }
-  }, []);
+  }, [location.pathname]);
 
   // Load profile from user data when logged in
   useEffect(() => {
     if (!user) return;
-    // Guarda contra nome vazio (sessão antiga antes do fix do login)
     if (user.nome) setPlayerName(user.nome);
     setTotalScore(user.pontuacao ?? 0);
-    // Usa foto como ID de avatar, com fallback para 'clara'
     if (user.foto) setPlayerAvatar(user.foto);
   }, [user]);
 
@@ -86,82 +70,60 @@ const GameManager = () => {
     }
   };
 
-  const handleStartGame = () => {
-    setCurrentScreen('cutscene');
-  };
-
-  const handleCutsceneEnd = () => {
-    setCurrentScreen('environmentSelection');
-  };
-
-  const handleSelectEnvironment = (envId: 1 | 2 | 3) => {
-    setCurrentEnvironment(envId);
-    setCurrentScreen('environment');
-  };
-
-  const handleProfile = (fromScreen: GameScreen) => {
-    setPreviousScreen(fromScreen);
-    setCurrentScreen('profile');
-  };
-
   const handleLogout = async () => {
     await signOut();
-    setCurrentScreen('login');
+    navigate('/login');
   };
 
-  const renderScreen = () => {
-    switch (currentScreen) {
-      case 'login':
-        return (
+  return (
+    <div className="w-full min-h-screen">
+      <Routes>
+        <Route path="/" element={<Navigate to="/login" replace />} />
+        
+        <Route path="/login" element={
           <LoginScreen
-            onLogin={() => setCurrentScreen('menu')}
-            onRegister={() => setCurrentScreen('register')}
-            onForgotPassword={() => setCurrentScreen('forgotPassword')}
-            onAdminLogin={() => setCurrentScreen('adminLogin')}
+            onLogin={() => navigate('/menu')}
+            onRegister={() => navigate('/register')}
+            onForgotPassword={() => navigate('/forgotPassword')}
+            onAdminLogin={() => navigate('/adminLogin')}
             signIn={signIn}
           />
-        );
+        } />
 
-      case 'forgotPassword':
-        return (
+        <Route path="/forgotPassword" element={
           <ForgotPasswordScreen
-            onBack={() => setCurrentScreen('login')}
+            onBack={() => navigate(-1)}
             forgotPassword={forgotPassword}
           />
-        );
+        } />
 
-      case 'newPassword':
-        return (
+        <Route path="/nova-senha" element={
           <NewPasswordScreen
             token={urlToken}
-            onSuccess={() => setCurrentScreen('login')}
+            onSuccess={() => navigate('/login')}
             resetPassword={resetPassword}
           />
-        );
-
+        } />
       
-      case 'menu':
-        return (
+        <Route path="/menu" element={
           <UserMenuScreen
-            onStart={handleStartGame}
-            onRanking={() => setCurrentScreen('ranking')}
-            onProfile={() => handleProfile('menu')}
+            onStart={() => navigate('/cutscene')}
+            onRanking={() => navigate('/ranking')}
+            onProfile={() => navigate('/profile')}
             onBack={handleLogout}
           />
-        );
+        } />
       
-      case 'ranking':
-        return (
+        <Route path="/ranking" element={
           <RankingScreen
-            onBack={() => setCurrentScreen('menu')}
+            onBack={() => navigate(-1)}
             cursoId={user?.cursoid || 1}
           />
-        );
+        } />
       
-      case 'profile':
-        return (
+        <Route path="/profile" element={
           <ProfileScreen
-            onBack={() => setCurrentScreen(previousScreen)}
+            onBack={() => navigate(-1)}
             playerName={playerName}
             playerAvatar={playerAvatar}
             totalScore={totalScore}
@@ -169,77 +131,67 @@ const GameManager = () => {
             onUpdateProfile={handleUpdateProfile}
             user={user}
           />
-        );
+        } />
       
-      case 'register':
-        return (
+        <Route path="/register" element={
           <RegisterScreen
-            onRegister={() => setCurrentScreen('login')}
-            onBackToLogin={() => setCurrentScreen('login')}
+            onRegister={() => navigate('/login')}
+            onBackToLogin={() => navigate(-1)}
             signUp={signUp}
           />
-        );
+        } />
       
-
-      
-      case 'cutscene':
-        return (
+        <Route path="/cutscene" element={
           <VisualNovelGame
-            onBack={() => setCurrentScreen('menu')}
-            onCutsceneEnd={handleCutsceneEnd}
+            onBack={() => navigate('/menu')}
+            onCutsceneEnd={() => navigate('/environmentSelection')}
           />
-        );
+        } />
       
-      case 'environmentSelection':
-        return (
+        <Route path="/environmentSelection" element={
           <EnvironmentSelectionScreen
-            onSelectEnvironment={handleSelectEnvironment}
-            onBack={() => setCurrentScreen('menu')}
+            onSelectEnvironment={(envId: 1 | 2 | 3) => {
+              setCurrentEnvironment(envId);
+              navigate('/environment');
+            }}
+            onBack={() => navigate('/menu')}
             completedEnvironments={completedEnvironments}
             isAdmin={isAdmin}
           />
-        );
+        } />
       
-      case 'environment':
-        return (
+        <Route path="/environment" element={
           <EnvironmentScreen
             environmentId={currentEnvironment}
-            onBackToPatio={() => setCurrentScreen('environmentSelection')}
-            onProfile={() => handleProfile('environment')}
+            onBackToPatio={() => navigate('/environmentSelection')}
+            onProfile={() => navigate('/profile')}
             onEnvironmentComplete={handleEnvironmentComplete}
           />
-        );
+        } />
       
-      case 'adminLogin':
-        return (
+        <Route path="/adminLogin" element={
           <AdminLoginScreen
-            onLogin={() => setCurrentScreen('questionAdmin')}
-            onBack={() => setCurrentScreen('login')}
+            onLogin={() => navigate('/questionAdmin')}
+            onBack={() => navigate('/login')}
             signIn={signIn}
             checkAdminRole={checkAdminRole}
           />
-        );
+        } />
       
-      case 'questionAdmin':
-        return (
+        <Route path="/questionAdmin" element={
           <QuestionAdminScreen
             onBack={() => {
               handleLogout();
-              setCurrentScreen('login');
+              navigate('/login');
             }}
           />
-        );
+        } />
       
-      default:
-        return null;
-    }
-  };
-
-  return (
-    <div className="w-full min-h-screen">
-      {renderScreen()}
+        <Route path="*" element={<NotFound />} />
+      </Routes>
     </div>
   );
 };
 
 export default GameManager;
+
