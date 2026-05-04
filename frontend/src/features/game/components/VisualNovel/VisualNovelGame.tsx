@@ -227,20 +227,20 @@ const VisualNovelGame = ({ onBack, onCutsceneEnd }: VisualNovelGameProps) => {
             <img
               src={paiImage}
               alt="Pai da Clara"
-              className="h-[55vh] md:h-[65vh] object-contain drop-shadow-2xl animate-float"
+              className="max-h-[75vh] max-w-[22vw] w-auto object-contain drop-shadow-2xl animate-float"
             />
             <img
               src={maeImage}
               alt="Mãe da Clara"
-              className="h-[55vh] md:h-[65vh] object-contain drop-shadow-2xl animate-float -ml-16"
+              className="max-h-[75vh] max-w-[22vw] w-auto object-contain drop-shadow-2xl animate-float -ml-12"
               style={{ animationDelay: '0.3s' }}
             />
           </div>
-          <div className="absolute bottom-0 right-0 md:right-8 animate-character-enter-right">
+          <div className="absolute bottom-0 right-0 md:right-4 animate-character-enter-right">
             <img
               src={claraAnimadaImage}
               alt="Clara"
-              className="h-[55vh] md:h-[65vh] object-contain drop-shadow-2xl animate-float"
+              className="max-h-[75vh] max-w-[38vw] w-auto object-contain drop-shadow-2xl animate-float"
               style={{ animationDelay: '0.6s' }}
             />
           </div>
