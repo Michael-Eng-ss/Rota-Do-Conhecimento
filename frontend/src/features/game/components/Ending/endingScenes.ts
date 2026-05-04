@@ -11,7 +11,7 @@ import claraSorrindoImage from '@/assets/characters/clara-sorrindo.png';
 import claraAnimadaImage from '@/assets/characters/clara-animada.png';
 import liviaImage from '@/assets/characters/livia.png';
 import maeImage from '@/assets/characters/mae-clara.png';
-import paiImage from '@/assets/characters/pai-clara.png';
+import paiImage from '@/assets/characters/Pai da Clara.png';
 
 /**
  * Cenas finais — exibidas após o jogador derrotar todos os 3 ambientes.

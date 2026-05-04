@@ -15,8 +15,8 @@ import patioEscolaImage from '@/assets/backgrounds/patio-escola.png';
 // Import assets - characters
 import claraImage from '@/assets/characters/clara.png';
 import maeImage from '@/assets/characters/mae-clara.png';
-import paiImage from '@/assets/characters/pai-clara.png';
-import paisImage from '@/assets/characters/pais-clara.png';
+import paiImage from '@/assets/characters/Pai da Clara.png';
+import paisImage from '@/assets/characters/Pai e mae juntos.png';
 import claraAnimadaImage from '@/assets/characters/clara-animada.png';
 import claraDuvidaImage from '@/assets/characters/clara-duvida.png';
 import claraEspantoImage from '@/assets/characters/clara-espanto.png';
