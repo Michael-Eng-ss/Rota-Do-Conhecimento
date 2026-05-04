@@ -121,8 +121,17 @@ const BattleScreen = ({ environmentId, onBackToPatio, onProfile, onVictory }: Ba
   }, [environmentId, fetchBattleQuestions]);
 
   const currentQuestion = questions[currentQuestionIndex];
-  // 10 pontos por acerto (100 / 10 perguntas). Dano ao jogador igual por erro.
-  const pointsPerHit = questions.length > 0 ? Math.floor(100 / questions.length) : 10;
+  
+  // Dano ao chefão por acerto
+  const bossDamagePerHit = questions.length > 0 ? Math.floor(100 / questions.length) : 10;
+  
+  // Cálculo de dano ao jogador (Clara) para ser coerente com os 80%:
+  // Quantos erros o jogador pode cometer sem perder (ex: 10 * 0.2 = 2 erros)
+  const maxErrorsAllowed = questions.length > 0 ? Math.floor(questions.length * (1 - MIN_PASS_PERCENTAGE)) : 2;
+  // O dano deve ser suficiente para zerar a vida no erro fatal (maxErrorsAllowed + 1)
+  // Ex: 2 erros permitidos -> 3º erro mata -> 100 / 3 = 34 de dano por erro.
+  const playerDamagePerHit = Math.ceil(100 / (maxErrorsAllowed + 1));
+
   const isLastQuestion = currentQuestionIndex === questions.length - 1;
   
   const bossNameByEnv: Record<EnvironmentId, string> = {
@@ -269,8 +278,8 @@ const BattleScreen = ({ environmentId, onBackToPatio, onProfile, onVictory }: Ba
       playSound(isCorrect ? 'correct' : 'wrong');
     }
 
-    const damageDealt  = isCorrect ? pointsPerHit : 0;  // acerto tira vida do chefão
-    const playerDamage = isCorrect ? 0 : pointsPerHit;  // erro tira vida do jogador
+    const damageDealt  = isCorrect ? bossDamagePerHit : 0;  // acerto tira vida do chefão
+    const playerDamage = isCorrect ? 0 : playerDamagePerHit;  // erro tira vida do jogador
 
     const newBossHealth   = Math.max(0, bossHealth   - damageDealt);
     const newPlayerHealth = Math.max(0, playerHealth - playerDamage);

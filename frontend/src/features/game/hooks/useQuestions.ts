@@ -97,7 +97,7 @@ export const useQuestions = () => {
   }, []);
 
   // Fetch active questions with alternatives for battle — sempre em ordem aleatória
-  const fetchBattleQuestions = useCallback(async (environmentId: number) => {
+    const fetchBattleQuestions = useCallback(async (environmentId: number) => {
     if (!environmentId || isNaN(environmentId)) return [];
     try {
       // ?random=true → ORDER BY RANDOM() no banco (1ª camada)
@@ -124,7 +124,12 @@ export const useQuestions = () => {
 
       // Fisher-Yates no array de perguntas (3ª camada — garante ordem diferente
       // a cada batalha mesmo que o banco retorne com cache)
-      return shuffle(parsed);
+      const shuffledQuestions = shuffle(parsed);
+      
+      // Limita o número de perguntas dependendo do ambiente
+      // Ambiente 1 e 2 = 10 perguntas, Ambiente 3 = 20 perguntas
+      const maxQuestions = environmentId === 3 ? 20 : 10;
+      return shuffledQuestions.slice(0, maxQuestions);
     } catch (err) {
       console.error('Error fetching battle questions:', err);
       return [];
