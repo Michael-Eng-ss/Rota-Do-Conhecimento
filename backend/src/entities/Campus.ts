@@ -6,7 +6,7 @@ export class Campus {
   @PrimaryGeneratedColumn()
   id!: number;
 
-  @Column({ name: 'nomecampus', type: 'varchar', length: 255, unique: true })
+  @Column({ name: 'nomecampus', type: 'text' })
   nome!: string;
 
   @OneToMany(() => Usuario, (u) => u.campus)

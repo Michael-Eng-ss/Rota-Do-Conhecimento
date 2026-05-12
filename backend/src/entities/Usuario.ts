@@ -12,24 +12,23 @@ export class Usuario {
   @PrimaryGeneratedColumn()
   id!: number;
 
-  @Column({ type: 'varchar', length: 255 })
+  @Column({ type: 'text' })
   nome!: string;
 
-  @Column({ type: 'varchar', length: 255, unique: true })
+  @Column({ type: 'text', unique: true })
   email!: string;
 
   /**
    * Senha armazenada como bcrypt hash.
    * select: false → nunca retornado em queries padrão.
    */
-  @Column({ type: 'varchar', select: false })
+  @Column({ type: 'text', select: false })
   senha!: string;
 
   /**
    * Nível de acesso do usuário.
-   * Mapeado como VARCHAR no banco (migration necessária para DBs existentes).
    */
-  @Column({ type: 'varchar', length: 20, default: Role.PLAYER })
+  @Column({ type: 'int', default: Role.PLAYER })
   role!: Role;
 
   /** Pontuação acumulada no jogo. */
@@ -37,24 +36,24 @@ export class Usuario {
   pontuacao!: number;
 
   /** URL da foto de perfil. */
-  @Column({ type: 'varchar', nullable: true })
+  @Column({ type: 'text', nullable: true, default: '' })
   foto!: string | null;
 
   /** Telefone de contato. */
-  @Column({ type: 'varchar', length: 20, nullable: true })
+  @Column({ type: 'text', nullable: true, default: '' })
   telefone!: string | null;
 
   /** Campo legado de sexo (0=não definido, 1=masc, 2=fem). Mantido por retrocompatibilidade. */
   @Column({ type: 'int', nullable: true, default: 0 })
   sexo!: number | null;
 
-  @Column({ type: 'date', nullable: true })
+  @Column({ type: 'timestamptz', nullable: true, default: () => 'CURRENT_TIMESTAMP' })
   datanascimento!: Date | null;
 
-  @Column({ type: 'varchar', length: 2, nullable: true })
+  @Column({ type: 'text', nullable: true, default: '' })
   uf!: string | null;
 
-  @Column({ type: 'varchar', length: 100, nullable: true })
+  @Column({ type: 'text', nullable: true, default: '' })
   cidade!: string | null;
 
   @Column({ type: 'varchar', length: 50, nullable: true })

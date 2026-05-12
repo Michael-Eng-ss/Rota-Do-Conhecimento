@@ -11,10 +11,10 @@
  * - PLAYER      : jogador comum (padrão de novos cadastros).
  */
 export enum Role {
-  SUPER_ADMIN  = 'super_admin',
-  ADMIN        = 'admin',
-  CAMPUS_ADMIN = 'campus_admin',
-  PLAYER       = 'player',
+  SUPER_ADMIN  = 1,
+  ADMIN        = 2,
+  PLAYER       = 3,
+  CAMPUS_ADMIN = 4,
 }
 
 /** Hierarquia numérica para comparação de permissões. Maior = mais poder. */
@@ -39,7 +39,7 @@ export enum Status {
  */
 export enum EmailTokenType {
   RESET_PASSWORD   = 'reset_password',
-  EMAIL_VERIFY     = 'email_verify',
+  EMAIL_VERIFY     = 'confirm_email',
 }
 
 /** Duração padrão de tokens (em minutos). */
