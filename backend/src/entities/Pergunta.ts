@@ -1,42 +1,49 @@
 import {
   Entity, PrimaryGeneratedColumn, Column,
-  ManyToOne, OneToMany, JoinColumn, CreateDateColumn,
+  ManyToOne, OneToMany, JoinColumn,
 } from 'typeorm';
-import { Categoria } from './Categoria';
-import { Alternativa } from './Alternativa';
-import { Campus } from './Campus';
+import { Categoria }    from './Categoria';
+import { Alternativa }  from './Alternativa';
+import { PerguntaNivel } from './PerguntaNivel';
+import { Quiz }         from './Quiz';
 
 @Entity('perguntas')
 export class Pergunta {
   @PrimaryGeneratedColumn()
   id!: number;
 
-  @Column({ type: 'text' })
-  enunciado!: string;
+  @Column({ type: 'text', nullable: true })
+  conteudo!: string | null;
 
-  @Column({ type: 'int', nullable: true })
-  dificuldade!: number | null;
+  @Column({ name: 'perguntasnivelid', type: 'int' })
+  perguntasnivelid!: number;
 
-  @Column({ name: 'categoriaid', type: 'int', nullable: true })
-  categoriaId!: number | null;
+  @Column({ type: 'int', default: 30 })
+  tempo!: number;
 
-  @ManyToOne(() => Categoria, { nullable: true, onDelete: 'SET NULL' })
-  @JoinColumn({ name: 'categoriaid' })
-  categoria!: Categoria | null;
-
-  /** Campus do qual a pergunta foi originada. */
-  @Column({ name: 'campusid', type: 'int', nullable: true })
-  campusId!: number | null;
-
-  @ManyToOne(() => Campus, { nullable: true, onDelete: 'SET NULL' })
-  @JoinColumn({ name: 'campusid' })
-  campus!: Campus | null;
+  @Column({ name: 'pathimage', type: 'text', nullable: true })
+  pathimage!: string | null;
 
   @Column({ type: 'boolean', default: true })
   status!: boolean;
 
-  @CreateDateColumn({ name: 'created_at', nullable: true })
-  createdAt!: Date;
+  @Column({ name: 'categoriasid', type: 'int' })
+  categoriasid!: number;
+
+  @Column({ name: 'quizid', type: 'int', nullable: true })
+  quizid!: number | null;
+
+  @ManyToOne(() => Categoria, { nullable: false, onDelete: 'RESTRICT' })
+  @JoinColumn({ name: 'categoriasid' })
+  categoria!: Categoria;
+
+  @ManyToOne(() => PerguntaNivel, { nullable: false, onDelete: 'RESTRICT' })
+  @JoinColumn({ name: 'perguntasnivelid' })
+  nivel!: PerguntaNivel;
+
+  @ManyToOne(() => Quiz, { nullable: true, onDelete: 'SET NULL' })
+  @JoinColumn({ name: 'quizid' })
+  quiz!: Quiz | null;
 
   @OneToMany(() => Alternativa, (a) => a.pergunta)
   alternativas!: Alternativa[];

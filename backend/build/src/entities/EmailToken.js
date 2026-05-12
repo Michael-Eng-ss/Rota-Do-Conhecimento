@@ -32,7 +32,7 @@ __decorate([
     __metadata("design:type", String)
 ], EmailToken.prototype, "tipo", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ name: 'expira_em', type: 'datetime' }),
+    (0, typeorm_1.Column)({ name: 'expira_em', type: process.env.NODE_ENV === 'test' ? 'datetime' : 'timestamptz' }),
     __metadata("design:type", Date)
 ], EmailToken.prototype, "expiraEm", void 0);
 __decorate([

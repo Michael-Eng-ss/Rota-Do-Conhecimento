@@ -47,7 +47,7 @@ export class Usuario {
   @Column({ type: 'int', nullable: true, default: 0 })
   sexo!: number | null;
 
-  @Column({ type: 'timestamptz', nullable: true, default: () => 'CURRENT_TIMESTAMP' })
+  @Column({ type: process.env.NODE_ENV === 'test' ? 'datetime' : 'timestamptz', nullable: true, default: () => 'CURRENT_TIMESTAMP' })
   datanascimento!: Date | null;
 
   @Column({ type: 'text', nullable: true, default: '' })

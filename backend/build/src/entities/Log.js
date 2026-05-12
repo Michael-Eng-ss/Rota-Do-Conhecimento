@@ -23,7 +23,7 @@ __decorate([
     __metadata("design:type", Number)
 ], Log.prototype, "usuariosId", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: 'varchar', length: 255 }),
+    (0, typeorm_1.Column)({ name: 'descricao', type: 'text' }),
     __metadata("design:type", String)
 ], Log.prototype, "acao", void 0);
 __decorate([

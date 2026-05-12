@@ -20,12 +20,12 @@ __decorate([
     __metadata("design:type", Number)
 ], Curso.prototype, "id", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: 'varchar', length: 255 }),
+    (0, typeorm_1.Column)({ type: 'text' }),
     __metadata("design:type", String)
 ], Curso.prototype, "nome", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: 'varchar', nullable: true }),
-    __metadata("design:type", Object)
+    (0, typeorm_1.Column)({ type: 'text', default: '' }),
+    __metadata("design:type", String)
 ], Curso.prototype, "imagem", void 0);
 __decorate([
     (0, typeorm_1.OneToMany)(() => Usuario_1.Usuario, (u) => u.curso),

@@ -14,10 +14,10 @@ exports.JWT_EXPIRES_IN = exports.TOKEN_TTL_MINUTES = exports.EmailTokenType = ex
  */
 var Role;
 (function (Role) {
-    Role["SUPER_ADMIN"] = "super_admin";
-    Role["ADMIN"] = "admin";
-    Role["CAMPUS_ADMIN"] = "campus_admin";
-    Role["PLAYER"] = "player";
+    Role[Role["SUPER_ADMIN"] = 1] = "SUPER_ADMIN";
+    Role[Role["ADMIN"] = 2] = "ADMIN";
+    Role[Role["PLAYER"] = 3] = "PLAYER";
+    Role[Role["CAMPUS_ADMIN"] = 4] = "CAMPUS_ADMIN";
 })(Role || (exports.Role = Role = {}));
 /** Hierarquia numérica para comparação de permissões. Maior = mais poder. */
 exports.ROLE_HIERARCHY = {
@@ -41,7 +41,7 @@ var Status;
 var EmailTokenType;
 (function (EmailTokenType) {
     EmailTokenType["RESET_PASSWORD"] = "reset_password";
-    EmailTokenType["EMAIL_VERIFY"] = "email_verify";
+    EmailTokenType["EMAIL_VERIFY"] = "confirm_email";
 })(EmailTokenType || (exports.EmailTokenType = EmailTokenType = {}));
 /** Duração padrão de tokens (em minutos). */
 exports.TOKEN_TTL_MINUTES = {

@@ -20,7 +20,7 @@ __decorate([
     __metadata("design:type", Number)
 ], Campus.prototype, "id", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ name: 'nomecampus', type: 'varchar', length: 255, unique: true }),
+    (0, typeorm_1.Column)({ name: 'nomecampus', type: 'text' }),
     __metadata("design:type", String)
 ], Campus.prototype, "nome", void 0);
 __decorate([

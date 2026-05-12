@@ -6,16 +6,19 @@ export class Alternativa {
   @PrimaryGeneratedColumn()
   id!: number;
 
-  @Column({ type: 'text' })
-  texto!: string;
+  @Column({ name: 'perguntasid', type: 'int' })
+  perguntasid!: number;
 
-  @Column({ name: 'correta', type: 'boolean', default: false })
+  @Column({ type: 'text', nullable: true })
+  conteudo!: string | null;
+
+  @Column({ type: 'text', nullable: true })
+  imagem!: string | null;
+
+  @Column({ type: 'boolean', default: false })
   correta!: boolean;
 
-  @Column({ name: 'perguntaid', type: 'int' })
-  perguntaId!: number;
-
   @ManyToOne(() => Pergunta, (p) => p.alternativas, { onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'perguntaid' })
+  @JoinColumn({ name: 'perguntasid' })
   pergunta!: Pergunta;
 }

@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { AuthRequest } from '@/middlewares/auth.middleware';
+import { AuthRequest } from '../middlewares/auth.middleware';
 export declare class UsuarioController {
     private service;
     constructor();

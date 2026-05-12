@@ -13,7 +13,8 @@ exports.Pergunta = void 0;
 const typeorm_1 = require("typeorm");
 const Categoria_1 = require("./Categoria");
 const Alternativa_1 = require("./Alternativa");
-const Campus_1 = require("./Campus");
+const PerguntaNivel_1 = require("./PerguntaNivel");
+const Quiz_1 = require("./Quiz");
 let Pergunta = class Pergunta {
 };
 exports.Pergunta = Pergunta;
@@ -22,39 +23,48 @@ __decorate([
     __metadata("design:type", Number)
 ], Pergunta.prototype, "id", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: 'text' }),
-    __metadata("design:type", String)
-], Pergunta.prototype, "enunciado", void 0);
-__decorate([
-    (0, typeorm_1.Column)({ type: 'int', nullable: true }),
+    (0, typeorm_1.Column)({ type: 'text', nullable: true }),
     __metadata("design:type", Object)
-], Pergunta.prototype, "dificuldade", void 0);
+], Pergunta.prototype, "conteudo", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ name: 'categoriaid', type: 'int', nullable: true }),
-    __metadata("design:type", Object)
-], Pergunta.prototype, "categoriaId", void 0);
+    (0, typeorm_1.Column)({ name: 'perguntasnivelid', type: 'int' }),
+    __metadata("design:type", Number)
+], Pergunta.prototype, "perguntasnivelid", void 0);
 __decorate([
-    (0, typeorm_1.ManyToOne)(() => Categoria_1.Categoria, { nullable: true, onDelete: 'SET NULL' }),
-    (0, typeorm_1.JoinColumn)({ name: 'categoriaid' }),
-    __metadata("design:type", Object)
-], Pergunta.prototype, "categoria", void 0);
+    (0, typeorm_1.Column)({ type: 'int', default: 30 }),
+    __metadata("design:type", Number)
+], Pergunta.prototype, "tempo", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ name: 'campusid', type: 'int', nullable: true }),
+    (0, typeorm_1.Column)({ name: 'pathimage', type: 'text', nullable: true }),
     __metadata("design:type", Object)
-], Pergunta.prototype, "campusId", void 0);
-__decorate([
-    (0, typeorm_1.ManyToOne)(() => Campus_1.Campus, { nullable: true, onDelete: 'SET NULL' }),
-    (0, typeorm_1.JoinColumn)({ name: 'campusid' }),
-    __metadata("design:type", Object)
-], Pergunta.prototype, "campus", void 0);
+], Pergunta.prototype, "pathimage", void 0);
 __decorate([
     (0, typeorm_1.Column)({ type: 'boolean', default: true }),
     __metadata("design:type", Boolean)
 ], Pergunta.prototype, "status", void 0);
 __decorate([
-    (0, typeorm_1.CreateDateColumn)({ name: 'created_at', nullable: true }),
-    __metadata("design:type", Date)
-], Pergunta.prototype, "createdAt", void 0);
+    (0, typeorm_1.Column)({ name: 'categoriasid', type: 'int' }),
+    __metadata("design:type", Number)
+], Pergunta.prototype, "categoriasid", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ name: 'quizid', type: 'int', nullable: true }),
+    __metadata("design:type", Object)
+], Pergunta.prototype, "quizid", void 0);
+__decorate([
+    (0, typeorm_1.ManyToOne)(() => Categoria_1.Categoria, { nullable: false, onDelete: 'RESTRICT' }),
+    (0, typeorm_1.JoinColumn)({ name: 'categoriasid' }),
+    __metadata("design:type", Categoria_1.Categoria)
+], Pergunta.prototype, "categoria", void 0);
+__decorate([
+    (0, typeorm_1.ManyToOne)(() => PerguntaNivel_1.PerguntaNivel, { nullable: false, onDelete: 'RESTRICT' }),
+    (0, typeorm_1.JoinColumn)({ name: 'perguntasnivelid' }),
+    __metadata("design:type", PerguntaNivel_1.PerguntaNivel)
+], Pergunta.prototype, "nivel", void 0);
+__decorate([
+    (0, typeorm_1.ManyToOne)(() => Quiz_1.Quiz, { nullable: true, onDelete: 'SET NULL' }),
+    (0, typeorm_1.JoinColumn)({ name: 'quizid' }),
+    __metadata("design:type", Object)
+], Pergunta.prototype, "quiz", void 0);
 __decorate([
     (0, typeorm_1.OneToMany)(() => Alternativa_1.Alternativa, (a) => a.pergunta),
     __metadata("design:type", Array)

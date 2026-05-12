@@ -10,10 +10,10 @@
  * - PLAYER      : jogador comum (padrão de novos cadastros).
  */
 export declare enum Role {
-    SUPER_ADMIN = "super_admin",
-    ADMIN = "admin",
-    CAMPUS_ADMIN = "campus_admin",
-    PLAYER = "player"
+    SUPER_ADMIN = 1,
+    ADMIN = 2,
+    PLAYER = 3,
+    CAMPUS_ADMIN = 4
 }
 /** Hierarquia numérica para comparação de permissões. Maior = mais poder. */
 export declare const ROLE_HIERARCHY: Record<Role, number>;
@@ -30,7 +30,7 @@ export declare enum Status {
  */
 export declare enum EmailTokenType {
     RESET_PASSWORD = "reset_password",
-    EMAIL_VERIFY = "email_verify"
+    EMAIL_VERIFY = "confirm_email"
 }
 /** Duração padrão de tokens (em minutos). */
 export declare const TOKEN_TTL_MINUTES: {

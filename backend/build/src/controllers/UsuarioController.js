@@ -1,9 +1,9 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.usuarioController = exports.UsuarioController = void 0;
-const UsuarioService_1 = require("@/services/UsuarioService");
-const AppError_1 = require("@/shared/AppError");
-const data_source_1 = require("@/config/data-source");
+const UsuarioService_1 = require("../services/UsuarioService");
+const AppError_1 = require("../shared/AppError");
+const data_source_1 = require("../config/data-source");
 class UsuarioController {
     constructor() {
         this.getById = async (req, res) => {

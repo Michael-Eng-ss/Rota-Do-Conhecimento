@@ -11,6 +11,8 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Progresso = void 0;
 const typeorm_1 = require("typeorm");
+const Usuario_1 = require("./Usuario");
+const Pergunta_1 = require("./Pergunta");
 let Progresso = class Progresso {
 };
 exports.Progresso = Progresso;
@@ -19,22 +21,24 @@ __decorate([
     __metadata("design:type", Number)
 ], Progresso.prototype, "id", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ name: 'usuarioid', type: 'int' }),
+    (0, typeorm_1.Column)({ name: 'usuariosid', type: 'int' }),
     __metadata("design:type", Number)
-], Progresso.prototype, "usuarioId", void 0);
+], Progresso.prototype, "usuariosid", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ name: 'perguntaid', type: 'int' }),
+    (0, typeorm_1.Column)({ name: 'perguntasid', type: 'int' }),
     __metadata("design:type", Number)
-], Progresso.prototype, "perguntaId", void 0);
+], Progresso.prototype, "perguntasid", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ name: 'acertou', type: 'boolean', default: false }),
-    __metadata("design:type", Boolean)
-], Progresso.prototype, "acertou", void 0);
+    (0, typeorm_1.ManyToOne)(() => Usuario_1.Usuario, { nullable: false, onDelete: 'RESTRICT' }),
+    (0, typeorm_1.JoinColumn)({ name: 'usuariosid' }),
+    __metadata("design:type", Usuario_1.Usuario)
+], Progresso.prototype, "usuario", void 0);
 __decorate([
-    (0, typeorm_1.CreateDateColumn)({ name: 'created_at', nullable: true }),
-    __metadata("design:type", Date)
-], Progresso.prototype, "createdAt", void 0);
+    (0, typeorm_1.ManyToOne)(() => Pergunta_1.Pergunta, { nullable: false, onDelete: 'RESTRICT' }),
+    (0, typeorm_1.JoinColumn)({ name: 'perguntasid' }),
+    __metadata("design:type", Pergunta_1.Pergunta)
+], Progresso.prototype, "pergunta", void 0);
 exports.Progresso = Progresso = __decorate([
-    (0, typeorm_1.Entity)('progresso_perguntas')
+    (0, typeorm_1.Entity)('progressoperguntas')
 ], Progresso);
 //# sourceMappingURL=Progresso.js.map

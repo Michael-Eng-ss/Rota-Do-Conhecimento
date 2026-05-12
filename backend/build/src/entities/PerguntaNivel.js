@@ -19,14 +19,18 @@ __decorate([
     __metadata("design:type", Number)
 ], PerguntaNivel.prototype, "id", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ name: 'perguntaid', type: 'int' }),
+    (0, typeorm_1.Column)({ type: 'int' }),
     __metadata("design:type", Number)
-], PerguntaNivel.prototype, "perguntaId", void 0);
+], PerguntaNivel.prototype, "nivel", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ name: 'nivelid', type: 'int' }),
+    (0, typeorm_1.Column)({ type: 'int' }),
     __metadata("design:type", Number)
-], PerguntaNivel.prototype, "nivelId", void 0);
+], PerguntaNivel.prototype, "pontuacao", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: 'int' }),
+    __metadata("design:type", Number)
+], PerguntaNivel.prototype, "tempo", void 0);
 exports.PerguntaNivel = PerguntaNivel = __decorate([
-    (0, typeorm_1.Entity)('pergunta_nivel')
+    (0, typeorm_1.Entity)('perguntasnivel')
 ], PerguntaNivel);
 //# sourceMappingURL=PerguntaNivel.js.map

@@ -1,6 +1,6 @@
-import { Role } from '@/shared/constants';
-import { Campus } from '@/entities/Campus';
-import { Curso } from '@/entities/Curso';
+import { Role } from '../shared/constants';
+import { Campus } from '../entities/Campus';
+import { Curso } from '../entities/Curso';
 export declare class Usuario {
     [key: string]: unknown;
     id: number;
@@ -13,7 +13,6 @@ export declare class Usuario {
     senha: string;
     /**
      * Nível de acesso do usuário.
-     * Mapeado como VARCHAR no banco (migration necessária para DBs existentes).
      */
     role: Role;
     /** Pontuação acumulada no jogo. */
@@ -34,7 +33,7 @@ export declare class Usuario {
     campus: Campus | null;
     cursoId: number | null;
     curso: Curso | null;
-    createdAt: Date;
+    emailVerified: boolean;
     get isAdmin(): boolean;
     get isCampusAdmin(): boolean;
     /** Retorna objeto seguro sem senha. */

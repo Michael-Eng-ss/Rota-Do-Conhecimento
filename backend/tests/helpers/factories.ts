@@ -3,6 +3,9 @@ import { DataSource } from 'typeorm';
 import { Usuario } from '../../src/entities/Usuario';
 import { Campus } from '../../src/entities/Campus';
 import { Curso } from '../../src/entities/Curso';
+import { Categoria } from '../../src/entities/Categoria';
+import { PerguntaNivel } from '../../src/entities/PerguntaNivel';
+import { Pergunta } from '../../src/entities/Pergunta';
 import { Role } from '../../src/shared/constants';
 
 const BCRYPT_ROUNDS = 4; // Rápido para testes
@@ -65,3 +68,23 @@ export async function createCampusAdmin(ds: DataSource, campusId: number): Promi
     senha:    'admin123',
   });
 }
+
+export async function createCategoria(ds: DataSource, cursoid: number, descricao = 'Categoria Teste'): Promise<Categoria> {
+  return ds.getRepository(Categoria).save(ds.getRepository(Categoria).create({ descricao, cursoid, status: true }));
+}
+
+export async function createPerguntaNivel(ds: DataSource, nivel = 1, pontuacao = 10, tempo = 30): Promise<PerguntaNivel> {
+  return ds.getRepository(PerguntaNivel).save(ds.getRepository(PerguntaNivel).create({ nivel, pontuacao, tempo }));
+}
+
+export async function createPergunta(
+  ds: DataSource, 
+  categoriasid: number, 
+  perguntasnivelid: number, 
+  conteudo = 'Pergunta Teste?'
+): Promise<Pergunta> {
+  return ds.getRepository(Pergunta).save(
+    ds.getRepository(Pergunta).create({ conteudo, categoriasid, perguntasnivelid, status: true, tempo: 30 })
+  );
+}
+

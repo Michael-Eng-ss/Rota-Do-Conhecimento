@@ -1,17 +1,19 @@
 import { Categoria } from './Categoria';
 import { Alternativa } from './Alternativa';
-import { Campus } from './Campus';
+import { PerguntaNivel } from './PerguntaNivel';
+import { Quiz } from './Quiz';
 export declare class Pergunta {
     id: number;
-    enunciado: string;
-    dificuldade: number | null;
-    categoriaId: number | null;
-    categoria: Categoria | null;
-    /** Campus do qual a pergunta foi originada. */
-    campusId: number | null;
-    campus: Campus | null;
+    conteudo: string | null;
+    perguntasnivelid: number;
+    tempo: number;
+    pathimage: string | null;
     status: boolean;
-    createdAt: Date;
+    categoriasid: number;
+    quizid: number | null;
+    categoria: Categoria;
+    nivel: PerguntaNivel;
+    quiz: Quiz | null;
     alternativas: Alternativa[];
 }
 //# sourceMappingURL=Pergunta.d.ts.map

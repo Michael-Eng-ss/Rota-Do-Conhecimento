@@ -20,20 +20,24 @@ __decorate([
     __metadata("design:type", Number)
 ], Alternativa.prototype, "id", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: 'text' }),
-    __metadata("design:type", String)
-], Alternativa.prototype, "texto", void 0);
+    (0, typeorm_1.Column)({ name: 'perguntasid', type: 'int' }),
+    __metadata("design:type", Number)
+], Alternativa.prototype, "perguntasid", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ name: 'correta', type: 'boolean', default: false }),
+    (0, typeorm_1.Column)({ type: 'text', nullable: true }),
+    __metadata("design:type", Object)
+], Alternativa.prototype, "conteudo", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: 'text', nullable: true }),
+    __metadata("design:type", Object)
+], Alternativa.prototype, "imagem", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: 'boolean', default: false }),
     __metadata("design:type", Boolean)
 ], Alternativa.prototype, "correta", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ name: 'perguntaid', type: 'int' }),
-    __metadata("design:type", Number)
-], Alternativa.prototype, "perguntaId", void 0);
-__decorate([
     (0, typeorm_1.ManyToOne)(() => Pergunta_1.Pergunta, (p) => p.alternativas, { onDelete: 'CASCADE' }),
-    (0, typeorm_1.JoinColumn)({ name: 'perguntaid' }),
+    (0, typeorm_1.JoinColumn)({ name: 'perguntasid' }),
     __metadata("design:type", Pergunta_1.Pergunta)
 ], Alternativa.prototype, "pergunta", void 0);
 exports.Alternativa = Alternativa = __decorate([

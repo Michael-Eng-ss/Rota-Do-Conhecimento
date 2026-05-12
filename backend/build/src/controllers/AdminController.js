@@ -1,10 +1,10 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.adminController = exports.AdminController = void 0;
-const AdminService_1 = require("@/services/AdminService");
-const AppError_1 = require("@/shared/AppError");
-const constants_1 = require("@/shared/constants");
-const data_source_1 = require("@/config/data-source");
+const AdminService_1 = require("../services/AdminService");
+const AppError_1 = require("../shared/AppError");
+const constants_1 = require("../shared/constants");
+const data_source_1 = require("../config/data-source");
 class AdminController {
     constructor() {
         /** POST /admin/admins — cria novo admin (SUPER_ADMIN only). */

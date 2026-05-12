@@ -1,16 +1,24 @@
-import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn } from 'typeorm';
+import { Curso } from './Curso';
 
 @Entity('categorias')
 export class Categoria {
   @PrimaryGeneratedColumn()
   id!: number;
 
-  @Column({ type: 'varchar', length: 255 })
-  nome!: string;
+  @Column({ type: 'text' })
+  descricao!: string;
 
-  @Column({ type: 'varchar', nullable: true })
-  imagem!: string | null;
+  @Column({ type: 'boolean', default: true })
+  status!: boolean;
 
-  @Column({ name: 'cursoid', type: 'int', nullable: true })
-  cursoId!: number | null;
+  @Column({ type: 'text', default: '' })
+  imagem!: string;
+
+  @Column({ name: 'cursoid', type: 'int' })
+  cursoid!: number;
+
+  @ManyToOne(() => Curso, { nullable: false, onDelete: 'RESTRICT' })
+  @JoinColumn({ name: 'cursoid' })
+  curso!: Curso;
 }

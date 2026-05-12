@@ -1,7 +1,7 @@
 import { DataSource } from 'typeorm';
-import { Role } from '@/shared/constants';
-import { Usuario } from '@/entities/Usuario';
-import { JWTPayload } from '@/shared/types';
+import { Role } from '../shared/constants';
+import { Usuario } from '../entities/Usuario';
+import { JWTPayload } from '../shared/types';
 export type { JWTPayload };
 export interface LoginResult {
     token: string;

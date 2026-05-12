@@ -11,9 +11,9 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Usuario = void 0;
 const typeorm_1 = require("typeorm");
-const constants_1 = require("@/shared/constants");
-const Campus_1 = require("@/entities/Campus");
-const Curso_1 = require("@/entities/Curso");
+const constants_1 = require("../shared/constants");
+const Campus_1 = require("../entities/Campus");
+const Curso_1 = require("../entities/Curso");
 let Usuario = class Usuario {
     // ── Helpers ──────────────────────────────────────────────────────────────
     get isAdmin() {
@@ -35,31 +35,31 @@ __decorate([
     __metadata("design:type", Number)
 ], Usuario.prototype, "id", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: 'varchar', length: 255 }),
+    (0, typeorm_1.Column)({ type: 'text' }),
     __metadata("design:type", String)
 ], Usuario.prototype, "nome", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: 'varchar', length: 255, unique: true }),
+    (0, typeorm_1.Column)({ type: 'text', unique: true }),
     __metadata("design:type", String)
 ], Usuario.prototype, "email", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: 'varchar', select: false }),
+    (0, typeorm_1.Column)({ type: 'text', select: false }),
     __metadata("design:type", String)
 ], Usuario.prototype, "senha", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: 'varchar', length: 20, default: constants_1.Role.PLAYER }),
-    __metadata("design:type", String)
+    (0, typeorm_1.Column)({ type: 'int', default: constants_1.Role.PLAYER }),
+    __metadata("design:type", Number)
 ], Usuario.prototype, "role", void 0);
 __decorate([
     (0, typeorm_1.Column)({ type: 'int', default: 0 }),
     __metadata("design:type", Number)
 ], Usuario.prototype, "pontuacao", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: 'varchar', nullable: true }),
+    (0, typeorm_1.Column)({ type: 'text', nullable: true, default: '' }),
     __metadata("design:type", Object)
 ], Usuario.prototype, "foto", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: 'varchar', length: 20, nullable: true }),
+    (0, typeorm_1.Column)({ type: 'text', nullable: true, default: '' }),
     __metadata("design:type", Object)
 ], Usuario.prototype, "telefone", void 0);
 __decorate([
@@ -67,15 +67,15 @@ __decorate([
     __metadata("design:type", Object)
 ], Usuario.prototype, "sexo", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: 'date', nullable: true }),
+    (0, typeorm_1.Column)({ type: process.env.NODE_ENV === 'test' ? 'datetime' : 'timestamptz', nullable: true, default: () => 'CURRENT_TIMESTAMP' }),
     __metadata("design:type", Object)
 ], Usuario.prototype, "datanascimento", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: 'varchar', length: 2, nullable: true }),
+    (0, typeorm_1.Column)({ type: 'text', nullable: true, default: '' }),
     __metadata("design:type", Object)
 ], Usuario.prototype, "uf", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: 'varchar', length: 100, nullable: true }),
+    (0, typeorm_1.Column)({ type: 'text', nullable: true, default: '' }),
     __metadata("design:type", Object)
 ], Usuario.prototype, "cidade", void 0);
 __decorate([
@@ -109,9 +109,9 @@ __decorate([
     __metadata("design:type", Object)
 ], Usuario.prototype, "curso", void 0);
 __decorate([
-    (0, typeorm_1.CreateDateColumn)({ name: 'created_at', nullable: true }),
-    __metadata("design:type", Date)
-], Usuario.prototype, "createdAt", void 0);
+    (0, typeorm_1.Column)({ name: 'email_verified', type: 'boolean', default: false }),
+    __metadata("design:type", Boolean)
+], Usuario.prototype, "emailVerified", void 0);
 exports.Usuario = Usuario = __decorate([
     (0, typeorm_1.Entity)('usuarios')
 ], Usuario);

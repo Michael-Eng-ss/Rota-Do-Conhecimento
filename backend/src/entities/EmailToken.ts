@@ -15,7 +15,7 @@ export class EmailToken {
   @Column({ type: 'varchar', length: 50 })
   tipo!: EmailTokenType;
 
-  @Column({ name: 'expira_em', type: 'timestamptz' })
+  @Column({ name: 'expira_em', type: process.env.NODE_ENV === 'test' ? 'datetime' : 'timestamptz' })
   expiraEm!: Date;
 
   @Column({ name: 'usado', type: 'boolean', default: false })

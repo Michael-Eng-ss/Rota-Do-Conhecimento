@@ -1,19 +1,23 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn } from 'typeorm';
+import { Usuario }  from './Usuario';
+import { Pergunta } from './Pergunta';
 
-@Entity('progresso_perguntas')
+@Entity('progressoperguntas')
 export class Progresso {
   @PrimaryGeneratedColumn()
   id!: number;
 
-  @Column({ name: 'usuarioid', type: 'int' })
-  usuarioId!: number;
+  @Column({ name: 'usuariosid', type: 'int' })
+  usuariosid!: number;
 
-  @Column({ name: 'perguntaid', type: 'int' })
-  perguntaId!: number;
+  @Column({ name: 'perguntasid', type: 'int' })
+  perguntasid!: number;
 
-  @Column({ name: 'acertou', type: 'boolean', default: false })
-  acertou!: boolean;
+  @ManyToOne(() => Usuario, { nullable: false, onDelete: 'RESTRICT' })
+  @JoinColumn({ name: 'usuariosid' })
+  usuario!: Usuario;
 
-  @CreateDateColumn({ name: 'created_at', nullable: true })
-  createdAt!: Date;
+  @ManyToOne(() => Pergunta, { nullable: false, onDelete: 'RESTRICT' })
+  @JoinColumn({ name: 'perguntasid' })
+  pergunta!: Pergunta;
 }
