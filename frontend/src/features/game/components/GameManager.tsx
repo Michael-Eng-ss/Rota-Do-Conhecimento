@@ -5,10 +5,11 @@ import { setSavedUser, updateUserScore as apiUpdateScore, type AppUser } from '@
 import LoginScreen from '@/features/auth/components/LoginScreen';
 import UserMenuScreen from '@/features/profile/components/UserMenuScreen';
 import RegisterScreen from '@/features/auth/components/RegisterScreen';
-import RankingScreen from '@/features/profile/components/RankingScreen';
+import { RankingPage as RankingScreen } from '@/pages/game/RankingPage';
 import ProfileScreen from '@/features/profile/components/ProfileScreen';
 import AdminLoginScreen from '@/features/auth/components/AdminLoginScreen';
 import QuestionAdminScreen from '@/features/admin/components/QuestionAdminScreen';
+import { ManageUsersPage } from '@/pages/admin/ManageUsersPage';
 import VisualNovelGame from '@/features/game/components/VisualNovel/VisualNovelGame';
 import EnvironmentScreen from '@/features/game/components/Environment/EnvironmentScreen';
 import EnvironmentSelectionScreen from '@/features/game/components/Environment/EnvironmentSelectionScreen';
@@ -241,6 +242,12 @@ const GameManager = () => {
                 navigate('/login');
               }}
             />
+          </ProtectedRoute>
+        } />
+        
+        <Route path="/admin/users" element={
+          <ProtectedRoute>
+            <ManageUsersPage />
           </ProtectedRoute>
         } />
       
