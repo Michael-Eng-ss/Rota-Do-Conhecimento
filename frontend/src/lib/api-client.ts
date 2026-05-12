@@ -27,6 +27,7 @@ const edgeFnToLocalPath: Record<string, string> = {
   'progresso-perguntas-api': '/progresso-perguntas',
   'quiz-avaliativo-api': '/quiz-avaliativo',
   'relatorios-api': '/relatorios',
+  'ranking-api': '/ranking',
 };
 
 export async function callEdge(
