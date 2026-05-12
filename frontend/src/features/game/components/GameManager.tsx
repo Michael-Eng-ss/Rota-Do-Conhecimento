@@ -8,6 +8,7 @@ import RegisterScreen from '@/features/auth/components/RegisterScreen';
 import { RankingPage as RankingScreen } from '@/pages/game/RankingPage';
 import ProfileScreen from '@/features/profile/components/ProfileScreen';
 import AdminLoginScreen from '@/features/auth/components/AdminLoginScreen';
+import AdminHubScreen from '@/features/admin/components/AdminHubScreen';
 import QuestionAdminScreen from '@/features/admin/components/QuestionAdminScreen';
 import { ManageUsersPage } from '@/pages/admin/ManageUsersPage';
 import VisualNovelGame from '@/features/game/components/VisualNovel/VisualNovelGame';
@@ -99,7 +100,7 @@ const GameManager = () => {
     if (user) {
       const userRole = String(user.role).toUpperCase();
       if (['SUPER_ADMIN', 'ADMIN', 'CAMPUS_ADMIN', '1', '2'].includes(userRole)) {
-        return <Navigate to="/admin/users" replace />;
+        return <Navigate to="/admin" replace />;
       }
       return <Navigate to="/menu" replace />;
     }
@@ -239,13 +240,16 @@ const GameManager = () => {
           </PublicOnlyRoute>
         } />
       
+        <Route path="/admin" element={
+          <ProtectedRoute>
+            <AdminHubScreen />
+          </ProtectedRoute>
+        } />
+
         <Route path="/questionAdmin" element={
           <ProtectedRoute>
             <QuestionAdminScreen
-              onBack={() => {
-                handleLogout();
-                navigate('/login');
-              }}
+              onBack={() => navigate('/admin')}
             />
           </ProtectedRoute>
         } />

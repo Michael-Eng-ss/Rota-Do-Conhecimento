@@ -111,7 +111,7 @@ const QuestionAdminScreen = ({ onBack }: QuestionAdminScreenProps) => {
           </div>
           <GameButton onClick={onBack} variant="primary" className="flex items-center gap-2">
             <LogOut className="w-4 h-4" />
-            Sair do Admin
+            Voltar ao Hub Admin
           </GameButton>
         </div>
 

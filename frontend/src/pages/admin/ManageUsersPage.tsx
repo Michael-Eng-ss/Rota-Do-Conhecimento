@@ -71,9 +71,9 @@ export const ManageUsersPage = () => {
               {isLoading ? 'Carregando...' : `${users.length} usuários cadastrados`}
             </p>
           </div>
-          <GameButton onClick={() => navigate('/menu')} variant="primary" className="flex items-center gap-2">
+          <GameButton onClick={() => navigate('/admin')} variant="primary" className="flex items-center gap-2">
             <LogOut className="w-5 h-5" />
-            Voltar ao Jogo
+            Voltar ao Hub Admin
           </GameButton>
         </div>
 
