@@ -9,11 +9,10 @@ interface LoginScreenProps {
   onLogin: () => void;
   onRegister: () => void;
   onForgotPassword: () => void;
-  onAdminLogin?: () => void;
   signIn: (email: string, password: string) => Promise<{ data: any; error: any }>;
 }
 
-const LoginScreen = ({ onLogin, onRegister, onForgotPassword, onAdminLogin, signIn }: LoginScreenProps) => {
+const LoginScreen = ({ onLogin, onRegister, onForgotPassword, signIn }: LoginScreenProps) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -68,12 +67,6 @@ const LoginScreen = ({ onLogin, onRegister, onForgotPassword, onAdminLogin, sign
             <GameButton onClick={onForgotPassword} variant="link">
               Esqueceu a senha ?
             </GameButton>
-            
-            {onAdminLogin && (
-              <GameButton onClick={onAdminLogin} variant="link" className="opacity-60 text-sm">
-                Área Admin
-              </GameButton>
-            )}
           </div>
         </div>
       </div>

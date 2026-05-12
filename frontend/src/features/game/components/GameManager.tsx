@@ -96,7 +96,13 @@ const GameManager = () => {
   };
 
   const PublicOnlyRoute = ({ children }: { children: JSX.Element }) => {
-    if (user) return <Navigate to="/menu" replace />;
+    if (user) {
+      const userRole = String(user.role).toUpperCase();
+      if (['SUPER_ADMIN', 'ADMIN', 'CAMPUS_ADMIN', '1', '2'].includes(userRole)) {
+        return <Navigate to="/admin/users" replace />;
+      }
+      return <Navigate to="/menu" replace />;
+    }
     return children;
   };
 
@@ -108,10 +114,9 @@ const GameManager = () => {
         <Route path="/login" element={
           <PublicOnlyRoute>
             <LoginScreen
-              onLogin={() => navigate('/menu')}
+              onLogin={() => {}}
               onRegister={() => navigate('/register')}
               onForgotPassword={() => navigate('/forgotPassword')}
-              onAdminLogin={() => navigate('/adminLogin')}
               signIn={signIn}
             />
           </PublicOnlyRoute>

@@ -3,6 +3,8 @@ import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip, CartesianGri
 import { Trophy, Medal, Award, Loader2 } from 'lucide-react';
 import { fetchRankingApi } from '@/lib/api';
 
+import { ArrowLeft } from 'lucide-react';
+
 // Cores dinâmicas para o pódio
 const getBarColor = (index: number) => {
   if (index === 0) return '#fbbf24'; // Ouro
@@ -11,15 +13,29 @@ const getBarColor = (index: number) => {
   return '#3b82f6'; // Azul padrão para os demais
 };
 
-export const RankingPage = () => {
+interface RankingPageProps {
+  onBack?: () => void;
+  cursoId?: number;
+}
+
+export const RankingPage = ({ onBack, cursoId }: RankingPageProps) => {
   const { data: rankingData, isLoading, isError } = useQuery({
     queryKey: ['ranking'],
     queryFn: () => fetchRankingApi(),
   });
 
   return (
-    <div className="min-h-screen bg-slate-950 text-white p-8">
-      <div className="max-w-5xl mx-auto space-y-12">
+    <div className="min-h-screen bg-slate-950 text-white p-8 relative">
+      {onBack && (
+        <button 
+          onClick={onBack}
+          className="absolute top-8 left-8 p-2 bg-slate-900 border border-slate-700 rounded-full hover:bg-slate-800 transition-colors"
+          title="Voltar"
+        >
+          <ArrowLeft className="w-6 h-6 text-slate-300" />
+        </button>
+      )}
+      <div className="max-w-5xl mx-auto space-y-12 mt-12 md:mt-0">
         <div className="text-center space-y-4">
           <h1 className="text-5xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-blue-500">
             Ranking Global

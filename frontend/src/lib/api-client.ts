@@ -69,7 +69,7 @@ export interface AppUser {
   id: number;
   nome: string;
   email: string;
-  role: number;
+  role: string | number;
   pontuacao: number;
   foto: string;
   cursoid: number;
