@@ -1,9 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip, CartesianGrid, Cell } from 'recharts';
-import { Trophy, Medal, Award, Loader2 } from 'lucide-react';
-import { fetchRankingApi } from '@/lib/api';
-
-import { ArrowLeft } from 'lucide-react';
+import { Trophy, Medal, Award, Loader2, ArrowLeft } from 'lucide-react';
+import { callEdge } from '@/lib/api-client';
 
 // Cores dinâmicas para o pódio
 const getBarColor = (index: number) => {
@@ -20,8 +18,22 @@ interface RankingPageProps {
 
 export const RankingPage = ({ onBack, cursoId }: RankingPageProps) => {
   const { data: rankingData, isLoading, isError } = useQuery({
-    queryKey: ['ranking'],
-    queryFn: () => fetchRankingApi(),
+    queryKey: ['ranking', cursoId],
+    queryFn: async () => {
+      const endpoint = cursoId ? `curso/${cursoId}` : '';
+      const res = await callEdge('ranking-api', endpoint);
+      if (!res.ok) throw new Error('Falha ao buscar ranking');
+      const rawData = await res.json();
+      
+      // Mapeia os dados do backend para o formato esperado pelo Recharts e UI
+      return rawData.map((item: any) => ({
+        rank: item.position,
+        name: item.nome,
+        score: item.pontuacao,
+        campus: item.campusId ? `Campus ${item.campusId}` : 'Geral',
+        photo: item.foto
+      }));
+    },
   });
 
   return (
@@ -65,7 +77,7 @@ export const RankingPage = ({ onBack, cursoId }: RankingPageProps) => {
               <div className="space-y-4">
                 {rankingData?.slice(0, 3).map((player: any, index: number) => (
                   <div 
-                    key={player.rank} 
+                    key={player.rank || index} 
                     className="flex items-center gap-4 bg-slate-900 border border-slate-800 p-4 rounded-xl shadow-lg transition-transform hover:scale-105"
                   >
                     <div className="flex-shrink-0 flex items-center justify-center w-12 h-12 rounded-full bg-slate-800">
