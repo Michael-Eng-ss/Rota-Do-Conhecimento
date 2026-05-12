@@ -81,8 +81,8 @@ export class Usuario {
   @JoinColumn({ name: 'cursoid' })
   curso!: Curso | null;
 
-  @CreateDateColumn({ name: 'created_at', nullable: true })
-  createdAt!: Date;
+  @Column({ name: 'email_verified', type: 'boolean', default: false })
+  emailVerified!: boolean;
 
   // ── Helpers ──────────────────────────────────────────────────────────────
 
