@@ -14,7 +14,6 @@ const AdminHubScreen = () => {
       navigate('/login', { replace: true });
     } catch (error) {
       console.error('Erro ao sair:', error);
-      // Fallback em caso de erro na promise
       navigate('/login', { replace: true });
     }
   };
