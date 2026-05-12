@@ -2,11 +2,19 @@ FROM node:18-alpine
 
 WORKDIR /app
 
-COPY package.json ./
-RUN npm install --production
+# Copia os arquivos de dependência
+COPY package*.json ./
 
-COPY src/ ./src/
+# Instala todas as dependências (incluindo as de desenvolvimento para rodar o build do TypeScript)
+RUN npm install
+
+# Copia todo o código fonte e configurações (incluindo tsconfig)
+COPY . .
+
+# Faz a compilação do TypeScript
+RUN npm run build
 
 EXPOSE 4000
 
-CMD ["node", "src/server.js"]
+# Executa o comando de produção mapeado no package.json ("node build/src/index.js")
+CMD ["npm", "start"]
