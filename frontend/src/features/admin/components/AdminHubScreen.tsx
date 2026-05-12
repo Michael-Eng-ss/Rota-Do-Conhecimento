@@ -9,8 +9,14 @@ const AdminHubScreen = () => {
   const { user, signOut } = useAuth();
 
   const handleLogout = async () => {
-    await signOut();
-    navigate('/login');
+    try {
+      await signOut();
+      navigate('/login', { replace: true });
+    } catch (error) {
+      console.error('Erro ao sair:', error);
+      // Fallback em caso de erro na promise
+      navigate('/login', { replace: true });
+    }
   };
 
   return (
@@ -18,9 +24,13 @@ const AdminHubScreen = () => {
       <div className="flex flex-col min-h-screen px-4 py-8 max-w-4xl mx-auto justify-center">
         <div className="bg-slate-900/60 backdrop-blur-md border border-slate-700/50 rounded-2xl p-8 shadow-2xl flex flex-col items-center">
           
-          <div className="w-24 h-24 rounded-full border-4 border-blue-500/50 bg-slate-800 flex items-center justify-center mb-4 overflow-hidden">
+          <div className="w-24 h-24 rounded-full border-4 border-blue-500/50 bg-slate-800 flex items-center justify-center mb-4 overflow-hidden bg-white/10">
             {user?.foto ? (
-              <img src={`/assets/avatars/${user.foto}.png`} alt="Avatar" className="w-full h-full object-cover" />
+              <img 
+                src={new URL(`../../../assets/characters/${user.foto}.png`, import.meta.url).href} 
+                alt="Avatar" 
+                className="w-full h-full object-cover object-top" 
+              />
             ) : (
               <div className="text-4xl">👑</div>
             )}

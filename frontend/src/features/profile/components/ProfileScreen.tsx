@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { ArrowLeft, Trophy, Star, Target, CheckCircle, Lock, Pencil, X, Check } from 'lucide-react';
 import { environmentConfigs, TOTAL_ENVIRONMENTS, type EnvironmentId } from '@/features/game/config/environments';
 import { useToast } from '@/hooks/use-toast';
@@ -78,8 +78,17 @@ const ProfileScreen = ({
   const effectiveScore = totalScore || (user?.pontuacao ?? 0);
   const effectiveCompleted = completedEnvironments;
 
+  // Sincroniza estados de edição com valores efetivos se estiverem vazios
+  useEffect(() => {
+    if (!editName || editName === 'Jogador') setEditName(effectiveName);
+    if (!editAvatar || editAvatar === 'clara') setEditAvatar(effectiveAvatar);
+  }, [effectiveName, effectiveAvatar]);
+
   const getCurrentAvatar = (avatarId: string) => {
-    return avatarOptions.find(a => a.id === avatarId)?.image || claraImage;
+    const option = avatarOptions.find(a => a.id === avatarId);
+    if (option) return option.image;
+    // Fallback para o avatar padrão ou tentar carregar dinamicamente se for um ID válido
+    return claraImage;
   };
 
   const handleSave = async () => {
@@ -91,7 +100,10 @@ const ProfileScreen = ({
         await apiUpdateUser(user.id, { nome: editName.trim(), foto: editAvatar });
         // Atualiza o usuário no localStorage para persistir o avatar
         const { setSavedUser } = await import('@/lib/api-client');
-        setSavedUser({ ...user, nome: editName.trim(), foto: editAvatar });
+        const updatedUser = { ...user, nome: editName.trim(), foto: editAvatar };
+        setSavedUser(updatedUser);
+        // Também precisamos atualizar o estado local do useAuth se possível, 
+        // mas o ProfileScreen depende do que o GameManager passa.
       } catch (err: any) {
         toast({ title: 'Erro ao salvar perfil', description: err.message, variant: 'destructive' });
         return;

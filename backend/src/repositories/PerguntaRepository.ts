@@ -9,7 +9,10 @@ export class PerguntaRepository {
   }
 
   findAll(): Promise<Pergunta[]> {
-    return this.repo.find({ order: { id: 'ASC' } });
+    return this.repo.find({ 
+      relations: ['alternativas', 'nivel'],
+      order: { id: 'ASC' } 
+    });
   }
 
   findById(id: number): Promise<Pergunta | null> {
