@@ -424,21 +424,23 @@ const BattleScreen = ({ environmentId, onBackToPatio, onProfile, onVictory }: Ba
       </div>
 
       <div className="absolute inset-0 z-10 pointer-events-none">
-        <div className={`absolute bottom-24 left-4 md:left-16 w-52 md:w-72 ${shakeClara ? 'animate-shake-damage' : ''}`}>
-          <img 
+        {/* Clara — ancorada no chão, esquerda */}
+        <div className={`absolute bottom-0 left-2 md:left-10 flex items-end ${shakeClara ? 'animate-shake-damage' : ''}`}>
+          <img
             key={getClaraSprite()}
-            src={getClaraSprite()} 
-            alt="Clara" 
-            className="w-full h-auto object-contain drop-shadow-lg animate-sprite-swap"
+            src={getClaraSprite()}
+            alt="Clara"
+            className="max-h-[60vh] md:max-h-[68vh] w-auto object-contain drop-shadow-2xl animate-sprite-swap"
           />
         </div>
-        
-        <div className={`absolute bottom-24 right-4 md:right-16 w-72 md:w-96 flex items-center justify-center ${shakeBoss ? 'animate-shake-damage' : ''}`}>
-          <img 
+
+        {/* Chefão — ancorado no chão, direita */}
+        <div className={`absolute bottom-0 right-2 md:right-10 flex items-end ${shakeBoss ? 'animate-shake-damage' : ''}`}>
+          <img
             key={getBossSprite()}
-            src={getBossSprite()} 
-            alt="Chefão" 
-            className="w-full h-auto object-contain drop-shadow-lg relative z-10 animate-sprite-swap"
+            src={getBossSprite()}
+            alt="Chefão"
+            className="max-h-[68vh] md:max-h-[78vh] w-auto object-contain drop-shadow-2xl animate-sprite-swap"
           />
         </div>
       </div>
