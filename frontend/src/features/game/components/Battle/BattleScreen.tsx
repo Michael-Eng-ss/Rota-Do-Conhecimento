@@ -257,7 +257,19 @@ const BattleScreen = ({ environmentId, onBackToPatio, onProfile, onVictory }: Ba
     }
   };
 
+  const [isDialogueComplete, setIsDialogueComplete] = useState(false);
+
+  useEffect(() => {
+    // Reset completion state when phase/dialogue changes
+    setIsDialogueComplete(false);
+  }, [phase]);
+
   const handleDialogueClick = () => {
+    // First click: complete the typewriter; second click: advance scene
+    if (!isDialogueComplete) {
+      setIsDialogueComplete(true);
+      return;
+    }
     if (phase === 'intro-1') {
       setPhase('intro-2');
     } else if (phase === 'intro-2') {
@@ -464,13 +476,14 @@ const BattleScreen = ({ environmentId, onBackToPatio, onProfile, onVictory }: Ba
       )}
 
       {(phase === 'intro-1' || phase === 'intro-2' || phase === 'intro-3' || phase === 'battle-start') && dialogue && (
-        <div 
+        <div
           className="absolute bottom-0 left-0 right-0 p-4 md:p-8 z-20 cursor-pointer"
           onClick={handleDialogueClick}
         >
           <DialogBox
             speaker={dialogue.speaker}
             dialogue={dialogue.text}
+            onComplete={() => setIsDialogueComplete(true)}
           />
         </div>
       )}

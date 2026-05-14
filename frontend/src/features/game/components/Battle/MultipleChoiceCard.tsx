@@ -19,7 +19,7 @@ interface MultipleChoiceCardProps {
   onContinue?: () => void;
 }
 
-/** Classifica o texto para adaptar tamanho de fonte e layout */
+/** Classifica o texto para adaptar tamanho de fonte */
 function getTextSize(text: string): 'short' | 'medium' | 'long' {
   if (text.length <= 80)  return 'short';
   if (text.length <= 220) return 'medium';
@@ -48,24 +48,22 @@ const MultipleChoiceCard = ({
   };
 
   const displaySelectedId = reviewMode ? reviewSelectedId : selectedId;
-  const questionSize   = getTextSize(baseText);
-  const hasLongAlts    = alternatives.some(a => a.text.length > 120);
-  const hasShortAlts   = alternatives.every(a => a.text.length <= 50);
+  const questionSize  = getTextSize(baseText);
+  const hasLongAlts   = alternatives.some(a => a.text.length > 120);
+  const hasShortAlts  = alternatives.every(a => a.text.length <= 50);
+  const progress      = Math.round((questionNumber / totalQuestions) * 100);
 
-  // Tamanho de fonte do enunciado baseado no tamanho do texto
   const questionFontClass =
-    questionSize === 'short'  ? 'text-base md:text-lg lg:text-xl' :
-    questionSize === 'medium' ? 'text-sm  md:text-base'           :
+    questionSize === 'short'  ? 'text-base md:text-lg' :
+    questionSize === 'medium' ? 'text-sm  md:text-base' :
                                 'text-xs  md:text-sm';
 
-  // Tamanho de fonte das alternativas
   const altFontClass = hasLongAlts
     ? 'text-xs md:text-sm'
     : hasShortAlts
-    ? 'text-sm md:text-base lg:text-lg'
+    ? 'text-sm md:text-base'
     : 'text-sm md:text-base';
 
-  // Grid 2 colunas somente se alternativas forem curtas
   const altGridClass = hasShortAlts && alternatives.length <= 4
     ? 'grid grid-cols-2 gap-2'
     : 'flex flex-col gap-2';
@@ -73,54 +71,83 @@ const MultipleChoiceCard = ({
   return (
     <div className="absolute inset-0 flex flex-col items-center justify-center z-30 pointer-events-none px-2 sm:px-4 py-2 sm:py-4">
 
-      {/* Contador flutuante */}
-      <div className="bg-blue-600 text-white px-3 py-1.5 rounded-full mb-2 shadow-lg pointer-events-auto flex-shrink-0 text-sm font-bold">
-        Questão {questionNumber} de {totalQuestions}
-      </div>
-
-      {/* Card principal — cresce com o conteúdo até o limite da tela */}
+      {/* Card principal */}
       <div
         className="
-          bg-white/97 backdrop-blur-sm rounded-2xl shadow-2xl border-4 border-blue-400
+          bg-slate-900/95 backdrop-blur-md rounded-2xl shadow-2xl
+          border border-slate-600/60
           pointer-events-auto w-full mx-auto flex flex-col
-          max-w-3xl
-          max-h-[88dvh] sm:max-h-[82dvh]
+          max-w-2xl
+          max-h-[90dvh] sm:max-h-[85dvh]
           overflow-hidden
         "
+        style={{ boxShadow: '0 0 40px rgba(0,0,0,0.8), 0 0 0 1px rgba(99,102,241,0.2)' }}
       >
+        {/* ── Barra de progresso ── */}
+        <div className="h-1.5 bg-slate-700 flex-shrink-0">
+          <div
+            className="h-full bg-gradient-to-r from-violet-500 to-blue-400 transition-all duration-500"
+            style={{ width: `${progress}%` }}
+          />
+        </div>
+
+        {/* ── Header: contador ── */}
+        <div className="flex items-center justify-between px-5 py-3 border-b border-slate-700/60 flex-shrink-0">
+          <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">
+            Questão
+          </span>
+          <span className="text-sm font-black text-violet-400">
+            {questionNumber} / {totalQuestions}
+          </span>
+        </div>
+
         {/* ── Enunciado ── */}
         <div
           className={`
-            px-4 sm:px-6 py-3 sm:py-4 bg-blue-50 border-b-2 border-blue-200
+            px-5 py-4 border-b border-slate-700/60
             overflow-y-auto flex-shrink-0
-            ${questionSize === 'long' ? 'max-h-[35%]' : questionSize === 'medium' ? 'max-h-[30%]' : ''}
+            ${questionSize === 'long' ? 'max-h-[32%]' : questionSize === 'medium' ? 'max-h-[28%]' : ''}
           `}
         >
-          <p className={`text-gray-800 leading-relaxed whitespace-pre-wrap ${questionFontClass}`}>
+          <p className={`text-slate-100 leading-relaxed whitespace-pre-wrap ${questionFontClass}`}>
             {baseText}
           </p>
         </div>
 
         {/* ── Label ── */}
-        <div className="px-4 sm:px-6 py-1.5 bg-gray-100 border-b border-gray-200 flex-shrink-0">
-          <p className="text-gray-500 text-xs font-medium tracking-wide uppercase">
+        <div className="px-5 py-2 bg-slate-800/60 border-b border-slate-700/40 flex-shrink-0">
+          <p className="text-slate-500 text-xs font-semibold tracking-wider uppercase">
             Selecione a alternativa correta
           </p>
         </div>
 
-        {/* ── Alternativas — scroll quando necessário ── */}
-        <div className={`px-4 sm:px-6 py-3 sm:py-4 overflow-y-auto flex-1 ${altGridClass}`}>
+        {/* ── Alternativas ── */}
+        <div className={`px-5 py-4 overflow-y-auto flex-1 ${altGridClass}`}>
           {alternatives.map((alt, index) => {
             const letter     = String.fromCharCode(65 + index);
             const isSelected = displaySelectedId === alt.id;
 
-            let bgClass = 'bg-gray-50 border border-gray-200 hover:bg-blue-50 hover:border-blue-300';
+            // Cores por estado
+            let btnClass = 'bg-slate-800 border border-slate-600 hover:bg-slate-700 hover:border-violet-500/60';
+            let letterClass = 'bg-slate-700 text-slate-300';
+            let textClass = 'text-slate-200';
+
             if (reviewMode) {
-              if (alt.isCorrect)                  bgClass = 'bg-green-100 border-2 border-green-400';
-              else if (isSelected && !alt.isCorrect) bgClass = 'bg-red-100 border-2 border-red-400';
-              else                                bgClass = 'bg-gray-50 border border-gray-200 opacity-50';
+              if (alt.isCorrect) {
+                btnClass   = 'bg-green-900/60 border-2 border-green-500/80';
+                letterClass = 'bg-green-500 text-white';
+                textClass   = 'text-green-200';
+              } else if (isSelected && !alt.isCorrect) {
+                btnClass   = 'bg-red-900/60 border-2 border-red-500/80';
+                letterClass = 'bg-red-500 text-white';
+                textClass   = 'text-red-200';
+              } else {
+                btnClass   = 'bg-slate-800/50 border border-slate-700 opacity-40';
+              }
             } else if (isSelected) {
-              bgClass = 'bg-blue-100 border-2 border-blue-500 shadow-md';
+              btnClass   = 'bg-violet-900/60 border-2 border-violet-400 shadow-lg shadow-violet-500/20';
+              letterClass = 'bg-violet-500 text-white';
+              textClass   = 'text-violet-100';
             }
 
             return (
@@ -130,35 +157,32 @@ const MultipleChoiceCard = ({
                 onClick={() => !disabled && !reviewMode && setSelectedId(alt.id)}
                 disabled={disabled || reviewMode}
                 className={`
-                  flex items-center gap-2 sm:gap-3 p-2.5 sm:p-3 rounded-xl text-left
+                  flex items-center gap-3 p-3 rounded-xl text-left
                   transition-all duration-150
-                  ${bgClass}
+                  ${btnClass}
                   ${disabled || reviewMode ? 'cursor-default' : 'cursor-pointer active:scale-[0.98]'}
                 `}
               >
                 {/* Letra */}
                 <span className={`
-                  flex-shrink-0 w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center
-                  font-bold text-xs sm:text-sm transition-all
-                  ${reviewMode && alt.isCorrect                  ? 'bg-green-500 text-white'
-                  : reviewMode && isSelected && !alt.isCorrect  ? 'bg-red-500 text-white'
-                  : isSelected                                   ? 'bg-blue-500 text-white'
-                  :                                               'bg-gray-200 text-gray-700'}
+                  flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center
+                  font-bold text-sm transition-all
+                  ${letterClass}
                 `}>
                   {letter}
                 </span>
 
                 {/* Texto */}
-                <span className={`flex-1 text-gray-800 leading-snug ${altFontClass}`}>
+                <span className={`flex-1 leading-snug ${altFontClass} ${textClass}`}>
                   {alt.text}
                 </span>
 
                 {/* Ícones review */}
                 {reviewMode && alt.isCorrect && (
-                  <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0" />
+                  <CheckCircle className="w-5 h-5 text-green-400 flex-shrink-0" />
                 )}
                 {reviewMode && isSelected && !alt.isCorrect && (
-                  <XCircle className="w-5 h-5 text-red-600 flex-shrink-0" />
+                  <XCircle className="w-5 h-5 text-red-400 flex-shrink-0" />
                 )}
               </button>
             );
@@ -166,13 +190,14 @@ const MultipleChoiceCard = ({
         </div>
 
         {/* ── Botão ── */}
-        <div className="px-4 sm:px-6 py-3 bg-gray-50 border-t border-gray-200 flex-shrink-0">
+        <div className="px-5 py-4 bg-slate-900/80 border-t border-slate-700/60 flex-shrink-0">
           {reviewMode ? (
             <button
               onClick={onContinue}
-              className="w-full py-2.5 sm:py-3 rounded-xl text-base sm:text-lg font-bold
-                         transition-all duration-200 bg-blue-500 hover:bg-blue-600
-                         text-white active:scale-[0.98] shadow-lg"
+              className="w-full py-3 rounded-xl text-base font-bold
+                         bg-gradient-to-r from-violet-600 to-blue-500
+                         hover:from-violet-500 hover:to-blue-400
+                         text-white active:scale-[0.98] shadow-lg transition-all duration-200"
             >
               Continuar ➜
             </button>
@@ -181,14 +206,14 @@ const MultipleChoiceCard = ({
               onClick={handleConfirm}
               disabled={!selectedId || disabled}
               className={`
-                w-full py-2.5 sm:py-3 rounded-xl text-base sm:text-lg font-bold
+                w-full py-3 rounded-xl text-base font-bold
                 transition-all duration-200 shadow-lg
                 ${selectedId && !disabled
-                  ? 'bg-green-500 hover:bg-green-600 text-white active:scale-[0.98]'
-                  : 'bg-gray-300 text-gray-500 cursor-not-allowed'}
+                  ? 'bg-gradient-to-r from-green-500 to-emerald-400 hover:from-green-400 hover:to-emerald-300 text-white active:scale-[0.98]'
+                  : 'bg-slate-700 text-slate-500 cursor-not-allowed'}
               `}
             >
-              {selectedId ? 'Confirmar Resposta' : 'Selecione uma alternativa'}
+              {selectedId ? 'Confirmar Resposta ✓' : 'Selecione uma alternativa'}
             </button>
           )}
         </div>
