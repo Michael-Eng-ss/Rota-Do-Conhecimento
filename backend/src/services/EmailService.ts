@@ -72,12 +72,23 @@ export class EmailService {
 
     try {
       const user = process.env.SMTP_USER || process.env.EMAIL_USER;
-      options.from = options.from || `"Rota do Conhecimento" <${user}>`;
+      options.from    = options.from    || `"Rota do Conhecimento" <${user}>`;
+      options.replyTo = options.replyTo || `"Rota do Conhecimento" <${user}>`;
+
+      // Cabeçalhos para melhorar entregabilidade e evitar filtros de spam
+      options.headers = {
+        'X-Mailer': 'Rota-do-Conhecimento-Mailer/1.0',
+        'X-Priority': '3',
+        'X-MSMail-Priority': 'Normal',
+        'Importance': 'Normal',
+        'List-Unsubscribe': `<mailto:${user}?subject=unsubscribe>`,
+        'Precedence': 'bulk',
+      };
+
       await this.transporter.sendMail(options);
+      console.info(`[EmailService] ✅ E-mail enviado com sucesso para: ${options.to} | Assunto: ${options.subject}`);
     } catch (error) {
       console.error('[EmailService] Falha ao enviar e-mail:', error);
-      // Aqui poderíamos lançar um AppError, mas falhas de e-mail geralmente 
-      // não devem travar o fluxo principal (ex: o usuário foi criado de qualquer forma)
     }
   }
 
