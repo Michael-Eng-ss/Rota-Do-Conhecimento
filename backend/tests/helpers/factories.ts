@@ -37,6 +37,7 @@ export async function createUser(
     status:    rest.status    ?? true,
     campusId:  rest.campusId  ?? null,
     cursoId:   rest.cursoId   ?? null,
+    emailVerified: rest.emailVerified ?? true,
   });
   return repo.save(entity);
 }
