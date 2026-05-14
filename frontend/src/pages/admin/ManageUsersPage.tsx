@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getAllUsers, updateUserRole, updateUser, toggleUserStatus } from '@/models/services/admin.service';
 import GameBackground from '@/shared/components/GameBackground';
 import GameButton from '@/shared/components/GameButton';
-import { useAuth } from '@/features/auth/hooks/useAuth';
+import { useAuth } from '@/features/auth/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Filter, ShieldAlert, ShieldCheck, Loader2, Edit, Power, PowerOff } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';

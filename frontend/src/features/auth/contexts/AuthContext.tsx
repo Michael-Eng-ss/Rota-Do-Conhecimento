@@ -1,9 +1,24 @@
-import { useState, useEffect, useCallback } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
 import { getToken, clearAuth, getSavedUser, setToken, setSavedUser, type AppUser } from '@/lib/api-client';
 import { login as apiLogin, forgotPassword as apiForgotPassword, resetPassword as apiResetPassword } from '@/models/services/auth.service';
 import { createUsuario as apiRegisterUser, getUsuarioById } from '@/models/services/usuario.service';
 
-export const useAuth = () => {
+interface AuthContextType {
+  user: AppUser | null;
+  setUser: React.Dispatch<React.SetStateAction<AppUser | null>>;
+  loading: boolean;
+  isAdmin: boolean;
+  signIn: (email: string, senha: string) => Promise<{ data: AppUser | null; error: any }>;
+  signUp: (email: string, senha: string, nome: string) => Promise<{ data: AppUser | null; error: any }>;
+  signOut: () => Promise<void>;
+  checkAdminRole: () => Promise<void>;
+  forgotPassword: (email: string) => Promise<{ error: any }>;
+  resetPassword: (token: string, novaSenha: string) => Promise<{ error: any }>;
+}
+
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
+export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<AppUser | null>(null);
   const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
@@ -61,7 +76,7 @@ export const useAuth = () => {
         senha: password,
         cursoid: 1,
       });
-      return { data: newUser, error: null };
+      return { data: newUser as unknown as AppUser, error: null };
     } catch (err: any) {
       return { data: null, error: { message: err.message } };
     }
@@ -97,6 +112,28 @@ export const useAuth = () => {
     }
   }, []);
 
+  return (
+    <AuthContext.Provider value={{
+      user,
+      setUser,
+      loading,
+      isAdmin,
+      signIn,
+      signUp,
+      signOut,
+      checkAdminRole,
+      forgotPassword,
+      resetPassword
+    }}>
+      {children}
+    </AuthContext.Provider>
+  );
+};
 
-  return { user, setUser, loading, isAdmin, signIn, signUp, signOut, checkAdminRole, forgotPassword, resetPassword };
+export const useAuth = () => {
+  const context = useContext(AuthContext);
+  if (context === undefined) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
+  return context;
 };

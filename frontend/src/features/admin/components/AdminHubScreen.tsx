@@ -1,17 +1,25 @@
 import { useNavigate } from 'react-router-dom';
 import GameBackground from '@/shared/components/GameBackground';
 import GameButton from '@/shared/components/GameButton';
-import { useAuth } from '@/features/auth/hooks/useAuth';
+import { useAuth } from '@/features/auth/contexts/AuthContext';
 import { Users, FileQuestion, Gamepad2, LogOut } from 'lucide-react';
 
-const AdminHubScreen = () => {
+interface AdminHubScreenProps {
+  onLogout?: () => void;
+}
+
+const AdminHubScreen = ({ onLogout }: AdminHubScreenProps) => {
   const navigate = useNavigate();
   const { user, signOut } = useAuth();
 
   const handleLogout = async () => {
     try {
-      await signOut();
-      navigate('/login', { replace: true });
+      if (onLogout) {
+        onLogout();
+      } else {
+        await signOut();
+        navigate('/login', { replace: true });
+      }
     } catch (error) {
       console.error('Erro ao sair:', error);
       navigate('/login', { replace: true });

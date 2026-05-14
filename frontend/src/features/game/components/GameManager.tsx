@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Routes, Route, useNavigate, Navigate, useLocation } from 'react-router-dom';
-import { useAuth } from '@/features/auth/hooks/useAuth';
+import { useAuth } from '@/features/auth/contexts/AuthContext';
 import { setSavedUser, updateUserScore as apiUpdateScore, type AppUser } from '@/lib/api-client';
 import LoginScreen from '@/features/auth/components/LoginScreen';
 import UserMenuScreen from '@/features/profile/components/UserMenuScreen';
@@ -247,7 +247,7 @@ const GameManager = () => {
       
         <Route path="/admin" element={
           <ProtectedRoute>
-            <AdminHubScreen />
+            <AdminHubScreen onLogout={handleLogout} />
           </ProtectedRoute>
         } />
 
