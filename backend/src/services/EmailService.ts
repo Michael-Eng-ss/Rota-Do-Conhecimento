@@ -107,6 +107,32 @@ export class EmailService {
     });
   }
 
+  async sendEmailVerification(email: string, nome: string, token: string): Promise<void> {
+    const link = `${FRONTEND_URL}/verificar-email?token=${token}`;
+
+    if (this.isDevMode) {
+      console.log(`[DEV MODE] Link de verificação de e-mail gerado: ${link}`);
+    }
+
+    const htmlContent = `
+      <h2 style="color: #1f2937; margin-top: 0;">Olá, ${nome}! Bem-vindo(a) ao Rota do Conhecimento! 🎉</h2>
+      <p style="color: #4b5563; font-size: 16px; line-height: 1.5;">Para começar a sua jornada e liberar o seu acesso ao jogo, precisamos que você confirme o seu endereço de e-mail.</p>
+      <p style="color: #4b5563; font-size: 16px; line-height: 1.5;">Clique no botão abaixo para ativar a sua conta. Este link expira em <strong>24 horas</strong>.</p>
+      <div style="text-align: center; margin: 32px 0;">
+        <a href="${link}" style="display: inline-block; padding: 14px 28px; background-color: #10b981; color: #ffffff; font-weight: bold; border-radius: 6px; text-decoration: none; letter-spacing: 0.5px;">
+          Confirmar meu E-mail
+        </a>
+      </div>
+      <p style="color: #6b7280; font-size: 14px; line-height: 1.5; margin-top: 24px; border-top: 1px solid #e5e7eb; padding-top: 16px;">Se você não realizou este cadastro, apenas ignore este e-mail.</p>
+    `;
+
+    await this.sendMail({
+      to: email,
+      subject: 'Confirme seu e-mail — Rota do Conhecimento 📩',
+      html: this.getBaseTemplate(htmlContent),
+    });
+  }
+
   async sendWelcome(email: string, nome: string): Promise<void> {
     const htmlContent = `
       <h2 style="color: #1f2937; margin-top: 0;">Bem-vindo(a), ${nome}! 🎉</h2>

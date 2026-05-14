@@ -21,3 +21,10 @@ export async function resetPassword(token: string, senha: string): Promise<void>
   const data = await res.json();
   if (!res.ok) throw new Error(data.message || 'Link inválido ou expirado');
 }
+
+export async function verifyEmail(token: string): Promise<{ message: string }> {
+  const res = await callEdge(FN, 'verificar-email', { method: 'POST', body: { token } });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.message || 'Erro ao verificar e-mail');
+  return data;
+}

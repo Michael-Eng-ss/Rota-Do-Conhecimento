@@ -3,8 +3,10 @@ import { DataSource } from 'typeorm';
 import { UsuarioRepository } from '../repositories/UsuarioRepository';
 import { CampusRepository } from '../repositories/CampusRepository';
 import { AppError } from '../shared/AppError';
-import { Role, ROLE_HIERARCHY } from '../shared/constants';
+import { Role, ROLE_HIERARCHY, EmailTokenType, TOKEN_TTL_MINUTES } from '../shared/constants';
 import { Usuario } from '../entities/Usuario';
+import { EmailTokenRepository } from '../repositories/EmailTokenRepository';
+import { EmailService } from './EmailService';
 
 const BCRYPT_ROUNDS = 12;
 
@@ -39,10 +41,14 @@ export interface UpdateUsuarioDTO {
 export class UsuarioService {
   private usuarioRepo: UsuarioRepository;
   private campusRepo: CampusRepository;
+  private emailTokenRepo: EmailTokenRepository;
+  private emailService: EmailService;
 
   constructor(dataSource: DataSource) {
     this.usuarioRepo = new UsuarioRepository(dataSource);
     this.campusRepo  = new CampusRepository(dataSource);
+    this.emailTokenRepo = new EmailTokenRepository(dataSource);
+    this.emailService = new EmailService();
   }
 
   async getById(id: number): Promise<Omit<Usuario, 'senha'>> {
@@ -80,6 +86,18 @@ export class UsuarioService {
       cursoId:        data.cursoId,
       campusId:       data.campusId,
     });
+
+    try {
+      const token = await this.emailTokenRepo.create(
+        user.id,
+        EmailTokenType.EMAIL_VERIFY,
+        TOKEN_TTL_MINUTES.EMAIL_VERIFY
+      );
+      await this.emailService.sendEmailVerification(user.email, user.nome, token);
+    } catch (err) {
+      console.error('[UsuarioService] Erro ao enviar e-mail de verificação no cadastro:', err);
+      // Não joga o erro para não quebrar a criação do usuário, ele pode pedir reenvio depois.
+    }
 
     const { senha: _, ...safe } = user as Record<string, unknown>;
     void _;

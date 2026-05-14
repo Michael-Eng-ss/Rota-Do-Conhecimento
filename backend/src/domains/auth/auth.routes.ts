@@ -36,4 +36,14 @@ router.post(
   asyncHandler(authController.resetPassword),
 );
 
+/**
+ * POST /auth/verificar-email
+ * Valida o e-mail do usuário recém-cadastrado.
+ */
+router.post(
+  '/verificar-email',
+  validateBody({ token: 'string' }),
+  asyncHandler(authController.verifyEmail),
+);
+
 export default router;

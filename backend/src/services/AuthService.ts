@@ -43,6 +43,10 @@ export class AuthService {
     if (!user) throw AppError.unauthorized('Email e/ou Senha Incorretos');
     if (!user.status) throw AppError.forbidden('Conta desativada. Entre em contato com o suporte.');
 
+    if (!user.emailVerified && user.role === Role.PLAYER) {
+      throw AppError.forbidden('E-mail não verificado. Por favor, verifique sua caixa de entrada antes de fazer login.');
+    }
+
     const valid = await this.verifyPassword(senha, user.senha);
     if (!valid) throw AppError.unauthorized('Email e/ou Senha Incorretos');
 
@@ -99,6 +103,18 @@ export class AuthService {
     await this.emailTokenRepo.markUsed(token);
 
     return { message: 'Senha atualizada com sucesso!' };
+  }
+
+  // ── Verificação de E-mail ─────────────────────────────────────────────────
+
+  async verifyEmail(token: string): Promise<{ message: string }> {
+    const record = await this.emailTokenRepo.findValid(token, EmailTokenType.EMAIL_VERIFY);
+    if (!record) throw AppError.badRequest('Link de verificação inválido ou expirado.');
+
+    await this.usuarioRepo.update(record.usuarioId, { emailVerified: true } as Partial<Usuario>);
+    await this.emailTokenRepo.markUsed(token);
+
+    return { message: 'E-mail verificado com sucesso!' };
   }
 
   // ── Helpers privados ──────────────────────────────────────────────────────

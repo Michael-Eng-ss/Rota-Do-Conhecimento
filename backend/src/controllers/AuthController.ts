@@ -26,6 +26,12 @@ export class AuthController {
     const result = await this.service.resetPassword(token, senha);
     res.json(result);
   };
+
+  verifyEmail = async (req: Request, res: Response): Promise<void> => {
+    const { token } = req.body as { token: string };
+    const result = await this.service.verifyEmail(token);
+    res.json(result);
+  };
 }
 
 export const authController = new AuthController();

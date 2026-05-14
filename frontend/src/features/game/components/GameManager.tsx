@@ -17,6 +17,8 @@ import EnvironmentSelectionScreen from '@/features/game/components/Environment/E
 import EndingScreen from '@/features/game/components/Ending/EndingScreen';
 import ForgotPasswordScreen from '@/features/auth/components/ForgotPasswordScreen';
 import NewPasswordScreen from '@/features/auth/components/NewPasswordScreen';
+import EmailConfirmScreen from '@/features/auth/components/EmailConfirmScreen';
+import { verifyEmail } from '@/models/services/auth.service';
 import NotFound from '@/pages/NotFound';
 
 const GameManager = () => {
@@ -36,7 +38,7 @@ const GameManager = () => {
     const params = new URLSearchParams(window.location.search);
     const token = params.get('token');
     const path = window.location.pathname;
-    if (token && path.includes('nova-senha')) {
+    if (token && (path.includes('nova-senha') || path.includes('verificar-email'))) {
       setUrlToken(token);
     }
   }, [location.pathname]);
@@ -143,6 +145,23 @@ const GameManager = () => {
               token={urlToken}
               onSuccess={() => navigate('/login')}
               resetPassword={resetPassword}
+            />
+          </PublicOnlyRoute>
+        } />
+
+        <Route path="/verificar-email" element={
+          <PublicOnlyRoute>
+            <EmailConfirmScreen
+              token={urlToken}
+              onGoToLogin={() => navigate('/login')}
+              confirmEmail={async (token) => {
+                try {
+                  await verifyEmail(token);
+                  return { error: null };
+                } catch (err: any) {
+                  return { error: err };
+                }
+              }}
             />
           </PublicOnlyRoute>
         } />
