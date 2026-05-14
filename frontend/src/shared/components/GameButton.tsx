@@ -2,13 +2,9 @@ import { forwardRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
-interface GameButtonProps {
-  children: React.ReactNode;
-  onClick?: () => void;
+interface GameButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: 'primary' | 'secondary' | 'outline' | 'link';
   size?: 'sm' | 'md' | 'lg';
-  className?: string;
-  disabled?: boolean;
 }
 
 const GameButton = forwardRef<HTMLButtonElement, GameButtonProps>(({ 
@@ -17,7 +13,8 @@ const GameButton = forwardRef<HTMLButtonElement, GameButtonProps>(({
   variant = 'primary',
   size = 'md',
   className = '',
-  disabled = false
+  disabled = false,
+  ...props
 }, ref) => {
   const baseClasses = "font-bold rounded-xl transition-all duration-200 hover:scale-105 active:scale-95 shadow-lg";
   
@@ -45,6 +42,7 @@ const GameButton = forwardRef<HTMLButtonElement, GameButtonProps>(({
         variantClasses[variant],
         className
       )}
+      {...props}
     >
       {children}
     </Button>
