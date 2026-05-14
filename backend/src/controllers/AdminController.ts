@@ -30,10 +30,38 @@ export class AdminController {
     res.json(result);
   };
 
-  /** GET /admin/usuarios — lista todos os usuários. */
+  /** GET /admin/usuarios — lista todos os usuários (incluindo inativos). */
   listAll = async (_req: Request, res: Response): Promise<void> => {
     const users = await this.service.listAll();
     res.json(users);
+  };
+
+  /** GET /admin/usuarios/:id — retorna perfil completo de um usuário. */
+  getUserById = async (req: AuthRequest, res: Response): Promise<void> => {
+    const targetId = parseInt(String(req.params.id));
+    if (isNaN(targetId)) throw AppError.badRequest('ID inválido');
+    const user = await this.service.getUserById(targetId);
+    res.json(user);
+  };
+
+  /** PUT /admin/usuarios/:id — edita dados do usuário (nome, email, etc.). */
+  updateUser = async (req: AuthRequest, res: Response): Promise<void> => {
+    const targetId = parseInt(String(req.params.id));
+    if (isNaN(targetId)) throw AppError.badRequest('ID inválido');
+    const user = await this.service.updateUser(targetId, req.body, req.user!);
+    res.json(user);
+  };
+
+  /** PUT /admin/usuarios/:id/status — ativa ou desativa um usuário. */
+  toggleStatus = async (req: AuthRequest, res: Response): Promise<void> => {
+    const targetId = parseInt(String(req.params.id));
+    if (isNaN(targetId)) throw AppError.badRequest('ID inválido');
+
+    const { status } = req.body as { status: boolean };
+    if (typeof status !== 'boolean') throw AppError.badRequest('Campo "status" deve ser booleano');
+
+    const result = await this.service.toggleStatus(targetId, status, req.user!);
+    res.json(result);
   };
 
   /** GET /admin/campus/:id/usuarios — lista usuários do campus. */

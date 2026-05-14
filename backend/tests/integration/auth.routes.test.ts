@@ -24,11 +24,7 @@ beforeAll(async () => {
   app = mod.app;
 });
 
-afterAll(async () => {
-  if (TestDataSource.isInitialized) {
-    await TestDataSource.destroy();
-  }
-});
+// Teardown gerenciado pelo globalTeardown.ts — não destruir aqui
 
 /**
  * Testes de integração: Rotas de Auth (/auth)

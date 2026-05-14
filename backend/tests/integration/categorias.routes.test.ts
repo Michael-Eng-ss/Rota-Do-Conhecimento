@@ -38,11 +38,7 @@ beforeAll(async () => {
   cursoBId = cursoB.id;
 });
 
-afterAll(async () => {
-  if (TestDataSource.isInitialized) {
-    await TestDataSource.destroy();
-  }
-});
+// Teardown gerenciado pelo globalTeardown.ts — não destruir aqui
 
 describe('Rotas de Categoria (/categorias)', () => {
   let categoriaId: number;

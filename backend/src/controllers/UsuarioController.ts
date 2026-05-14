@@ -20,7 +20,25 @@ export class UsuarioController {
   };
 
   create = async (req: Request, res: Response): Promise<void> => {
-    const user = await this.service.create(req.body);
+    const body = req.body as Record<string, unknown>;
+
+    // Normaliza snake_case (legado/frontend) → camelCase (DTO interno)
+    // Aceita tanto cursoid/campusid quanto cursoId/campusId
+    const dto = {
+      nome:           body.nome,
+      email:          body.email,
+      senha:          body.senha,
+      telefone:       body.telefone,
+      datanascimento: body.datanascimento,
+      uf:             body.uf,
+      cidade:         body.cidade,
+      turma:          body.turma,
+      periodo:        body.periodo,
+      cursoId:        (body.cursoId ?? body.cursoid) as number | undefined,
+      campusId:       (body.campusId ?? body.campusid) as number | undefined,
+    };
+
+    const user = await this.service.create(dto as Parameters<typeof this.service.create>[0]);
     res.status(201).json(user);
   };
 

@@ -18,6 +18,14 @@ export interface CreateAdminDTO {
   cursoId?: number;
 }
 
+export interface AdminUpdateUserDTO {
+  nome?: string;
+  email?: string;
+  telefone?: string;
+  cidade?: string;
+  uf?: string;
+}
+
 export class AdminService {
   private usuarioRepo: UsuarioRepository;
   private campusRepo: CampusRepository;
@@ -84,14 +92,81 @@ export class AdminService {
     return { message: `Usuário promovido para ${newRole} com sucesso` };
   }
 
-  /** Lista todos os usuários (admin e players). */
+  /** Lista todos os usuários (incluindo inativos) para o painel admin. */
   async listAll(): Promise<Omit<Usuario, 'senha'>[]> {
-    const users = await this.usuarioRepo.findAll();
+    const users = await this.usuarioRepo.findAllForAdmin();
     return users.map((u) => {
       const { senha: _, ...safe } = u as Record<string, unknown>;
       void _;
       return safe as Omit<Usuario, 'senha'>;
     });
+  }
+
+  /** Busca um usuário por ID — para visualização de perfil completo no admin. */
+  async getUserById(targetId: number): Promise<Omit<Usuario, 'senha'>> {
+    const user = await this.usuarioRepo.findByIdWithRelations(targetId);
+    if (!user) throw AppError.notFound('Usuário não encontrado');
+    const { senha: _, ...safe } = user as Record<string, unknown>;
+    void _;
+    return safe as Omit<Usuario, 'senha'>;
+  }
+
+  /**
+   * Edita dados de um usuário (nome, email, etc.) via painel admin.
+   * Verifica duplicata de e-mail antes de atualizar.
+   */
+  async updateUser(
+    targetId: number,
+    data: AdminUpdateUserDTO,
+    requester: JWTPayload,
+  ): Promise<Omit<Usuario, 'senha'>> {
+    const target = await this.usuarioRepo.findById(targetId);
+    if (!target) throw AppError.notFound('Usuário não encontrado');
+
+    // Não permite editar usuário de role >= ao do requester (exceto a si mesmo)
+    if (
+      targetId !== requester.id &&
+      ROLE_HIERARCHY[target.role] >= ROLE_HIERARCHY[requester.role]
+    ) {
+      throw AppError.forbidden('Sem permissão para editar este usuário');
+    }
+
+    // Verifica duplicata de e-mail (se o e-mail mudou)
+    if (data.email && data.email !== target.email) {
+      if (await this.usuarioRepo.existsByEmail(data.email)) {
+        throw AppError.conflict('E-mail já está em uso por outro usuário');
+      }
+    }
+
+    const updated = await this.usuarioRepo.update(targetId, data as Partial<Usuario>);
+    if (!updated) throw AppError.notFound('Usuário não encontrado');
+
+    const { senha: _, ...safe } = updated as Record<string, unknown>;
+    void _;
+    return safe as Omit<Usuario, 'senha'>;
+  }
+
+  /**
+   * Ativa ou desativa um usuário.
+   * Não permite alterar o status de usuário com role >= ao do requester.
+   */
+  async toggleStatus(
+    targetId: number,
+    status: boolean,
+    requester: JWTPayload,
+  ): Promise<{ message: string }> {
+    const target = await this.usuarioRepo.findById(targetId);
+    if (!target) throw AppError.notFound('Usuário não encontrado');
+
+    if (
+      targetId !== requester.id &&
+      ROLE_HIERARCHY[target.role] >= ROLE_HIERARCHY[requester.role]
+    ) {
+      throw AppError.forbidden('Sem permissão para alterar o status deste usuário');
+    }
+
+    await this.usuarioRepo.setStatus(targetId, status);
+    return { message: `Usuário ${status ? 'ativado' : 'desativado'} com sucesso` };
   }
 
   /** Lista usuários de um campus (para campus_admin). */

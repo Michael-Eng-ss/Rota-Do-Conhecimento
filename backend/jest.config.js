@@ -24,4 +24,11 @@ module.exports = {
   clearMocks: true,
   restoreMocks: true,
   verbose: true,
+  // DataSource compartilhado: inicializado UMA vez antes de todas as suites
+  // e destruído UMA vez após todas. Evita conflito entre workers de Jest.
+  globalSetup: './tests/integration/setup/globalSetup.ts',
+  globalTeardown: './tests/integration/setup/globalTeardown.ts',
+  // Roda as suites sequencialmente no mesmo worker para compartilhar o DataSource
+  maxWorkers: 1,
+  runInBand: true,
 };

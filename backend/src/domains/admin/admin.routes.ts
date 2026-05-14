@@ -13,15 +13,12 @@ const router = Router();
 
 /**
  * Todas as rotas deste módulo exigem autenticação.
- * A tela de admin é acessada diretamente pela URL (/admin).
- * O back-end valida o role no JWT — o front-end NÃO precisa de lógica para "esconder" o botão.
  */
 router.use(requireAuth);
 
 /**
  * POST /admin/admins
- * Cria um novo admin (SUPER_ADMIN pode criar ADMIN ou CAMPUS_ADMIN;
- * ADMIN pode criar apenas CAMPUS_ADMIN).
+ * Cria um novo admin (SUPER_ADMIN pode criar ADMIN ou CAMPUS_ADMIN).
  */
 router.post(
   '/admins',
@@ -32,7 +29,6 @@ router.post(
 /**
  * PUT /admin/usuarios/:id/role
  * Promove/altera o role de um usuário.
- * Apenas SUPER_ADMIN pode promover.
  */
 router.put(
   '/usuarios/:id/role',
@@ -41,16 +37,44 @@ router.put(
 );
 
 /**
+ * PUT /admin/usuarios/:id/status
+ * Ativa ou desativa um usuário.
+ */
+router.put(
+  '/usuarios/:id/status',
+  requireAdmin,
+  asyncHandler(adminController.toggleStatus),
+);
+
+/**
+ * PUT /admin/usuarios/:id
+ * Edita dados do usuário (nome, email, etc.).
+ */
+router.put(
+  '/usuarios/:id',
+  requireAdmin,
+  asyncHandler(adminController.updateUser),
+);
+
+/**
+ * GET /admin/usuarios/:id
+ * Retorna o perfil completo de um usuário.
+ */
+router.get(
+  '/usuarios/:id',
+  requireAdmin,
+  asyncHandler(adminController.getUserById),
+);
+
+/**
  * GET /admin/usuarios
- * Lista todos os usuários.
- * Requer ADMIN ou SUPER_ADMIN.
+ * Lista todos os usuários (incluindo inativos).
  */
 router.get('/usuarios', requireAdmin, asyncHandler(adminController.listAll));
 
 /**
  * GET /admin/campus/:id/usuarios
- * Lista usuários de um campus específico.
- * CAMPUS_ADMIN só acessa o próprio campus.
+ * Lista usuários de um campus específico (CAMPUS_ADMIN só acessa o próprio).
  */
 router.get(
   '/campus/:id/usuarios',

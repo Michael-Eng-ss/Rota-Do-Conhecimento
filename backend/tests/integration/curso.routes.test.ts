@@ -30,11 +30,7 @@ beforeAll(async () => {
   adminToken = loginRes.body.token;
 });
 
-afterAll(async () => {
-  if (TestDataSource.isInitialized) {
-    await TestDataSource.destroy();
-  }
-});
+// Teardown gerenciado pelo globalTeardown.ts — não destruir aqui
 
 describe('Rotas de Curso (/curso)', () => {
   let cursoCriadoId: number;

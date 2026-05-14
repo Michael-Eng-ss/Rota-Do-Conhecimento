@@ -21,6 +21,6 @@ export class EmailToken {
   @Column({ name: 'usado', type: 'boolean', default: false })
   usado!: boolean;
 
-  @CreateDateColumn({ name: 'created_at' })
-  createdAt!: Date;
+  @CreateDateColumn({ name: 'criado_em' })
+  criadoEm!: Date;
 }

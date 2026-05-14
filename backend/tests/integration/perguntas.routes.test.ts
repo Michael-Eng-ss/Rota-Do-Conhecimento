@@ -52,11 +52,7 @@ beforeAll(async () => {
   nivelId = nivel.id;
 });
 
-afterAll(async () => {
-  if (TestDataSource.isInitialized) {
-    await TestDataSource.destroy();
-  }
-});
+// Teardown gerenciado pelo globalTeardown.ts — não destruir aqui
 
 describe('Rotas de Pergunta (/perguntas)', () => {
   let perguntaId: number;

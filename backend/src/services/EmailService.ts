@@ -19,6 +19,13 @@ export class EmailService {
           pass: process.env.SMTP_PASS,
         },
       });
+
+      // Verifica conectividade SMTP na inicialização para detectar problemas cedo
+      this.transporter.verify().then(() => {
+        console.info('[EmailService] Conexão SMTP verificada com sucesso.');
+      }).catch((err: Error) => {
+        console.error('[EmailService] FALHA na verificação SMTP. Verifique SMTP_HOST, SMTP_PORT, SMTP_USER e SMTP_PASS.', err.message);
+      });
     } else {
       console.warn('[EmailService] SMTP_HOST não configurado. O serviço funcionará em modo DEV (apenas logs).');
     }

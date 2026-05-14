@@ -51,6 +51,17 @@ export class UsuarioRepository {
     return this.repo.find({ where: { status: true } });
   }
 
+  /** Lista TODOS os usuários (incluindo inativos) — apenas para admin. */
+  async findAllForAdmin(): Promise<Usuario[]> {
+    return this.repo.find({ order: { id: 'ASC' } });
+  }
+
+  /** Ativa ou desativa um usuário. */
+  async setStatus(id: number, status: boolean): Promise<boolean> {
+    const result = await this.repo.update(id, { status });
+    return (result.affected ?? 0) > 0;
+  }
+
   // ── Ranking ───────────────────────────────────────────────────────────────
 
   async findRankingByCurso(cursoId: number, limit = 50): Promise<Usuario[]> {

@@ -31,13 +31,51 @@ const ALL_ENTITIES = [
 const MIGRATIONS = [path.join(__dirname, '..', '..', 'migrations', '*.{ts,js}')];
 
 // ─────────────────────────────────────────────
+// Configuração de SSL dinâmica
+// ─────────────────────────────────────────────
+
+/**
+ * Determina a configuração de SSL com base no ambiente:
+ * - Testes (SQLite in-memory): sem SSL
+ * - URLs locais (localhost/127.0.0.1): sem SSL, mesmo com DATABASE_URL
+ * - Produção/Remoto (Supabase, Render etc.): SSL com rejectUnauthorized: false
+ */
+function buildSSLConfig(): boolean | { rejectUnauthorized: boolean } {
+  // Testes usam SQLite — SSL não se aplica
+  if (process.env.NODE_ENV === 'test') return false;
+
+  const dbUrl   = process.env.DATABASE_URL;
+  const nodeEnv = process.env.NODE_ENV;
+
+  if (dbUrl) {
+    // Detecta URLs locais — não precisa de SSL
+    const isLocal = /localhost|127\.0\.0\.1|::1/.test(dbUrl);
+    if (isLocal) return false;
+
+    // URL remota (Supabase, Render, etc.) — força SSL
+    return { rejectUnauthorized: false };
+  }
+
+  // Sem DATABASE_URL: usa variáveis individuais
+  const host = process.env.DB_HOST || 'localhost';
+  const isLocalHost = /localhost|127\.0\.0\.1/.test(host);
+  const isProduction = nodeEnv === 'production';
+
+  if (isProduction && !isLocalHost) {
+    return { rejectUnauthorized: false };
+  }
+
+  return false;
+}
+
+// ─────────────────────────────────────────────
 // Opções de conexão PostgreSQL (produção/dev)
 // ─────────────────────────────────────────────
 const postgresOptions: DataSourceOptions = process.env.DATABASE_URL
   ? {
       type: 'postgres',
       url: process.env.DATABASE_URL,
-      ssl: { rejectUnauthorized: false },
+      ssl: buildSSLConfig(),
       entities: ALL_ENTITIES,
       migrations: MIGRATIONS,
       synchronize: false,                        // Nunca em produção
@@ -50,7 +88,7 @@ const postgresOptions: DataSourceOptions = process.env.DATABASE_URL
       username: process.env.DB_USER     || 'quizgame',
       password: process.env.DB_PASSWORD || 'quizgame123',
       database: process.env.DB_NAME     || 'quizgame',
-      ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
+      ssl: buildSSLConfig(),
       entities: ALL_ENTITIES,
       migrations: MIGRATIONS,
       synchronize: false,

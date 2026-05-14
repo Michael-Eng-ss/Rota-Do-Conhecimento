@@ -27,10 +27,10 @@ export class EmailTokenRepository {
   async findValid(token: string, tipo: EmailTokenType): Promise<EmailToken | null> {
     return this.repo
       .createQueryBuilder('t')
-      .where('t.token = :token AND t.tipo = :tipo AND t.usado = false AND t.expiraEm > NOW()', {
-        token,
-        tipo,
-      })
+      .where('t.token = :token', { token })
+      .andWhere('t.tipo = :tipo', { tipo })
+      .andWhere('t.usado = :usado', { usado: false })
+      .andWhere('t.expiraEm > :now', { now: new Date() }) // Compatível com PostgreSQL e SQLite
       .getOne();
   }
 
