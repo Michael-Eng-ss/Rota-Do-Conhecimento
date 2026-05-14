@@ -33,14 +33,23 @@ beforeAll(async () => {
 // Teardown gerenciado pelo globalTeardown.ts — não destruir aqui
 
 describe('POST /usuarios — Cadastro de Usuário', () => {
-  const novoUsuario = {
+  let cursoId: number;
+
+  beforeAll(async () => {
+    const cursoRepo = TestDataSource.getRepository(require('../../src/entities/Curso').Curso);
+    const curso = await cursoRepo.save(cursoRepo.create({ nome: 'Curso T' }));
+    cursoId = curso.id;
+  });
+
+  const getNovoUsuario = () => ({
     nome: 'Clara Teste',
     email: `clara.${Date.now()}@mail.com`,
     senha: 'senha@123',
-    cursoid: 1,  // Formato snake_case enviado pelo frontend
-  };
+    cursoid: cursoId,  // Formato snake_case enviado pelo frontend
+  });
 
   it('deve criar usuário com sucesso e retornar 201', async () => {
+    const novoUsuario = getNovoUsuario();
     const res = await request(app)
       .post('/usuarios')
       .send(novoUsuario);
@@ -54,6 +63,10 @@ describe('POST /usuarios — Cadastro de Usuário', () => {
   });
 
   it('deve retornar 409 ao tentar criar com e-mail duplicado', async () => {
+    const novoUsuario = getNovoUsuario();
+    // first insert
+    await request(app).post('/usuarios').send(novoUsuario);
+    // second insert
     const res = await request(app)
       .post('/usuarios')
       .send(novoUsuario); // mesmo e-mail de antes
@@ -72,14 +85,22 @@ describe('POST /usuarios — Cadastro de Usuário', () => {
 });
 
 describe('Fluxo completo: Cadastro → Login → Perfil', () => {
-  const credenciais = {
-    nome: 'Jogador Flow',
-    email: `flow.${Date.now()}@mail.com`,
-    senha: 'fluxoSeguro!99',
-    cursoid: 1,
-  };
+  let cursoId: number;
+  let credenciais: any;
   let userId: number;
   let token: string;
+
+  beforeAll(async () => {
+    const cursoRepo = TestDataSource.getRepository(require('../../src/entities/Curso').Curso);
+    const curso = await cursoRepo.save(cursoRepo.create({ nome: 'Curso Flow' }));
+    cursoId = curso.id;
+    credenciais = {
+      nome: 'Jogador Flow',
+      email: `flow.${Date.now()}@mail.com`,
+      senha: 'fluxoSeguro!99',
+      cursoid: cursoId,
+    };
+  });
 
   it('[1/3] deve criar o usuário com cursoid (snake_case do frontend)', async () => {
     const res = await request(app)
@@ -89,6 +110,7 @@ describe('Fluxo completo: Cadastro → Login → Perfil', () => {
     expect(res.status).toBe(201);
     expect(res.body).toHaveProperty('id');
     userId = res.body.id as number;
+    await TestDataSource.getRepository(Usuario).update(userId, { emailVerified: true });
   });
 
   it('[2/3] deve autenticar com as credenciais recém-cadastradas', async () => {

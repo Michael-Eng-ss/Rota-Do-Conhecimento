@@ -55,7 +55,7 @@ describe('AuthService.login()', () => {
     mockUsuarioRepo.findByEmailWithPassword.mockResolvedValue({
       id: 1, email: 'u@u.com', nome: 'U',
       senha: hash, role: Role.PLAYER, status: true,
-      campusId: null, cursoId: null,
+      campusId: null, cursoId: null, emailVerified: true,
     } as never);
 
     await expect(service.login('u@u.com', 'errada')).rejects.toMatchObject({ statusCode: 401 });
@@ -84,7 +84,7 @@ describe('AuthService.login()', () => {
     mockUsuarioRepo.findByEmailWithPassword.mockResolvedValue({
       id: 99, email: 'legacy@c.com', nome: 'Legacy',
       senha: sha256hash, role: Role.PLAYER, status: true,
-      campusId: null, cursoId: null,
+      campusId: null, cursoId: null, emailVerified: true,
     } as never);
     mockUsuarioRepo.updatePassword.mockResolvedValue(true);
     mockLogRepo.create.mockResolvedValue({} as never);

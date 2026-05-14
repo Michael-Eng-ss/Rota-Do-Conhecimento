@@ -11,6 +11,7 @@
     "migration:generate": "npm run typeorm -- migration:generate",
     "migration:run": "npm run typeorm -- migration:run",
     "migration:revert": "npm run typeorm -- migration:revert",
+    "db:seed": "ts-node -r tsconfig-paths/register scripts/seed-questoes.ts",
     "test:unit": "jest --config=jest.unit.config.js",
     "test:unit:watch": "jest --config=jest.unit.config.js --watch",
     "test:unit:coverage": "jest --config=jest.unit.config.js --coverage",

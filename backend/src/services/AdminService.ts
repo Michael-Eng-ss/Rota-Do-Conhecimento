@@ -65,6 +65,7 @@ export class AdminService {
       cursoId:  data.cursoId  ?? null,
       pontuacao: 0,
       status:   true,
+      emailVerified: true,
     });
 
     const { senha: _, ...safe } = user as Record<string, unknown>;

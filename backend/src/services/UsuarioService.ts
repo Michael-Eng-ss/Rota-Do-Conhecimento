@@ -85,6 +85,7 @@ export class UsuarioService {
       periodo:        data.periodo,
       cursoId:        data.cursoId,
       campusId:       data.campusId,
+      emailVerified:  false,
     });
 
     try {
