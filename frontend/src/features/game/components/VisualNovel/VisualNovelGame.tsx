@@ -277,10 +277,11 @@ const VisualNovelGame = ({ onBack, onCutsceneEnd }: VisualNovelGameProps) => {
         <button
           onClick={(e) => {
             e.stopPropagation();
-            isFirstScene ? handleGoToLast() : handlePrevious();
+            handlePrevious();
           }}
-          className="p-2 rounded-full bg-white/20 backdrop-blur-sm hover:bg-white/40 transition-all duration-200 hover:scale-110"
-          title={isFirstScene ? "Ir para última cena" : "Cena anterior"}
+          disabled={isFirstScene}
+          className="p-2 rounded-full bg-white/20 backdrop-blur-sm hover:bg-white/40 transition-all duration-200 hover:scale-110 disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:scale-100"
+          title="Cena anterior"
         >
           <ChevronLeft className="w-8 h-8 text-white" />
         </button>
@@ -290,10 +291,14 @@ const VisualNovelGame = ({ onBack, onCutsceneEnd }: VisualNovelGameProps) => {
         <button
           onClick={(e) => {
             e.stopPropagation();
-            isLastScene ? handleGoToFirst() : handleAdvance();
+            if (isLastScene) {
+              onCutsceneEnd?.();
+            } else {
+              handleAdvance();
+            }
           }}
           className="p-2 rounded-full bg-white/20 backdrop-blur-sm hover:bg-white/40 transition-all duration-200 hover:scale-110"
-          title={isLastScene ? "Ir para primeira cena" : "Próxima cena"}
+          title={isLastScene ? "Iniciar jogo" : "Próxima cena"}
         >
           <ChevronRight className="w-8 h-8 text-white" />
         </button>
