@@ -7,16 +7,22 @@ export class EmailService {
   private isDevMode: boolean;
 
   constructor() {
-    this.isDevMode = !process.env.SMTP_HOST;
+    const host = process.env.SMTP_HOST || process.env.EMAIL_HOST;
+    const port = process.env.SMTP_PORT || process.env.EMAIL_PORT || '587';
+    const user = process.env.SMTP_USER || process.env.EMAIL_USER;
+    const pass = process.env.SMTP_PASS || process.env.EMAIL_PASS;
+    const secure = process.env.SMTP_SECURE === 'true' || process.env.EMAIL_SECURE === 'true';
+
+    this.isDevMode = !host;
 
     if (!this.isDevMode) {
       this.transporter = nodemailer.createTransport({
-        host: process.env.SMTP_HOST,
-        port: parseInt(process.env.SMTP_PORT || '587'),
-        secure: process.env.SMTP_SECURE === 'true',
+        host: host,
+        port: parseInt(port),
+        secure: secure,
         auth: {
-          user: process.env.SMTP_USER,
-          pass: process.env.SMTP_PASS,
+          user: user,
+          pass: pass,
         },
       });
 
@@ -65,7 +71,8 @@ export class EmailService {
     }
 
     try {
-      options.from = options.from || `"Rota do Conhecimento" <${process.env.SMTP_USER}>`;
+      const user = process.env.SMTP_USER || process.env.EMAIL_USER;
+      options.from = options.from || `"Rota do Conhecimento" <${user}>`;
       await this.transporter.sendMail(options);
     } catch (error) {
       console.error('[EmailService] Falha ao enviar e-mail:', error);
