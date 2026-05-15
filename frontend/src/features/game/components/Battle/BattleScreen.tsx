@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect } from 'react';
 import { useSoundSystem } from '@/features/game/hooks/useSoundSystem';
-import { useQuestions } from '@/features/game/hooks/useQuestions';
+import { useBattleSession } from '@/features/game/hooks/useBattleSession';
 import { useSoundEffects } from '@/features/game/hooks/useSoundEffects';
 import { environmentConfigs, MIN_PASS_PERCENTAGE, getDamagePercentage, type EnvironmentId } from '@/features/game/config/environments';
 import HealthBar from '@/features/game/components/Environment/HealthBar';
@@ -91,14 +91,27 @@ interface BattleScreenProps {
 
 const BattleScreen = ({ environmentId, onBackToPatio, onProfile, onVictory }: BattleScreenProps) => {
   const envConfig = environmentConfigs[environmentId];
-  const { fetchBattleQuestions } = useQuestions();
-  const [questions, setQuestions] = useState<BattleQuestion[]>([]);
-  const [questionsLoaded, setQuestionsLoaded] = useState(false);
-  
+
+  // ── Gerenciamento de perguntas (sorteio, limite e reset) ──────────────────────
+  const {
+    currentQuestion,
+    currentIndex,
+    totalQuestions,
+    isLastQuestion,
+    questionsLoaded,
+    isLoading: questionsLoading,
+    startNewSession,
+    advanceQuestion,
+  } = useBattleSession(environmentId);
+
+  // Carrega as perguntas ao montar o componente
+  useEffect(() => {
+    startNewSession();
+  }, [startNewSession]);
+
   const [phase, setPhase] = useState<BattlePhase>('intro-1');
   const [playerHealth, setPlayerHealth] = useState(100);
   const [bossHealth, setBossHealth] = useState(envConfig.maxHealth);
-  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [score, setScore] = useState(0);
   const [totalDamageDealt, setTotalDamageDealt] = useState(0);
   const [feedback, setFeedback] = useState<FeedbackType>(null);
@@ -111,28 +124,13 @@ const BattleScreen = ({ environmentId, onBackToPatio, onProfile, onVictory }: Ba
   const { settings, toggleMute } = useSoundSystem();
   const { playSound } = useSoundEffects();
 
-  useEffect(() => {
-    const loadQuestions = async () => {
-      const fetched = await fetchBattleQuestions(environmentId);
-      setQuestions(fetched);
-      setQuestionsLoaded(true);
-    };
-    loadQuestions();
-  }, [environmentId, fetchBattleQuestions]);
+  // Dano ao chefão por acerto (dividido igualmente pelas perguntas disponíveis)
+  const bossDamagePerHit = totalQuestions > 0 ? Math.floor(100 / totalQuestions) : 10;
 
-  const currentQuestion = questions[currentQuestionIndex];
-  
-  // Dano ao chefão por acerto
-  const bossDamagePerHit = questions.length > 0 ? Math.floor(100 / questions.length) : 10;
-  
-  // Cálculo de dano ao jogador (Clara) para ser coerente com os 80%:
   // Quantos erros o jogador pode cometer sem perder (ex: 10 * 0.2 = 2 erros)
-  const maxErrorsAllowed = questions.length > 0 ? Math.floor(questions.length * (1 - MIN_PASS_PERCENTAGE)) : 2;
-  // O dano deve ser suficiente para zerar a vida no erro fatal (maxErrorsAllowed + 1)
-  // Ex: 2 erros permitidos -> 3º erro mata -> 100 / 3 = 34 de dano por erro.
+  const maxErrorsAllowed = totalQuestions > 0 ? Math.floor(totalQuestions * (1 - MIN_PASS_PERCENTAGE)) : 2;
+  // O dano por erro zera a vida exatamente no erro fatal (maxErrorsAllowed + 1)
   const playerDamagePerHit = Math.ceil(100 / (maxErrorsAllowed + 1));
-
-  const isLastQuestion = currentQuestionIndex === questions.length - 1;
   
   const bossNameByEnv: Record<EnvironmentId, string> = {
     1: 'Professor do Auditório',
@@ -349,7 +347,9 @@ const BattleScreen = ({ environmentId, onBackToPatio, onProfile, onVictory }: Ba
       setTotalDamageDealt(newTotalDamage);
 
       // Vitória se acertou ≥ 80% das perguntas
-      const hitRate = newScore / questions.length;
+      // Ambientes 1 e 2: 10 perguntas → mínimo 8 acertos
+      // Ambiente 3 (Boss Final): 20 perguntas → mínimo 16 acertos
+      const hitRate = newScore / totalQuestions;
       if (hitRate >= MIN_PASS_PERCENTAGE) {
         setPhase('victory');
       } else {
@@ -358,14 +358,14 @@ const BattleScreen = ({ environmentId, onBackToPatio, onProfile, onVictory }: Ba
       return;
     }
 
-    // Próxima pergunta
+    // Próxima pergunta — advanceQuestion() tem guard interno anti-estouro
     setBossHealth(newBossHealth);
     setPlayerHealth(newPlayerHealth);
     setScore(newScore);
     setTotalDamageDealt(newTotalDamage);
-    setCurrentQuestionIndex(prev => prev + 1);
+    advanceQuestion();
     setPhase('question');
-  }, [pendingResult, score, totalDamageDealt, isLastQuestion, questions.length]);
+  }, [pendingResult, score, totalDamageDealt, isLastQuestion, totalQuestions, advanceQuestion]);
 
   useEffect(() => {
     if (settings.isMuted) return;
@@ -373,17 +373,21 @@ const BattleScreen = ({ environmentId, onBackToPatio, onProfile, onVictory }: Ba
     else if (phase === 'defeat') playSound('defeat');
   }, [phase, settings.isMuted, playSound]);
 
-  const handleRestart = () => {
+  const handleRestart = async () => {
+    // 1. Reseta todos os estados de UI e combate
     setPhase('intro-1');
     setPlayerHealth(100);
     setBossHealth(envConfig.maxHealth);
-    setCurrentQuestionIndex(0);
     setScore(0);
     setTotalDamageDealt(0);
     setFeedback(null);
+    setLastFeedback(null);
     setPendingResult(null);
     setBossTransformed(false);
     setReviewSelectedId(undefined);
+    // 2. Re-busca perguntas no banco com novo sorteio (Game Over reset)
+    //    usedIds e currentIndex são zerados dentro de startNewSession().
+    await startNewSession();
   };
 
   const handleVictoryComplete = () => {
@@ -447,8 +451,8 @@ const BattleScreen = ({ environmentId, onBackToPatio, onProfile, onVictory }: Ba
 
       {(phase === 'question' || phase === 'feedback') && currentQuestion && (
         <MultipleChoiceCard
-          questionNumber={currentQuestionIndex + 1}
-          totalQuestions={questions.length}
+          questionNumber={currentIndex + 1}
+          totalQuestions={totalQuestions}
           baseText={currentQuestion.baseText}
           alternatives={currentQuestion.alternatives}
           onConfirm={handleAnswerConfirm}
@@ -458,8 +462,8 @@ const BattleScreen = ({ environmentId, onBackToPatio, onProfile, onVictory }: Ba
 
       {phase === 'review' && currentQuestion && (
         <MultipleChoiceCard
-          questionNumber={currentQuestionIndex + 1}
-          totalQuestions={questions.length}
+          questionNumber={currentIndex + 1}
+          totalQuestions={totalQuestions}
           baseText={currentQuestion.baseText}
           alternatives={currentQuestion.alternatives}
           onConfirm={handleAnswerConfirm}
@@ -493,7 +497,7 @@ const BattleScreen = ({ environmentId, onBackToPatio, onProfile, onVictory }: Ba
       {phase === 'victory' && (
         <VictoryScreen
           score={score}
-          totalQuestions={questions.length}
+          totalQuestions={totalQuestions}
           damageDealt={totalDamageDealt}
           maxBossHealth={envConfig.maxHealth}
           onBackToPatio={handleVictoryComplete}
@@ -502,12 +506,18 @@ const BattleScreen = ({ environmentId, onBackToPatio, onProfile, onVictory }: Ba
         />
       )}
 
+      {questionsLoading && !questionsLoaded && (
+        <div className="absolute inset-0 flex items-center justify-center bg-black/60 z-50">
+          <div className="animate-spin w-12 h-12 border-4 border-primary border-t-transparent rounded-full" />
+        </div>
+      )}
+
       {phase === 'defeat' && (
         <DefeatScreen
           onBackToPatio={onBackToPatio}
           onRestart={handleRestart}
           score={score}
-          totalQuestions={questions.length}
+          totalQuestions={totalQuestions}
         />
       )}
     </div>
