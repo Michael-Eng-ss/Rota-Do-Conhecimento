@@ -2,7 +2,7 @@ export interface Character {
   id: string;
   name: string;
   image: string;
-  position: 'left' | 'center' | 'right';
+  position: 'far-left' | 'left' | 'center' | 'right' | 'far-right';
 }
 
 export interface Scene {

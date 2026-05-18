@@ -7,15 +7,19 @@ interface CharacterSpriteProps {
 
 const CharacterSprite = ({ character, isNew = false }: CharacterSpriteProps) => {
   const positionClasses = {
-    left: 'left-0 md:left-4',
+    'far-left': 'left-0 md:left-0',
+    left: 'left-[10%] md:left-[12%]',
     center: 'left-1/2 -translate-x-1/2',
-    right: 'right-0 md:right-4',
+    right: 'right-[10%] md:right-[12%]',
+    'far-right': 'right-0 md:right-0',
   };
 
   const animationClasses = {
+    'far-left': isNew ? 'animate-character-enter-left' : '',
     left: isNew ? 'animate-character-enter-left' : '',
     center: isNew ? 'animate-character-enter-center' : '',
     right: isNew ? 'animate-character-enter-right' : '',
+    'far-right': isNew ? 'animate-character-enter-right' : '',
   };
 
   return (

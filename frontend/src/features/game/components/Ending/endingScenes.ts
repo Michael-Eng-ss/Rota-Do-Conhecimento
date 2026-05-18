@@ -12,6 +12,7 @@ import claraAnimadaImage from '@/assets/characters/clara-animada.png';
 import liviaImage from '@/assets/characters/livia.png';
 import maeImage from '@/assets/characters/mae-clara.png';
 import paiImage from '@/assets/characters/Pai da Clara.png';
+import paiEMaeJuntosImage from '@/assets/characters/Pai e mae juntos.png';
 
 /**
  * Cenas finais — exibidas após o jogador derrotar todos os 3 ambientes.
@@ -65,9 +66,8 @@ export const endingScenes: Scene[] = [
     id: 105,
     background: casaTropicalImage,
     characters: [
-      { id: 'mae', name: 'Mãe da Clara', image: maeImage, position: 'left' },
-      { id: 'clara-celebrando', name: 'Clara', image: claraCelebrandoImage, position: 'center' },
-      { id: 'pai', name: 'Pai da Clara', image: paiImage, position: 'right' },
+      { id: 'pais-juntos', name: 'Pais da Clara', image: paiEMaeJuntosImage, position: 'left' },
+      { id: 'clara-celebrando', name: 'Clara', image: claraCelebrandoImage, position: 'right' },
     ],
     speaker: 'Mãe Da Clara',
     dialogue: 'Filha, estamos tão orgulhosos de você! Você enfrentou seus medos e venceu!',
@@ -77,9 +77,8 @@ export const endingScenes: Scene[] = [
     id: 106,
     background: casaTropicalImage,
     characters: [
-      { id: 'mae', name: 'Mãe da Clara', image: maeImage, position: 'left' },
-      { id: 'clara-celebrando', name: 'Clara', image: claraCelebrandoImage, position: 'center' },
-      { id: 'pai', name: 'Pai da Clara', image: paiImage, position: 'right' },
+      { id: 'pais-juntos', name: 'Pais da Clara', image: paiEMaeJuntosImage, position: 'left' },
+      { id: 'clara-celebrando', name: 'Clara', image: claraCelebrandoImage, position: 'right' },
     ],
     speaker: 'Pai Da Clara',
     dialogue: 'Sabíamos que você conseguiria. Esse é só o começo da sua jornada, minha filha.',
