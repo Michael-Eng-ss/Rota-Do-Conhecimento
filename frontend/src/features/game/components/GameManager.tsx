@@ -103,6 +103,12 @@ const GameManager = () => {
     return children;
   };
 
+  const AdminRoute = ({ children }: { children: JSX.Element }) => {
+    if (!user) return <Navigate to="/login" replace />;
+    if (!isAdmin) return <Navigate to="/menu" replace />;
+    return children;
+  };
+
   const PublicOnlyRoute = ({ children }: { children: JSX.Element }) => {
     if (user) {
       const userRole = String(user.role).toUpperCase();
@@ -279,9 +285,18 @@ const GameManager = () => {
         } />
         
         <Route path="/admin/users" element={
-          <ProtectedRoute>
+          <AdminRoute>
             <ManageUsersPage />
-          </ProtectedRoute>
+          </AdminRoute>
+        } />
+
+        <Route path="/admin/preview-ending" element={
+          <AdminRoute>
+            <EndingScreen
+              onBack={() => navigate('/admin')}
+              onEndingComplete={() => navigate('/admin')}
+            />
+          </AdminRoute>
         } />
       
         <Route path="*" element={<NotFound />} />

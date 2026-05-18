@@ -2,7 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import GameBackground from '@/shared/components/GameBackground';
 import GameButton from '@/shared/components/GameButton';
 import { useAuth } from '@/features/auth/contexts/AuthContext';
-import { Users, FileQuestion, Gamepad2, LogOut } from 'lucide-react';
+import { Users, FileQuestion, Gamepad2, LogOut, Clapperboard } from 'lucide-react';
 
 interface AdminHubScreenProps {
   onLogout?: () => void;
@@ -77,6 +77,15 @@ const AdminHubScreen = ({ onLogout }: AdminHubScreenProps) => {
             >
               <Gamepad2 className="w-10 h-10 text-emerald-400" />
               <span className="text-xl font-bold">Entrar no Jogo</span>
+            </GameButton>
+
+            <GameButton
+              onClick={() => navigate('/admin/preview-ending')}
+              variant="secondary"
+              className="flex flex-col items-center justify-center py-8 gap-4 hover:scale-105 transition-transform bg-slate-800"
+            >
+              <Clapperboard className="w-10 h-10 text-yellow-400" />
+              <span className="text-xl font-bold">Preview do Final</span>
             </GameButton>
 
             <GameButton
