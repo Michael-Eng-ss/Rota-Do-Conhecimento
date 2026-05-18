@@ -1,7 +1,7 @@
 import { Scene } from '../VisualNovel/types';
 
 // Backgrounds
-import patioEscolaImage from '@/assets/backgrounds/patio-escola.png';
+import patioEscolaRecuperadaImage from '@/assets/backgrounds/patio-escola-renovada.png';
 import universidadeImage from '@/assets/backgrounds/universidade.jpg';
 import casaTropicalImage from '@/assets/backgrounds/casa-tropical.jpg';
 
@@ -18,20 +18,20 @@ import paiImage from '@/assets/characters/Pai da Clara.png';
  * Mantém o mesmo padrão de Scene usado pela engine VisualNovel.
  */
 export const endingScenes: Scene[] = [
-  // Cena E1 — Pátio purificado
+  // Cena E1 — Pátio purificado (escola recuperada)
   {
     id: 101,
-    background: patioEscolaImage,
+    background: patioEscolaRecuperadaImage,
     characters: [
       { id: 'clara-celebrando', name: 'Clara', image: claraCelebrandoImage, position: 'center' },
     ],
     speaker: 'Clara',
     dialogue: 'Conseguimos! A ansiedade do fracasso foi derrotada... a escola voltou ao normal!',
   },
-  // Cena E2 — Reencontro com Lívia
+  // Cena E2 — Reencontro com Lívia (escola recuperada)
   {
     id: 102,
-    background: patioEscolaImage,
+    background: patioEscolaRecuperadaImage,
     characters: [
       { id: 'livia', name: 'Lívia', image: liviaImage, position: 'left' },
       { id: 'clara-sorrindo', name: 'Clara', image: claraSorrindoImage, position: 'right' },
@@ -39,10 +39,10 @@ export const endingScenes: Scene[] = [
     speaker: 'Lívia',
     dialogue: 'Clara, você foi incrível! Os professores voltaram ao normal e os alunos estão a salvo. Obrigada por não desistir!',
   },
-  // Cena E3 — Clara responde
+  // Cena E3 — Clara responde (escola recuperada)
   {
     id: 103,
-    background: patioEscolaImage,
+    background: patioEscolaRecuperadaImage,
     characters: [
       { id: 'livia', name: 'Lívia', image: liviaImage, position: 'left' },
       { id: 'clara-sorrindo', name: 'Clara', image: claraSorrindoImage, position: 'right' },
