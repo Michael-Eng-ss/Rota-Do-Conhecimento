@@ -9,10 +9,10 @@ export class Alternativa {
   @Column({ name: 'perguntasid', type: 'int' })
   perguntasid!: number;
 
-  @Column({ type: 'text', nullable: true })
+  @Column({ type: 'varchar', length: 1000, nullable: true })
   conteudo!: string | null;
 
-  @Column({ type: 'text', nullable: true })
+  @Column({ type: 'varchar', length: 500, nullable: true })
   imagem!: string | null;
 
   @Column({ type: 'boolean', default: false })

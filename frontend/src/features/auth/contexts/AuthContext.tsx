@@ -9,7 +9,7 @@ interface AuthContextType {
   loading: boolean;
   isAdmin: boolean;
   signIn: (email: string, senha: string) => Promise<{ data: AppUser | null; error: any }>;
-  signUp: (email: string, senha: string, nome: string) => Promise<{ data: AppUser | null; error: any }>;
+  signUp: (email: string, senha: string, nome: string, campusId?: number) => Promise<{ data: AppUser | null; error: any }>;
   signOut: () => Promise<void>;
   checkAdminRole: () => Promise<void>;
   forgotPassword: (email: string) => Promise<{ error: any }>;
@@ -68,13 +68,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   }, []);
 
-  const signUp = useCallback(async (email: string, password: string, displayName: string) => {
+  const signUp = useCallback(async (email: string, password: string, displayName: string, campusId?: number) => {
     try {
       const newUser = await apiRegisterUser({
         nome: displayName,
         email,
         senha: password,
         cursoid: 1,
+        campusid: campusId || 1,
       });
       return { data: newUser as unknown as AppUser, error: null };
     } catch (err: any) {

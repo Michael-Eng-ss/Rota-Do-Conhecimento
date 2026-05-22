@@ -8,7 +8,7 @@ export class Log {
   @Column({ name: 'usuariosid', type: 'int' })
   usuariosId!: number;
 
-  @Column({ name: 'descricao', type: 'text' })
+  @Column({ name: 'descricao', type: 'varchar', length: 500 })
   acao!: string;
 
   @CreateDateColumn({ name: 'datalogin' })

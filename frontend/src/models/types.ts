@@ -49,7 +49,7 @@ export interface UsuarioCreate {
   email: string;
   senha: string;
   cursoid: number;
-  campusid?: number;
+  campusid: number;
   telefone?: string;
   sexo?: number;
   datanascimento?: string;

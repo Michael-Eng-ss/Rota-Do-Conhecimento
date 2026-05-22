@@ -12,23 +12,23 @@ export class Usuario {
   @PrimaryGeneratedColumn()
   id!: number;
 
-  @Column({ type: 'text' })
+  @Column({ type: 'varchar', length: 150 })
   nome!: string;
 
-  @Column({ type: 'text', unique: true })
+  @Column({ type: 'varchar', length: 320, unique: true })
   email!: string;
 
   /**
    * Senha armazenada como bcrypt hash.
    * select: false → nunca retornado em queries padrão.
    */
-  @Column({ type: 'text', select: false })
+  @Column({ type: 'varchar', length: 255, select: false })
   senha!: string;
 
   /**
    * Nível de acesso do usuário.
    */
-  @Column({ type: 'int', default: Role.PLAYER })
+  @Column({ type: 'smallint', default: Role.PLAYER })
   role!: Role;
 
   /** Pontuação acumulada no jogo. */
@@ -36,27 +36,27 @@ export class Usuario {
   pontuacao!: number;
 
   /** URL da foto de perfil. */
-  @Column({ type: 'text', nullable: true, default: '' })
+  @Column({ type: 'varchar', length: 500, nullable: true, default: '' })
   foto!: string | null;
 
   /** Telefone de contato. */
-  @Column({ type: 'text', nullable: true, default: '' })
+  @Column({ type: 'varchar', length: 20, nullable: true, default: '' })
   telefone!: string | null;
 
   /** Campo legado de sexo (0=não definido, 1=masc, 2=fem). Mantido por retrocompatibilidade. */
-  @Column({ type: 'int', nullable: true, default: 0 })
+  @Column({ type: 'smallint', nullable: true, default: 0 })
   sexo!: number | null;
 
   @Column({ type: process.env.NODE_ENV === 'test' ? 'datetime' : 'timestamptz', nullable: true, default: () => 'CURRENT_TIMESTAMP' })
   datanascimento!: Date | null;
 
-  @Column({ type: 'text', nullable: true, default: '' })
+  @Column({ type: 'char', length: 2, nullable: true, default: '' })
   uf!: string | null;
 
-  @Column({ type: 'text', nullable: true, default: '' })
+  @Column({ type: 'varchar', length: 100, nullable: true, default: '' })
   cidade!: string | null;
 
-  @Column({ type: 'varchar', length: 50, nullable: true })
+  @Column({ type: 'varchar', length: 20, nullable: true })
   turma!: string | null;
 
   @Column({ type: 'int', nullable: true })

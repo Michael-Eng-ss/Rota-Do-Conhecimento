@@ -21,7 +21,7 @@ export class Pergunta {
   @Column({ type: 'int', default: 30 })
   tempo!: number;
 
-  @Column({ name: 'pathimage', type: 'text', nullable: true })
+  @Column({ name: 'pathimage', type: 'varchar', length: 500, nullable: true })
   pathimage!: string | null;
 
   @Column({ type: 'boolean', default: true })

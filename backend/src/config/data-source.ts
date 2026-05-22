@@ -84,7 +84,7 @@ const postgresOptions: DataSourceOptions = process.env.DATABASE_URL
       ssl: buildSSLConfig(),
       entities: ALL_ENTITIES,
       migrations: MIGRATIONS,
-      synchronize: process.env.NODE_ENV === 'staging', // Sync automático apenas em staging
+      synchronize: false, // Migrations controladas (não mais auto-sync)
       logging: process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'staging',
     }
   : {

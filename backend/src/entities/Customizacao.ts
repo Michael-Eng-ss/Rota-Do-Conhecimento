@@ -13,11 +13,11 @@ export class Customizacao {
   id!: number;
 
   /** Tipo da customização: 'cutscene', 'banner', 'dialogo' */
-  @Column({ type: 'text' })
+  @Column({ type: 'varchar', length: 30 })
   tipo!: string;
 
   /** Título/nome da customização */
-  @Column({ type: 'text' })
+  @Column({ type: 'varchar', length: 200 })
   titulo!: string;
 
   /** Conteúdo de texto (corpo, diálogo, descrição) */
@@ -25,7 +25,7 @@ export class Customizacao {
   conteudo!: string | null;
 
   /** URL da imagem associada */
-  @Column({ name: 'imagem_url', type: 'text', nullable: true })
+  @Column({ name: 'imagem_url', type: 'varchar', length: 500, nullable: true })
   imagemUrl!: string | null;
 
   /** Ordem de exibição */

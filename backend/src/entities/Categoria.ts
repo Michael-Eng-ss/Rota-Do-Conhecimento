@@ -6,13 +6,13 @@ export class Categoria {
   @PrimaryGeneratedColumn()
   id!: number;
 
-  @Column({ type: 'text' })
+  @Column({ type: 'varchar', length: 200 })
   descricao!: string;
 
   @Column({ type: 'boolean', default: true })
   status!: boolean;
 
-  @Column({ type: 'text', default: '' })
+  @Column({ type: 'varchar', length: 500, default: '' })
   imagem!: string;
 
   @Column({ name: 'cursoid', type: 'int' })

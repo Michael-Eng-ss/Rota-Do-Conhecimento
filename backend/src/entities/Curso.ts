@@ -6,10 +6,10 @@ export class Curso {
   @PrimaryGeneratedColumn()
   id!: number;
 
-  @Column({ type: 'text' })
+  @Column({ type: 'varchar', length: 150 })
   nome!: string;
 
-  @Column({ type: 'text', default: '' })
+  @Column({ type: 'varchar', length: 500, default: '' })
   imagem!: string;
 
   @OneToMany(() => Usuario, (u) => u.curso)

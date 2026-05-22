@@ -210,7 +210,7 @@ const GameManager = () => {
           <PublicOnlyRoute>
             <RegisterScreen
               onRegister={() => navigate('/login')}
-              onBackToLogin={() => navigate(-1)}
+              onBackToLogin={() => navigate('/login')}
               signUp={signUp}
             />
           </PublicOnlyRoute>

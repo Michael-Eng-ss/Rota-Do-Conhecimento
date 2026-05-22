@@ -7,13 +7,13 @@ export class Quiz {
   @PrimaryGeneratedColumn()
   id!: number;
 
-  @Column({ type: 'text' })
+  @Column({ type: 'varchar', length: 200 })
   titulo!: string;
 
   @Column({ name: 'cursoid', type: 'int' })
   cursoid!: number;
 
-  @Column({ type: 'text', default: '' })
+  @Column({ type: 'varchar', length: 500, default: '' })
   imagem!: string;
 
   @Column({ type: 'boolean', default: true })
