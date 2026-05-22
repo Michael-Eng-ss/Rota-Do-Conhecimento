@@ -1,11 +1,18 @@
-import { Edit, Trash2, CheckCircle } from 'lucide-react';
+import { Edit, Trash2, CheckCircle, Camera } from 'lucide-react';
 import { Question, getEnvironmentName } from '@/features/game/types/questions';
+import ImagePreview from '@/shared/components/ImagePreview';
 
 interface QuestionListProps {
   questions: Question[];
   onEdit: (question: Question) => void;
   onDelete: (id: string) => void;
 }
+
+const NIVEL_BADGES: Record<number, { label: string; emoji: string; bg: string }> = {
+  1: { label: 'Fácil', emoji: '🟢', bg: 'bg-emerald-500' },
+  2: { label: 'Médio', emoji: '🟡', bg: 'bg-amber-500' },
+  3: { label: 'Difícil', emoji: '🔴', bg: 'bg-red-500' },
+};
 
 const QuestionList = ({ questions, onEdit, onDelete }: QuestionListProps) => {
   if (questions.length === 0) {
@@ -17,71 +24,102 @@ const QuestionList = ({ questions, onEdit, onDelete }: QuestionListProps) => {
     );
   }
 
+  const apiUrl = import.meta.env.VITE_API_URL || '';
+
   return (
     <div className="space-y-4">
-      {questions.map((question) => (
-        <div
-          key={question.id}
-          className="bg-white/95 backdrop-blur-sm rounded-xl shadow-xl border-2 border-blue-400 overflow-hidden"
-        >
-          {/* Header */}
-          <div className="bg-blue-500 text-white px-4 py-3 flex justify-between items-center">
-            <div className="flex items-center gap-3">
-              <span className="bg-blue-700 px-2 py-1 rounded text-sm font-bold">
-                Amb. {question.environmentId}
-              </span>
-              <span className="bg-blue-600 px-2 py-1 rounded text-sm">
-                {question.subject}
-              </span>
-            </div>
-            <div className="flex gap-2">
-              <button
-                onClick={() => onEdit(question)}
-                className="p-2 bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors"
-                title="Editar"
-              >
-                <Edit className="w-4 h-4" />
-              </button>
-              <button
-                onClick={() => onDelete(question.id)}
-                className="p-2 bg-red-500 hover:bg-red-600 rounded-lg transition-colors"
-                title="Excluir"
-              >
-                <Trash2 className="w-4 h-4" />
-              </button>
-            </div>
-          </div>
+      {questions.map((question) => {
+        const q = question as any; // Access extra fields like perguntasnivelid, pathimage
+        const nivelId = q.perguntasnivelid || q.nivel?.nivel || 1;
+        const nivel = NIVEL_BADGES[nivelId] || NIVEL_BADGES[1];
+        const hasImage = !!(q.pathimage);
 
-          {/* Enunciado */}
-          <div className="px-4 py-3 border-b border-gray-200">
-            <p className="text-gray-800 text-sm whitespace-pre-wrap line-clamp-3">{question.baseText}</p>
-          </div>
-
-          {/* Alternativas */}
-          <div className="p-4 space-y-2">
-            {question.alternatives.map((alt, index) => {
-              const letter = String.fromCharCode(65 + index);
-              return (
-                <div key={alt.id} className="flex items-start gap-3">
-                  <span className={`flex-shrink-0 w-7 h-7 flex items-center justify-center rounded-full font-bold text-sm ${
-                    alt.isCorrect 
-                      ? 'bg-green-500 text-white' 
-                      : 'bg-gray-100 text-gray-600'
-                  }`}>
-                    {letter}
+        return (
+          <div
+            key={question.id}
+            className="bg-white/95 backdrop-blur-sm rounded-xl shadow-xl border-2 border-blue-400 overflow-hidden"
+          >
+            {/* Header */}
+            <div className="bg-blue-500 text-white px-4 py-3 flex justify-between items-center">
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="bg-blue-700 px-2 py-1 rounded text-sm font-bold">
+                  Amb. {question.environmentId}
+                </span>
+                <span className="bg-blue-600 px-2 py-1 rounded text-sm">
+                  {question.subject}
+                </span>
+                {/* Nivel badge */}
+                <span className={`${nivel.bg} px-2 py-1 rounded text-sm font-bold flex items-center gap-1`}>
+                  {nivel.emoji} {nivel.label}
+                </span>
+                {/* Image indicator */}
+                {hasImage && (
+                  <span className="bg-sky-600 px-2 py-1 rounded text-sm font-bold flex items-center gap-1">
+                    <Camera className="w-3 h-3" /> Imagem
                   </span>
-                  <p className="flex-1 text-gray-700 text-sm">{alt.text}</p>
-                  {alt.isCorrect && (
-                    <CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0" />
-                  )}
-                </div>
-              );
-            })}
+                )}
+              </div>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => onEdit(question)}
+                  className="p-2 bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors"
+                  title="Editar"
+                >
+                  <Edit className="w-4 h-4" />
+                </button>
+                <button
+                  onClick={() => onDelete(question.id)}
+                  className="p-2 bg-red-500 hover:bg-red-600 rounded-lg transition-colors"
+                  title="Excluir"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+
+            {/* Image preview if present */}
+            {hasImage && (
+              <div className="px-4 pt-3">
+                <ImagePreview
+                  src={q.pathimage.startsWith('http') ? q.pathimage : `${apiUrl}${q.pathimage}`}
+                  alt="Imagem da pergunta"
+                  zoomable
+                />
+              </div>
+            )}
+
+            {/* Enunciado */}
+            <div className="px-4 py-3 border-b border-gray-200">
+              <p className="text-gray-800 text-sm whitespace-pre-wrap line-clamp-3">{question.baseText}</p>
+            </div>
+
+            {/* Alternativas */}
+            <div className="p-4 space-y-2">
+              {question.alternatives.map((alt, index) => {
+                const letter = String.fromCharCode(65 + index);
+                return (
+                  <div key={alt.id} className="flex items-start gap-3">
+                    <span className={`flex-shrink-0 w-7 h-7 flex items-center justify-center rounded-full font-bold text-sm ${
+                      alt.isCorrect 
+                        ? 'bg-green-500 text-white' 
+                        : 'bg-gray-100 text-gray-600'
+                    }`}>
+                      {letter}
+                    </span>
+                    <p className="flex-1 text-gray-700 text-sm">{alt.text}</p>
+                    {alt.isCorrect && (
+                      <CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0" />
+                    )}
+                  </div>
+                );
+              })}
+            </div>
           </div>
-        </div>
-      ))}
+        );
+      })}
     </div>
   );
 };
 
 export default QuestionList;
+

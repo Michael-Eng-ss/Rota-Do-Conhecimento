@@ -64,7 +64,7 @@ describe('UsuarioService.create()', () => {
   it('deve lançar 409 se e-mail já estiver cadastrado', async () => {
     mockRepo.existsByEmail.mockResolvedValue(true);
     await expect(
-      service.create({ nome: 'A', email: 'dup@mail.com', senha: '123' }),
+      service.create({ nome: 'A', email: 'dup@mail.com', senha: '123', campusId: 1 }),
     ).rejects.toMatchObject({ statusCode: 409 });
   });
 
@@ -79,7 +79,8 @@ describe('UsuarioService.create()', () => {
   it('deve criar usuário e retornar sem senha', async () => {
     mockRepo.existsByEmail.mockResolvedValue(false);
     mockRepo.create.mockResolvedValue(fakeUser({ id: 5, senha: 'bcrypt' }) as never);
-    const result = await service.create({ nome: 'Novo', email: 'novo@mail.com', senha: 'abc' });
+    mockCampus.findById.mockResolvedValue({ id: 1, nome: 'Campus Teste' } as never);
+    const result = await service.create({ nome: 'Novo', email: 'novo@mail.com', senha: 'abc', campusId: 1 });
     expect(result).not.toHaveProperty('senha');
     expect(result.id).toBe(5);
   });
@@ -87,7 +88,8 @@ describe('UsuarioService.create()', () => {
   it('deve criar usuário com role=PLAYER sempre', async () => {
     mockRepo.existsByEmail.mockResolvedValue(false);
     mockRepo.create.mockImplementation(async (data) => ({ ...fakeUser(), ...data }) as never);
-    const result = await service.create({ nome: 'X', email: 'x@mail.com', senha: 'x' });
+    mockCampus.findById.mockResolvedValue({ id: 1, nome: 'Campus Teste' } as never);
+    const result = await service.create({ nome: 'X', email: 'x@mail.com', senha: 'x', campusId: 1 });
     expect(result.role).toBe(Role.PLAYER);
   });
 });

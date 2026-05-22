@@ -2,7 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import GameBackground from '@/shared/components/GameBackground';
 import GameButton from '@/shared/components/GameButton';
 import { useAuth } from '@/features/auth/contexts/AuthContext';
-import { Users, FileQuestion, Gamepad2, LogOut, Clapperboard } from 'lucide-react';
+import { Users, FileQuestion, Gamepad2, LogOut, Clapperboard, Palette } from 'lucide-react';
 
 interface AdminHubScreenProps {
   onLogout?: () => void;
@@ -11,6 +11,8 @@ interface AdminHubScreenProps {
 const AdminHubScreen = ({ onLogout }: AdminHubScreenProps) => {
   const navigate = useNavigate();
   const { user, signOut } = useAuth();
+
+  const isSuperAdmin = user?.role === 1 || user?.role === 'SUPER_ADMIN';
 
   const handleLogout = async () => {
     try {
@@ -69,6 +71,18 @@ const AdminHubScreen = ({ onLogout }: AdminHubScreenProps) => {
               <FileQuestion className="w-10 h-10 text-white" />
               <span className="text-xl font-bold">Gerenciar Questões</span>
             </GameButton>
+
+            {/* Apenas SUPERADMIN vê este botão */}
+            {isSuperAdmin && (
+              <GameButton
+                onClick={() => navigate('/admin/customizacoes')}
+                variant="primary"
+                className="flex flex-col items-center justify-center py-8 gap-4 hover:scale-105 transition-transform bg-gradient-to-br from-purple-600 to-indigo-700 border-purple-500/50"
+              >
+                <Palette className="w-10 h-10 text-white" />
+                <span className="text-xl font-bold">Customizações</span>
+              </GameButton>
+            )}
 
             <GameButton
               onClick={() => navigate('/menu')}

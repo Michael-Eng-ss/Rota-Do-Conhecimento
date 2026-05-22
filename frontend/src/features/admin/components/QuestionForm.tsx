@@ -1,13 +1,21 @@
 import { useState, useEffect } from 'react';
-import { Plus, Trash2, Check, X } from 'lucide-react';
+import { Plus, Trash2, Check, X, Upload, ImageIcon, Loader2 } from 'lucide-react';
 import { Question, Alternative, subjectsByEnvironment, getEnvironmentName } from '@/features/game/types/questions';
 import GameButton from '@/shared/components/GameButton';
+import ImagePreview from '@/shared/components/ImagePreview';
+import { UploadService } from '@/models';
 
 interface QuestionFormProps {
   initialData?: Question | null;
-  onSave: (question: Omit<Question, 'id' | 'createdAt' | 'updatedAt'>) => void;
+  onSave: (question: Omit<Question, 'id' | 'createdAt' | 'updatedAt'> & { pathimage?: string; perguntasnivelid?: number }) => void;
   onCancel: () => void;
 }
+
+const NIVEIS = [
+  { id: 1, label: 'Fácil', color: 'bg-emerald-500', textColor: 'text-emerald-400', borderColor: 'border-emerald-500', emoji: '🟢', pontuacao: 10, tempo: 30 },
+  { id: 2, label: 'Médio', color: 'bg-amber-500', textColor: 'text-amber-400', borderColor: 'border-amber-500', emoji: '🟡', pontuacao: 20, tempo: 25 },
+  { id: 3, label: 'Difícil', color: 'bg-red-500', textColor: 'text-red-400', borderColor: 'border-red-500', emoji: '🔴', pontuacao: 30, tempo: 20 },
+];
 
 const emptyAlternative = (): Omit<Alternative, 'id'> => ({
   text: '',
@@ -18,6 +26,9 @@ const QuestionForm = ({ initialData, onSave, onCancel }: QuestionFormProps) => {
   const [environmentId, setEnvironmentId] = useState<1 | 2 | 3>(initialData?.environmentId || 1);
   const [subject, setSubject] = useState(initialData?.subject || subjectsByEnvironment[1][0]);
   const [baseText, setBaseText] = useState(initialData?.baseText || '');
+  const [nivelId, setNivelId] = useState(1);
+  const [pathimage, setPathimage] = useState<string>('');
+  const [uploading, setUploading] = useState(false);
   const [alternatives, setAlternatives] = useState<Omit<Alternative, 'id'>[]>(
     initialData?.alternatives.map(a => ({ text: a.text, isCorrect: a.isCorrect })) || 
     [emptyAlternative(), emptyAlternative(), emptyAlternative(), emptyAlternative()]
@@ -61,6 +72,21 @@ const QuestionForm = ({ initialData, onSave, onCancel }: QuestionFormProps) => {
     }
   };
 
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploading(true);
+    try {
+      const result = await UploadService.uploadImage(file);
+      setPathimage(result.url);
+    } catch (err: any) {
+      alert(`Erro no upload: ${err.message}`);
+    } finally {
+      setUploading(false);
+    }
+  };
+
   const handleSubmit = () => {
     if (!baseText.trim()) {
       alert('Digite o enunciado da questão');
@@ -93,8 +119,13 @@ const QuestionForm = ({ initialData, onSave, onCancel }: QuestionFormProps) => {
       subject,
       baseText: baseText.trim(),
       alternatives: finalAlternatives,
+      pathimage: pathimage || undefined,
+      perguntasnivelid: nivelId,
     });
   };
+
+  const selectedNivel = NIVEIS.find(n => n.id === nivelId) || NIVEIS[0];
+  const apiUrl = import.meta.env.VITE_API_URL || '';
 
   return (
     <div className="bg-white/95 backdrop-blur-sm rounded-xl p-6 shadow-xl border-2 border-blue-400">
@@ -102,6 +133,31 @@ const QuestionForm = ({ initialData, onSave, onCancel }: QuestionFormProps) => {
         {initialData ? 'Editar Questão' : 'Nova Questão'}
       </h3>
       
+      {/* Nível de Dificuldade */}
+      <div className="mb-4">
+        <label className="block text-sm font-medium text-gray-700 mb-2">
+          Nível de Dificuldade *
+        </label>
+        <div className="flex gap-3">
+          {NIVEIS.map(nivel => (
+            <button
+              key={nivel.id}
+              type="button"
+              onClick={() => setNivelId(nivel.id)}
+              className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-bold transition-all border-2 ${
+                nivelId === nivel.id
+                  ? `${nivel.color} text-white border-transparent shadow-lg scale-105`
+                  : `bg-white text-gray-600 border-gray-200 hover:${nivel.borderColor} hover:shadow-md`
+              }`}
+            >
+              <span>{nivel.emoji}</span>
+              <span>{nivel.label}</span>
+              <span className="text-xs opacity-75">({nivel.pontuacao}pts)</span>
+            </button>
+          ))}
+        </div>
+      </div>
+
       {/* Grupo e Matéria */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
         <div>
@@ -146,6 +202,50 @@ const QuestionForm = ({ initialData, onSave, onCancel }: QuestionFormProps) => {
           placeholder="Digite o enunciado da questão..."
           className="w-full p-3 border-2 border-gray-300 rounded-lg text-gray-800 min-h-[120px]"
         />
+      </div>
+
+      {/* Imagem da Pergunta */}
+      <div className="mb-4">
+        <label className="block text-sm font-medium text-gray-700 mb-2">
+          Imagem da Pergunta (opcional)
+        </label>
+        <div className="space-y-2">
+          {pathimage && (
+            <div className="relative">
+              <ImagePreview
+                src={pathimage.startsWith('http') ? pathimage : `${apiUrl}${pathimage}`}
+                alt="Imagem da pergunta"
+                zoomable
+              />
+              <button
+                type="button"
+                onClick={() => setPathimage('')}
+                className="absolute top-2 right-2 p-1.5 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors shadow-lg"
+                title="Remover imagem"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+          )}
+          <div className="flex gap-2">
+            <label className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 border-2 border-dashed border-gray-300 rounded-lg text-gray-500 hover:border-blue-400 hover:text-blue-500 transition-colors cursor-pointer ${
+              uploading ? 'opacity-50 pointer-events-none' : ''
+            }`}>
+              {uploading ? (
+                <><Loader2 className="w-5 h-5 animate-spin" /> Enviando...</>
+              ) : (
+                <><Upload className="w-5 h-5" /> {pathimage ? 'Trocar Imagem' : 'Adicionar Imagem'}</>
+              )}
+              <input
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={handleImageUpload}
+                disabled={uploading}
+              />
+            </label>
+          </div>
+        </div>
       </div>
 
       {/* Alternativas */}
@@ -229,3 +329,4 @@ const QuestionForm = ({ initialData, onSave, onCancel }: QuestionFormProps) => {
 };
 
 export default QuestionForm;
+

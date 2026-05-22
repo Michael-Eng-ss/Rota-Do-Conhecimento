@@ -10,3 +10,4 @@ export { Progresso }           from './Progresso';
 export { QuizAvalativoUsuario} from './QuizAvalativoUsuario';
 export { Log }                 from './Log';
 export { EmailToken }          from './EmailToken';
+export { Customizacao }        from './Customizacao';

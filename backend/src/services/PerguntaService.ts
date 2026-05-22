@@ -24,6 +24,21 @@ export class PerguntaService {
     return this.repo.findCompletasByCategoria(categoriasid, activeOnly);
   }
 
+  /** Filtra perguntas por nível de dificuldade. */
+  getByNivel(nivelId: number, activeOnly = true): Promise<Pergunta[]> {
+    return this.repo.findByNivel(nivelId, activeOnly);
+  }
+
+  /** Filtra perguntas por campus (via categoria → curso). */
+  getByCampus(campusId: number, activeOnly = true): Promise<Pergunta[]> {
+    return this.repo.findByCampus(campusId, activeOnly);
+  }
+
+  /** Retorna perguntas que possuem imagem anexada. */
+  getWithImage(activeOnly = true): Promise<Pergunta[]> {
+    return this.repo.findWithImage(activeOnly);
+  }
+
   create(data: Partial<Pergunta>): Promise<Pergunta> {
     if (!data.conteudo?.trim()) throw AppError.badRequest('Conteúdo da pergunta é obrigatório');
     if (!data.categoriasid)     throw AppError.badRequest('Categoria é obrigatória');
@@ -44,3 +59,4 @@ export class PerguntaService {
     return { message: 'Pergunta removida com sucesso' };
   }
 }
+

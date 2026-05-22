@@ -6,6 +6,7 @@ import { ProtectedRoute } from './ProtectedRoute';
 import { LoginPage } from '@/pages/public/LoginPage';
 import { HomePage } from '@/pages/public/HomePage';
 import { ManageUsersPage } from '@/pages/admin/ManageUsersPage';
+import { CustomizacoesPage } from '@/pages/admin/CustomizacoesPage';
 import { RankingPage } from '@/pages/game/RankingPage';
 import { GamePage } from '@/pages/game/GamePage';
 
@@ -16,6 +17,11 @@ export const AppRoutes = () => {
         {/* Rotas Públicas */}
         <Route path="/" element={<HomePage />} />
         <Route path="/login" element={<LoginPage />} />
+
+        {/* Rotas Protegidas - Apenas SUPERADMIN */}
+        <Route element={<ProtectedRoute allowedRoles={['SUPER_ADMIN']} />}>
+          <Route path="/admin/customizacoes" element={<CustomizacoesPage />} />
+        </Route>
 
         {/* Rotas Protegidas - Apenas Administradores */}
         <Route element={<ProtectedRoute allowedRoles={['SUPER_ADMIN', 'ADMIN', 'CAMPUS_ADMIN']} />}>
@@ -35,3 +41,4 @@ export const AppRoutes = () => {
     </BrowserRouter>
   );
 };
+

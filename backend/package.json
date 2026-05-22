@@ -12,6 +12,8 @@
     "migration:run": "npm run typeorm -- migration:run",
     "migration:revert": "npm run typeorm -- migration:revert",
     "db:seed": "ts-node -r tsconfig-paths/register scripts/seed-questoes.ts",
+    "dev:staging": "cross-env NODE_ENV=staging ts-node-dev --respawn --transpile-only -r tsconfig-paths/register src/index.ts",
+    "db:sync:staging": "cross-env NODE_ENV=staging ts-node -r tsconfig-paths/register -e \"import { AppDataSource } from './src/config/data-source'; AppDataSource.initialize().then(() => { console.log('Schema synced to Neon!'); process.exit(0); }).catch(e => { console.error(e); process.exit(1); })\"",
     "test:unit": "jest --config=jest.unit.config.js",
     "test:unit:watch": "jest --config=jest.unit.config.js --watch",
     "test:unit:coverage": "jest --config=jest.unit.config.js --coverage",

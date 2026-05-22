@@ -18,3 +18,5 @@ export * as QuizService from './services/quiz.service';
 export * as QuizAvaliativoService from './services/quiz-avaliativo.service';
 export * as ProgressoService from './services/progresso.service';
 export * as RelatorioService from './services/relatorio.service';
+export * as CustomizacaoService from './services/customizacao.service';
+export * as UploadService from './services/upload.service';

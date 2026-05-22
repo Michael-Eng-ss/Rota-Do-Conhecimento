@@ -1,6 +1,7 @@
 import 'reflect-metadata';
 import express from 'express';
 import cors from 'cors';
+import path from 'path';
 
 // ── Rotas existentes ──────────────────────────────────────────────────────
 import authRoutes    from './domains/auth/auth.routes';
@@ -18,6 +19,10 @@ import quizRoutes             from './domains/quiz/quiz.routes';
 import perguntasNivelRoutes   from './domains/perguntas-nivel/perguntas-nivel.routes';
 import progressoRoutes        from './domains/progresso-perguntas/progresso-perguntas.routes';
 import quizAvaliativoRoutes   from './domains/quiz-avaliativo/quiz-avaliativo.routes';
+
+// ── Microserviços novos ────────────────────────────────────────────────────
+import customizacoesRoutes    from './domains/customizacoes/customizacoes.routes';
+import uploadRoutes           from './domains/upload/upload.routes';
 
 import { errorHandler, notFoundHandler, requestLogger } from './middlewares';
 
@@ -38,6 +43,9 @@ app.use(cors(corsOptions));
 app.use(express.json());
 app.use(requestLogger);
 
+// ── Servir arquivos estáticos (uploads de imagens) ─────────────────────────
+app.use('/uploads', express.static(path.resolve(process.cwd(), 'uploads')));
+
 // ── Rotas existentes ───────────────────────────────────────────────────────
 app.use('/auth',      authRoutes);
 app.use('/usuarios',  usersRoutes);
@@ -55,8 +63,13 @@ app.use('/perguntas-nivel',    perguntasNivelRoutes);
 app.use('/progresso-perguntas', progressoRoutes);
 app.use('/quiz-avaliativo',    quizAvaliativoRoutes);
 
+// ── Microserviços novos ────────────────────────────────────────────────────
+app.use('/customizacoes',      customizacoesRoutes);
+app.use('/upload',             uploadRoutes);
+
 // ── Error Handlers ─────────────────────────────────────────────────────────
 app.use(notFoundHandler);
 app.use(errorHandler);
 
 export { app };
+

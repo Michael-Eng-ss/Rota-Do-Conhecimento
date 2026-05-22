@@ -216,3 +216,36 @@ export interface LoginResponse {
   role: number;
   user: UsuarioPublico;
 }
+
+// ---------- Customização ----------
+export interface Customizacao {
+  id: number;
+  tipo: 'cutscene' | 'banner' | 'dialogo';
+  titulo: string;
+  conteudo: string | null;
+  imagemUrl: string | null;
+  ordem: number;
+  ativo: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CustomizacaoCreate {
+  tipo: 'cutscene' | 'banner' | 'dialogo';
+  titulo: string;
+  conteudo?: string;
+  imagemUrl?: string;
+  ordem?: number;
+}
+
+export type CustomizacaoUpdate = Partial<Omit<Customizacao, 'id' | 'createdAt' | 'updatedAt'>>;
+
+// ---------- Upload ----------
+export interface UploadResponse {
+  message: string;
+  url: string;
+  filename: string;
+  originalName: string;
+  size: number;
+}
+

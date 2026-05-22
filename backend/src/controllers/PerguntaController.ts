@@ -25,6 +25,31 @@ export class PerguntaController {
     res.json(items);
   };
 
+  /** GET /perguntas/nivel/:nivelId?active=false */
+  getByNivel = async (req: Request, res: Response): Promise<void> => {
+    const nivelId = parseInt(String(req.params.nivelId));
+    if (isNaN(nivelId)) throw AppError.badRequest('ID de nível inválido');
+    const activeOnly = req.query.active !== 'false';
+    const items = await this.service.getByNivel(nivelId, activeOnly);
+    res.json(items);
+  };
+
+  /** GET /perguntas/campus/:campusId?active=false */
+  getByCampus = async (req: Request, res: Response): Promise<void> => {
+    const campusId = parseInt(String(req.params.campusId));
+    if (isNaN(campusId)) throw AppError.badRequest('ID de campus inválido');
+    const activeOnly = req.query.active !== 'false';
+    const items = await this.service.getByCampus(campusId, activeOnly);
+    res.json(items);
+  };
+
+  /** GET /perguntas/com-imagem?active=false */
+  getWithImage = async (req: Request, res: Response): Promise<void> => {
+    const activeOnly = req.query.active !== 'false';
+    const items = await this.service.getWithImage(activeOnly);
+    res.json(items);
+  };
+
   /** GET /perguntas/:id */
   getById = async (req: Request, res: Response): Promise<void> => {
     const id = parseInt(String(req.params.id));
@@ -57,3 +82,4 @@ export class PerguntaController {
 }
 
 export const perguntaController = new PerguntaController();
+

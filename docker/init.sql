@@ -115,6 +115,19 @@ CREATE TABLE IF NOT EXISTS logs (
   descricao TEXT NOT NULL
 );
 
+-- Tabela: customizacoes (cutscenes, banners, diálogos)
+CREATE TABLE IF NOT EXISTS customizacoes (
+  id SERIAL PRIMARY KEY,
+  tipo TEXT NOT NULL,
+  titulo TEXT NOT NULL,
+  conteudo TEXT,
+  imagem_url TEXT,
+  ordem INTEGER NOT NULL DEFAULT 0,
+  ativo BOOLEAN NOT NULL DEFAULT true,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
 -- ============================================
 -- Dados iniciais
 -- ============================================
@@ -160,3 +173,12 @@ INSERT INTO categorias (id, descricao, cursoid) VALUES
   (2, 'Ambiente 2 - Biblioteca', 1),
   (3, 'Boss Final', 1)
 ON CONFLICT DO NOTHING;
+
+-- Customizações iniciais (cutscenes do jogo)
+INSERT INTO customizacoes (tipo, titulo, conteudo, ordem, ativo) VALUES
+  ('cutscene', 'Introdução do Jogo', 'Bem-vindo ao Rota do Conhecimento! Prepare-se para uma aventura educacional.', 1, true),
+  ('cutscene', 'Transição Fase 1 → 2', 'Parabéns! Você completou o Auditório. Agora siga para a Biblioteca!', 2, true),
+  ('cutscene', 'Boss Final', 'Chegou a hora do desafio final! Mostre tudo que aprendeu.', 3, true),
+  ('banner', 'Aviso do Sistema', 'Sistema em manutenção programada. Volte em breve!', 1, false)
+ON CONFLICT DO NOTHING;
+

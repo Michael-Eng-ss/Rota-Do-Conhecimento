@@ -3,7 +3,12 @@ import { DataSource, DataSourceOptions } from 'typeorm';
 import * as dotenv from 'dotenv';
 import path from 'path';
 
-dotenv.config();
+// Carrega .env adequado ao ambiente
+if (process.env.NODE_ENV === 'staging') {
+  dotenv.config({ path: path.resolve(process.cwd(), '..', '.env.test') });
+} else {
+  dotenv.config();
+}
 
 // ─────────────────────────────────────────────
 // Importações explícitas das entidades
@@ -21,11 +26,12 @@ import { Progresso }             from '../entities/Progresso';
 import { QuizAvalativoUsuario }  from '../entities/QuizAvalativoUsuario';
 import { Log }                   from '../entities/Log';
 import { EmailToken }            from '../entities/EmailToken';
+import { Customizacao }          from '../entities/Customizacao';
 
 const ALL_ENTITIES = [
   Usuario, Campus, Curso, Categoria, Pergunta,
   Alternativa, PerguntaNivel, Quiz, Progresso,
-  QuizAvalativoUsuario, Log, EmailToken,
+  QuizAvalativoUsuario, Log, EmailToken, Customizacao,
 ];
 
 const MIGRATIONS = [path.join(__dirname, '..', '..', 'migrations', '*.{ts,js}')];
@@ -38,7 +44,7 @@ const MIGRATIONS = [path.join(__dirname, '..', '..', 'migrations', '*.{ts,js}')]
  * Determina a configuração de SSL com base no ambiente:
  * - Testes (SQLite in-memory): sem SSL
  * - URLs locais (localhost/127.0.0.1): sem SSL, mesmo com DATABASE_URL
- * - Produção/Remoto (Supabase, Render etc.): SSL com rejectUnauthorized: false
+ * - Staging (Neon) / Produção/Remoto (Supabase, Render etc.): SSL com rejectUnauthorized: false
  */
 function buildSSLConfig(): boolean | { rejectUnauthorized: boolean } {
   // Testes usam SQLite — SSL não se aplica
@@ -52,14 +58,14 @@ function buildSSLConfig(): boolean | { rejectUnauthorized: boolean } {
     const isLocal = /localhost|127\.0\.0\.1|::1/.test(dbUrl);
     if (isLocal) return false;
 
-    // URL remota (Supabase, Render, etc.) — força SSL
+    // URL remota (Supabase, Render, Neon etc.) — força SSL
     return { rejectUnauthorized: false };
   }
 
   // Sem DATABASE_URL: usa variáveis individuais
   const host = process.env.DB_HOST || 'localhost';
   const isLocalHost = /localhost|127\.0\.0\.1/.test(host);
-  const isProduction = nodeEnv === 'production';
+  const isProduction = nodeEnv === 'production' || nodeEnv === 'staging';
 
   if (isProduction && !isLocalHost) {
     return { rejectUnauthorized: false };
@@ -78,8 +84,8 @@ const postgresOptions: DataSourceOptions = process.env.DATABASE_URL
       ssl: buildSSLConfig(),
       entities: ALL_ENTITIES,
       migrations: MIGRATIONS,
-      synchronize: false,                        // Nunca em produção
-      logging: process.env.NODE_ENV === 'development',
+      synchronize: process.env.NODE_ENV === 'staging', // Sync automático apenas em staging
+      logging: process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'staging',
     }
   : {
       type: 'postgres',

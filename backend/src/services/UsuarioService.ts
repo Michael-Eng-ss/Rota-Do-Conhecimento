@@ -21,7 +21,7 @@ export interface CreateUsuarioDTO {
   turma?: string;
   periodo?: number;
   cursoId?: number;
-  campusId?: number;
+  campusId: number;  // Obrigatório no cadastro
 }
 
 export interface UpdateUsuarioDTO {
@@ -64,7 +64,11 @@ export class UsuarioService {
       throw AppError.conflict('E-mail já cadastrado');
     }
 
-    if (data.campusId) {
+    if (!data.campusId) {
+      throw AppError.badRequest('Campus é obrigatório');
+    }
+
+    {
       const campus = await this.campusRepo.findById(data.campusId);
       if (!campus) throw AppError.badRequest('Campus não encontrado');
     }
