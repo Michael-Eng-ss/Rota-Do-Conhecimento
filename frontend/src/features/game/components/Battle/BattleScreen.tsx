@@ -329,7 +329,7 @@ const BattleScreen = ({ environmentId, onBackToPatio, onProfile, onVictory }: Ba
     setPendingResult(null);
     setReviewSelectedId(undefined);
 
-    // Verifica derrota por vida zerada
+    // Derrota antecipada: vida zerada = erros demais para atingir 80%
     if (newPlayerHealth <= 0) {
       setBossHealth(newBossHealth);
       setPlayerHealth(0);
@@ -346,9 +346,6 @@ const BattleScreen = ({ environmentId, onBackToPatio, onProfile, onVictory }: Ba
       setScore(newScore);
       setTotalDamageDealt(newTotalDamage);
 
-      // Vitória se acertou ≥ 80% das perguntas
-      // Ambientes 1 e 2: 10 perguntas → mínimo 8 acertos
-      // Ambiente 3 (Boss Final): 20 perguntas → mínimo 16 acertos
       const hitRate = newScore / totalQuestions;
       if (hitRate >= MIN_PASS_PERCENTAGE) {
         setPhase('victory');
@@ -358,7 +355,7 @@ const BattleScreen = ({ environmentId, onBackToPatio, onProfile, onVictory }: Ba
       return;
     }
 
-    // Próxima pergunta — advanceQuestion() tem guard interno anti-estouro
+    // Ainda há perguntas — continua o combate
     setBossHealth(newBossHealth);
     setPlayerHealth(newPlayerHealth);
     setScore(newScore);

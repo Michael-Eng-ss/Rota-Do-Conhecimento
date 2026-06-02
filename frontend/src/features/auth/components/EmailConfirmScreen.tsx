@@ -7,7 +7,7 @@ import GameFormCard from '@/shared/components/GameFormCard';
 interface EmailConfirmScreenProps {
   token: string;
   onGoToLogin: () => void;
-  confirmEmail: (token: string) => Promise<{ error: any }>;
+  confirmEmail: (token: string) => Promise<{ error: { message: string } | null }>;
 }
 
 const EmailConfirmScreen = ({ token, onGoToLogin, confirmEmail }: EmailConfirmScreenProps) => {
@@ -29,7 +29,7 @@ const EmailConfirmScreen = ({ token, onGoToLogin, confirmEmail }: EmailConfirmSc
         setMessage('Seu e-mail foi confirmado com sucesso! Agora você pode fazer login.');
       }
     });
-  }, [token]);
+  }, [token, confirmEmail]);
 
   return (
     <GameBackground>

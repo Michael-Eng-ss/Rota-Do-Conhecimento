@@ -9,7 +9,7 @@ import { useToast } from '@/hooks/use-toast';
 interface NewPasswordScreenProps {
   token: string;
   onSuccess: () => void;
-  resetPassword: (token: string, novaSenha: string) => Promise<{ error: any }>;
+  resetPassword: (token: string, novaSenha: string) => Promise<{ error: { message: string } | null }>;
 }
 
 const NewPasswordScreen = ({ token, onSuccess, resetPassword }: NewPasswordScreenProps) => {
@@ -23,7 +23,7 @@ const NewPasswordScreen = ({ token, onSuccess, resetPassword }: NewPasswordScree
     if (!token) {
       toast({ title: 'Link inválido', description: 'Token não encontrado na URL.', variant: 'destructive' });
     }
-  }, [token]);
+  }, [token, toast]);
 
   const handleSubmit = async () => {
     if (!senha || !confirmar) {

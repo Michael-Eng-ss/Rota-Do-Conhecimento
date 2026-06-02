@@ -6,10 +6,19 @@ import GameButton from '@/shared/components/GameButton';
 import { Shield, ArrowLeft } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
+interface SignInData {
+  role: number;
+  [key: string]: unknown;
+}
+
+interface SignInError {
+  message: string;
+}
+
 interface AdminLoginScreenProps {
   onLogin: () => void;
   onBack: () => void;
-  signIn: (email: string, password: string) => Promise<{ data: any; error: any }>;
+  signIn: (email: string, password: string) => Promise<{ data: SignInData | null; error: SignInError | null }>;
   checkAdminRole: () => Promise<void>;
 }
 

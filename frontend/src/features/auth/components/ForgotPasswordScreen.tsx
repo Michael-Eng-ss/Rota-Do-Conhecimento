@@ -8,7 +8,7 @@ import { useToast } from '@/hooks/use-toast';
 
 interface ForgotPasswordScreenProps {
   onBack: () => void;
-  forgotPassword: (email: string) => Promise<{ error: any }>;
+  forgotPassword: (email: string) => Promise<{ error: { message: string } | null }>;
 }
 
 const ForgotPasswordScreen = ({ onBack, forgotPassword }: ForgotPasswordScreenProps) => {

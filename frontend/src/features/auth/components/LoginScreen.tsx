@@ -9,7 +9,7 @@ interface LoginScreenProps {
   onLogin: () => void;
   onRegister: () => void;
   onForgotPassword: () => void;
-  signIn: (email: string, password: string) => Promise<{ data: any; error: any }>;
+  signIn: (email: string, password: string) => Promise<{ data: unknown; error: { message: string } | null }>;
 }
 
 const LoginScreen = ({ onLogin, onRegister, onForgotPassword, signIn }: LoginScreenProps) => {

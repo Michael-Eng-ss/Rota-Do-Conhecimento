@@ -28,7 +28,12 @@ export const apiClient = async (endpoint: string, options: RequestInit = {}) => 
 // Mocks Temporários (Enquanto o backend não é integrado)
 // -----------------------------------------------------
 
-export const loginApi = async (data: any) => {
+interface LoginCredentials {
+  email: string;
+  password: string;
+}
+
+export const loginApi = async (data: LoginCredentials) => {
   // Para testar o fetch real, descomente abaixo:
   // return apiClient('/auth/login', { method: 'POST', body: JSON.stringify(data) });
 

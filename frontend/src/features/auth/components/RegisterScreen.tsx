@@ -9,7 +9,7 @@ import { useToast } from '@/hooks/use-toast';
 interface RegisterScreenProps {
   onRegister: () => void;
   onBackToLogin: () => void;
-  signUp: (email: string, password: string, displayName: string) => Promise<{ data: any; error: any }>;
+  signUp: (email: string, password: string, displayName: string) => Promise<{ data: unknown; error: { message: string } | null }>;
 }
 
 const RegisterScreen = ({ onRegister, onBackToLogin, signUp }: RegisterScreenProps) => {
