@@ -132,7 +132,8 @@ const BattleScreen = ({ environmentId, onBackToPatio, onProfile, onVictory }: Ba
   // para garantir que o limiar de erros seja sempre consistente, mesmo se o banco
   // retornar menos perguntas que o esperado.
   const configuredTotal = envConfig.totalQuestions;
-  const maxErrorsAllowed = Math.floor(configuredTotal * (1 - MIN_PASS_PERCENTAGE));
+  // Adiciona um epsilon (+ 1e-9) para evitar imprecisões de ponto flutuante no JS (ex: 10 * 0.2 = 1.9999999999999996)
+  const maxErrorsAllowed = Math.floor(configuredTotal * (1 - MIN_PASS_PERCENTAGE) + 1e-9);
   // O dano por erro zera a vida exatamente no erro fatal (maxErrorsAllowed + 1)
   const playerDamagePerHit = maxErrorsAllowed > 0 ? Math.ceil(100 / (maxErrorsAllowed + 1)) : 100;
   
