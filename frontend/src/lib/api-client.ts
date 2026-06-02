@@ -110,6 +110,7 @@ export function setSavedUser(user: AppUser) {
   localStorage.setItem(AUTH_USER_KEY, JSON.stringify(user));
 }
 
+/** @deprecated Use `updatePontuacao` from `@/models/services/usuario.service` instead. */
 export async function updateUserScore(userId: number, score: number): Promise<AppUser> {
   const res = await callEdge('usuarios-api', `${userId}/pontuacao`, {
     method: 'PUT',

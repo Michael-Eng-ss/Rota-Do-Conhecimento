@@ -3,7 +3,9 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useMutation } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
-import { loginApi } from '@/lib/api';
+import { login } from '@/models/services/auth.service';
+import { setToken, setSavedUser } from '@/lib/api-client';
+import type { LoginResponse } from '@/models/types';
 
 const loginSchema = z.object({
   email: z.string().email('Insira um e-mail válido'),
@@ -20,13 +22,15 @@ export const LoginForm = () => {
   });
 
   const loginMutation = useMutation({
-    mutationFn: (data: LoginFormValues) => loginApi(data),
-    onSuccess: (data) => {
-      // Salva o mock user no localStorage para persistência temporária
-      localStorage.setItem('user', JSON.stringify(data.user));
+    mutationFn: (data: LoginFormValues) => login({ email: data.email, senha: data.password }),
+    onSuccess: (data: LoginResponse) => {
+      // Persiste token e usuário usando o sistema real (app_token / app_user)
+      setToken(data.token);
+      setSavedUser(data.user as Parameters<typeof setSavedUser>[0]);
 
       const { role } = data.user;
-      if (role === 'SUPER_ADMIN' || role === 'ADMIN' || role === 'CAMPUS_ADMIN') {
+      // role 1 = SUPER_ADMIN, 2 = ADMIN, 4 = CAMPUS_ADMIN
+      if (role === 1 || role === 2 || role === 4) {
         navigate('/admin/users', { replace: true });
       } else {
         navigate('/game', { replace: true });

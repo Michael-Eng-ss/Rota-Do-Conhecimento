@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Routes, Route, useNavigate, Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/features/auth/contexts/AuthContext';
-import { setSavedUser, updateUserScore as apiUpdateScore, type AppUser } from '@/lib/api-client';
+import { setSavedUser, type AppUser } from '@/lib/api-client';
+import { updatePontuacao } from '@/models/services/usuario.service';
 import LoginScreen from '@/features/auth/components/LoginScreen';
 import UserMenuScreen from '@/features/profile/components/UserMenuScreen';
 import RegisterScreen from '@/features/auth/components/RegisterScreen';
@@ -65,9 +66,9 @@ const GameManager = () => {
 
     if (user) {
       try {
-        const updatedUser = await apiUpdateScore(user.id, score);
-        setSavedUser(updatedUser);
-        setUser(updatedUser);
+        const updatedUser = await updatePontuacao(user.id, score);
+        setSavedUser(updatedUser as unknown as AppUser);
+        setUser(updatedUser as unknown as AppUser);
       } catch (err) {
         console.error('Failed to update score:', err);
         setTotalScore(prev => prev + score);
@@ -164,7 +165,7 @@ const GameManager = () => {
                 try {
                   await verifyEmail(token);
                   return { error: null };
-                } catch (err: any) {
+                } catch (err: unknown) {
                   return { error: err };
                 }
               }}
