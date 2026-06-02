@@ -127,10 +127,14 @@ const BattleScreen = ({ environmentId, onBackToPatio, onProfile, onVictory }: Ba
   // Dano ao chefão por acerto (dividido igualmente pelas perguntas disponíveis)
   const bossDamagePerHit = totalQuestions > 0 ? Math.floor(100 / totalQuestions) : 10;
 
-  // Quantos erros o jogador pode cometer sem perder (ex: 10 * 0.2 = 2 erros)
-  const maxErrorsAllowed = totalQuestions > 0 ? Math.floor(totalQuestions * (1 - MIN_PASS_PERCENTAGE)) : 2;
+  // Quantos erros o jogador pode cometer sem perder.
+  // Usa envConfig.totalQuestions (configurado: 10 ou 20) em vez de totalQuestions (real)
+  // para garantir que o limiar de erros seja sempre consistente, mesmo se o banco
+  // retornar menos perguntas que o esperado.
+  const configuredTotal = envConfig.totalQuestions;
+  const maxErrorsAllowed = Math.floor(configuredTotal * (1 - MIN_PASS_PERCENTAGE));
   // O dano por erro zera a vida exatamente no erro fatal (maxErrorsAllowed + 1)
-  const playerDamagePerHit = Math.ceil(100 / (maxErrorsAllowed + 1));
+  const playerDamagePerHit = maxErrorsAllowed > 0 ? Math.ceil(100 / (maxErrorsAllowed + 1)) : 100;
   
   const bossNameByEnv: Record<EnvironmentId, string> = {
     1: 'Professor do Auditório',
