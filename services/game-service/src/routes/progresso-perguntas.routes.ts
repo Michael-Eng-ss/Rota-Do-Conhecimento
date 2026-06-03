@@ -1,6 +1,6 @@
 import { Router } from 'express';
-import { progressoController } from '../../controllers/ProgressoController';
-import { asyncHandler, requireAuth } from '../../middlewares';
+import { progressoController } from '../controllers/ProgressoController';
+import { asyncHandler, requireAuth } from '../middlewares';
 
 const router = Router();
 

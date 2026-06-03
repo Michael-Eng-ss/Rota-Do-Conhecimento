@@ -1,6 +1,6 @@
 import { Router } from 'express';
-import { quizController } from '../../controllers/QuizController';
-import { asyncHandler, requireAuth, requireAdmin } from '../../middlewares';
+import { quizController } from '../controllers/QuizController';
+import { asyncHandler, requireAuth, requireAdmin } from '../middlewares';
 
 const router = Router();
 

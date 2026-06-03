@@ -1,6 +1,6 @@
 import { Router } from 'express';
-import { alternativaController } from '../../controllers/AlternativaController';
-import { asyncHandler, requireAuth, requireAdmin } from '../../middlewares';
+import { alternativaController } from '../controllers/AlternativaController';
+import { asyncHandler, requireAuth, requireAdmin } from '../middlewares';
 
 const router = Router();
 

@@ -1,6 +1,6 @@
 import { Router } from 'express';
-import { rankingController } from '../../controllers/RankingController';
-import { asyncHandler } from '../../middlewares';
+import { rankingController } from '../controllers/RankingController';
+import { asyncHandler } from '../middlewares';
 
 const router = Router();
 

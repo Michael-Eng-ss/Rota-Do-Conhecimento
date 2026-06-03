@@ -1,6 +1,6 @@
 import { Router } from 'express';
-import { cursoController } from '../../controllers/CursoController';
-import { asyncHandler, requireAuth, requireAdmin } from '../../middlewares';
+import { cursoController } from '../controllers/CursoController';
+import { asyncHandler, requireAuth, requireAdmin } from '../middlewares';
 
 const router = Router();
 

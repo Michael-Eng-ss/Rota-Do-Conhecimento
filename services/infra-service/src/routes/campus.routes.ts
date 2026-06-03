@@ -1,10 +1,10 @@
 import { Router } from 'express';
-import { campusController } from '../../controllers/CampusController';
+import { campusController } from '../controllers/CampusController';
 import {
   asyncHandler,
   requireAuth,
   requireAdmin,
-} from '../../middlewares';
+} from '../middlewares';
 
 const router = Router();
 

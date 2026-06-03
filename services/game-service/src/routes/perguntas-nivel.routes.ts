@@ -1,6 +1,6 @@
 import { Router } from 'express';
-import { perguntaNivelController } from '../../controllers/PerguntaNivelController';
-import { asyncHandler, requireAuth, requireAdmin } from '../../middlewares';
+import { perguntaNivelController } from '../controllers/PerguntaNivelController';
+import { asyncHandler, requireAuth, requireAdmin } from '../middlewares';
 
 const router = Router();
 
