@@ -4,10 +4,12 @@ import GameHeader from '@/shared/components/GameHeader';
 import GameButton from '@/shared/components/GameButton';
 import GameFormCard from '@/shared/components/GameFormCard';
 
+import type { AuthError } from '@/models/types';
+
 interface EmailConfirmScreenProps {
   token: string;
   onGoToLogin: () => void;
-  confirmEmail: (token: string) => Promise<{ error: any }>;
+  confirmEmail: (token: string) => Promise<{ error: AuthError | null }>;
 }
 
 const EmailConfirmScreen = ({ token, onGoToLogin, confirmEmail }: EmailConfirmScreenProps) => {
@@ -29,7 +31,7 @@ const EmailConfirmScreen = ({ token, onGoToLogin, confirmEmail }: EmailConfirmSc
         setMessage('Seu e-mail foi confirmado com sucesso! Agora você pode fazer login.');
       }
     });
-  }, [token]);
+  }, [token, confirmEmail]);
 
   return (
     <GameBackground>

@@ -5,11 +5,12 @@ import GameInput from '@/shared/components/GameInput';
 import GameButton from '@/shared/components/GameButton';
 import { Shield, ArrowLeft } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import type { AppUser, AuthError } from '@/models/types';
 
 interface AdminLoginScreenProps {
   onLogin: () => void;
   onBack: () => void;
-  signIn: (email: string, password: string) => Promise<{ data: any; error: any }>;
+  signIn: (email: string, password: string) => Promise<{ data: AppUser | null; error: AuthError | null }>;
   checkAdminRole: () => Promise<void>;
 }
 

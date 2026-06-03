@@ -4,12 +4,17 @@ import * as dotenv from 'dotenv';
 
 dotenv.config();
 
-import { Campus }       from '../entities/Campus';
-import { Curso }        from '../entities/Curso';
-import { Categoria }    from '../entities/Categoria';
-import { Customizacao } from '../entities/Customizacao';
+import { 
+  Usuario, Campus, Curso, Categoria, Pergunta, Alternativa, 
+  PerguntaNivel, Quiz, Progresso, QuizAvalativoUsuario, Log, 
+  EmailToken, Customizacao 
+} from '../entities';
 
-const ALL_ENTITIES = [Campus, Curso, Categoria, Customizacao];
+const ALL_ENTITIES = [
+  Usuario, Campus, Curso, Categoria, Pergunta, Alternativa, 
+  PerguntaNivel, Quiz, Progresso, QuizAvalativoUsuario, Log, 
+  EmailToken, Customizacao
+];
 
 function buildSSLConfig(): boolean | { rejectUnauthorized: boolean } {
   const dbUrl = process.env.DATABASE_URL;

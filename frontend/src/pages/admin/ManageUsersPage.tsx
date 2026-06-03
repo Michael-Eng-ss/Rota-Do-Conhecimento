@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getAllUsers, updateUserRole, updateUser, toggleUserStatus } from '@/models/services/admin.service';
 import GameBackground from '@/shared/components/GameBackground';
 import GameButton from '@/shared/components/GameButton';
-import { useAuth } from '@/features/auth/contexts/AuthContext';
+import { useAuth } from '@/features/auth/hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Filter, ShieldAlert, ShieldCheck, Loader2, Edit, Power, PowerOff } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
@@ -33,7 +33,7 @@ export const ManageUsersPage = () => {
       toast({ title: 'Permissão atualizada com sucesso!' });
       queryClient.invalidateQueries({ queryKey: ['admin-users'] });
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       toast({ title: 'Erro ao atualizar', description: error.message, variant: 'destructive' });
     }
   });
@@ -45,7 +45,7 @@ export const ManageUsersPage = () => {
       setEditingUser(null);
       queryClient.invalidateQueries({ queryKey: ['admin-users'] });
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       toast({ title: 'Erro ao atualizar usuário', description: error.message, variant: 'destructive' });
     }
   });
@@ -56,7 +56,7 @@ export const ManageUsersPage = () => {
       toast({ title: variables.status ? 'Usuário ativado!' : 'Usuário desativado!' });
       queryClient.invalidateQueries({ queryKey: ['admin-users'] });
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       toast({ title: 'Erro ao alterar status', description: error.message, variant: 'destructive' });
     }
   });

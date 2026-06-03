@@ -2,11 +2,11 @@
   "name": "rdc-gateway-service",
   "version": "1.0.0",
   "description": "API Gateway for Rota do Conhecimento",
-  "main": "build/src/index.js",
+  "main": "build/index.js",
   "scripts": {
     "dev": "ts-node-dev --respawn --transpile-only src/index.ts",
     "build": "tsc",
-    "start": "node build/src/index.js"
+    "start": "node build/index.js"
   },
   "dependencies": {
     "cors": "^2.8.5",

@@ -5,7 +5,7 @@ import type { Customizacao, CustomizacaoCreate } from '@/models/types';
 import GameBackground from '@/shared/components/GameBackground';
 import GameButton from '@/shared/components/GameButton';
 import ImagePreview from '@/shared/components/ImagePreview';
-import { useAuth } from '@/features/auth/contexts/AuthContext';
+import { useAuth } from '@/features/auth/hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 import {
@@ -58,7 +58,7 @@ export const CustomizacoesPage = () => {
       closeForm();
       queryClient.invalidateQueries({ queryKey: ['customizacoes'] });
     },
-    onError: (err: any) => toast({ title: 'Erro ao criar', description: err.message, variant: 'destructive' }),
+    onError: (err: Error) => toast({ title: 'Erro ao criar', description: err.message, variant: 'destructive' }),
   });
 
   const updateMutation = useMutation({
@@ -68,7 +68,7 @@ export const CustomizacoesPage = () => {
       closeForm();
       queryClient.invalidateQueries({ queryKey: ['customizacoes'] });
     },
-    onError: (err: any) => toast({ title: 'Erro ao atualizar', description: err.message, variant: 'destructive' }),
+    onError: (err: Error) => toast({ title: 'Erro ao atualizar', description: err.message, variant: 'destructive' }),
   });
 
   const toggleMutation = useMutation({
@@ -77,7 +77,7 @@ export const CustomizacoesPage = () => {
       toast({ title: vars.ativo ? 'Customização ativada!' : 'Customização desativada!' });
       queryClient.invalidateQueries({ queryKey: ['customizacoes'] });
     },
-    onError: (err: any) => toast({ title: 'Erro', description: err.message, variant: 'destructive' }),
+    onError: (err: Error) => toast({ title: 'Erro', description: err.message, variant: 'destructive' }),
   });
 
   const deleteMutation = useMutation({
@@ -86,7 +86,7 @@ export const CustomizacoesPage = () => {
       toast({ title: 'Customização removida!' });
       queryClient.invalidateQueries({ queryKey: ['customizacoes'] });
     },
-    onError: (err: any) => toast({ title: 'Erro ao remover', description: err.message, variant: 'destructive' }),
+    onError: (err: Error) => toast({ title: 'Erro ao remover', description: err.message, variant: 'destructive' }),
   });
 
   // Helpers
@@ -144,8 +144,8 @@ export const CustomizacoesPage = () => {
       const result = await UploadService.uploadImage(file);
       setFormImagemUrl(result.url);
       toast({ title: 'Imagem carregada!' });
-    } catch (err: any) {
-      toast({ title: 'Erro no upload', description: err.message, variant: 'destructive' });
+    } catch (err: unknown) {
+      toast({ title: 'Erro no upload', description: err instanceof Error ? err.message : String(err), variant: 'destructive' });
     } finally {
       setUploading(false);
     }

@@ -5,10 +5,11 @@ import GameInput from '@/shared/components/GameInput';
 import GameButton from '@/shared/components/GameButton';
 import GameFormCard from '@/shared/components/GameFormCard';
 import { useToast } from '@/hooks/use-toast';
+import type { AuthError } from '@/models/types';
 
 interface ForgotPasswordScreenProps {
   onBack: () => void;
-  forgotPassword: (email: string) => Promise<{ error: any }>;
+  forgotPassword: (email: string) => Promise<{ error: AuthError | null }>;
 }
 
 const ForgotPasswordScreen = ({ onBack, forgotPassword }: ForgotPasswordScreenProps) => {

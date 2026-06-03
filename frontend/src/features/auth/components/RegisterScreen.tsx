@@ -5,7 +5,7 @@ import GameHeader from '@/shared/components/GameHeader';
 import GameButton from '@/shared/components/GameButton';
 import { useToast } from '@/hooks/use-toast';
 import { getCampusList } from '@/models/services/campus.service';
-import type { Campus } from '@/models/types';
+import type { Campus, AppUser, AuthError } from '@/models/types';
 import {
   User, Mail, Lock, Eye, EyeOff, MapPin, ChevronRight,
   ChevronLeft, Check, Loader2, GraduationCap, Shield,
@@ -14,7 +14,7 @@ import {
 interface RegisterScreenProps {
   onRegister: () => void;
   onBackToLogin: () => void;
-  signUp: (email: string, password: string, displayName: string, campusId?: number) => Promise<{ data: any; error: any }>;
+  signUp: (email: string, password: string, displayName: string, campusId?: number) => Promise<{ data: AppUser | null; error: AuthError | null }>;
 }
 
 const STEPS = [

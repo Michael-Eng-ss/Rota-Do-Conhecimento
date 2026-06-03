@@ -2,21 +2,22 @@ import React, { createContext, useContext, useState, useEffect, useCallback, Rea
 import { getToken, clearAuth, getSavedUser, setToken, setSavedUser, type AppUser } from '@/lib/api-client';
 import { login as apiLogin, forgotPassword as apiForgotPassword, resetPassword as apiResetPassword } from '@/models/services/auth.service';
 import { createUsuario as apiRegisterUser, getUsuarioById } from '@/models/services/usuario.service';
+import { type AuthError } from '@/models/types';
 
 interface AuthContextType {
   user: AppUser | null;
   setUser: React.Dispatch<React.SetStateAction<AppUser | null>>;
   loading: boolean;
   isAdmin: boolean;
-  signIn: (email: string, senha: string) => Promise<{ data: AppUser | null; error: any }>;
-  signUp: (email: string, senha: string, nome: string, campusId?: number) => Promise<{ data: AppUser | null; error: any }>;
+  signIn: (email: string, senha: string) => Promise<{ data: AppUser | null; error: AuthError | null }>;
+  signUp: (email: string, senha: string, nome: string, campusId?: number) => Promise<{ data: AppUser | null; error: AuthError | null }>;
   signOut: () => Promise<void>;
   checkAdminRole: () => Promise<void>;
-  forgotPassword: (email: string) => Promise<{ error: any }>;
-  resetPassword: (token: string, novaSenha: string) => Promise<{ error: any }>;
+  forgotPassword: (email: string) => Promise<{ error: AuthError | null }>;
+  resetPassword: (token: string, novaSenha: string) => Promise<{ error: AuthError | null }>;
 }
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
+export const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<AppUser | null>(null);
@@ -63,8 +64,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setUser(appUser);
       setIsAdmin(result.role === 1);
       return { data: appUser, error: null };
-    } catch (err: any) {
-      return { data: null, error: { message: err.message } };
+    } catch (err: unknown) {
+      return { data: null, error: { message: err instanceof Error ? err.message : String(err) } };
     }
   }, []);
 
@@ -78,8 +79,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         campusid: campusId || 1,
       });
       return { data: newUser as unknown as AppUser, error: null };
-    } catch (err: any) {
-      return { data: null, error: { message: err.message } };
+    } catch (err: unknown) {
+      return { data: null, error: { message: err instanceof Error ? err.message : String(err) } };
     }
   }, []);
 
@@ -99,8 +100,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     try {
       await apiForgotPassword(email);
       return { error: null };
-    } catch (err: any) {
-      return { error: { message: err.message } };
+    } catch (err: unknown) {
+      return { error: { message: err instanceof Error ? err.message : String(err) } };
     }
   }, []);
 
@@ -108,8 +109,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     try {
       await apiResetPassword(token, novaSenha);
       return { error: null };
-    } catch (err: any) {
-      return { error: { message: err.message } };
+    } catch (err: unknown) {
+      return { error: { message: err instanceof Error ? err.message : String(err) } };
     }
   }, []);
 
@@ -129,12 +130,4 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       {children}
     </AuthContext.Provider>
   );
-};
-
-export const useAuth = () => {
-  const context = useContext(AuthContext);
-  if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
-  return context;
 };

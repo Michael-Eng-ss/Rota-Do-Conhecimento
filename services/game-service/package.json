@@ -1,12 +1,12 @@
-﻿{
+{
   "name": "rdc-game-service",
   "version": "1.0.0",
   "description": "Perguntas, Alternativas, Niveis, Progresso",
-  "main": "build/src/index.js",
+  "main": "build/index.js",
   "scripts": {
     "dev": "ts-node-dev --respawn --transpile-only -r tsconfig-paths/register src/index.ts",
     "build": "tsc -p tsconfig.build.json && tsc-alias -p tsconfig.build.json",
-    "start": "node build/src/index.js"
+    "start": "node build/index.js"
   },
   "dependencies": {
     "bcrypt": "^6.0.0",

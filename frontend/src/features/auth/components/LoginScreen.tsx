@@ -4,12 +4,13 @@ import GameHeader from '@/shared/components/GameHeader';
 import GameInput from '@/shared/components/GameInput';
 import GameButton from '@/shared/components/GameButton';
 import { useToast } from '@/hooks/use-toast';
+import type { AppUser, AuthError } from '@/models/types';
 
 interface LoginScreenProps {
   onLogin: () => void;
   onRegister: () => void;
   onForgotPassword: () => void;
-  signIn: (email: string, password: string) => Promise<{ data: any; error: any }>;
+  signIn: (email: string, password: string) => Promise<{ data: AppUser | null; error: AuthError | null }>;
 }
 
 const LoginScreen = ({ onLogin, onRegister, onForgotPassword, signIn }: LoginScreenProps) => {

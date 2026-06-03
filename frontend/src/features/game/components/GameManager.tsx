@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Routes, Route, useNavigate, Navigate, useLocation } from 'react-router-dom';
-import { useAuth } from '@/features/auth/contexts/AuthContext';
+import { useAuth } from '@/features/auth/hooks/useAuth';
 import { setSavedUser, type AppUser } from '@/lib/api-client';
 import { updatePontuacao } from '@/models/services/usuario.service';
 import LoginScreen from '@/features/auth/components/LoginScreen';
@@ -166,7 +166,7 @@ const GameManager = () => {
                   await verifyEmail(token);
                   return { error: null };
                 } catch (err: unknown) {
-                  return { error: err };
+                  return { error: { message: err instanceof Error ? err.message : String(err) } };
                 }
               }}
             />

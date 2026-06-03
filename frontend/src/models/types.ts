@@ -205,6 +205,10 @@ export interface RankingEntry {
 }
 
 // ---------- Auth ----------
+export interface AuthError {
+  message: string;
+}
+
 export interface LoginPayload {
   email: string;
   senha: string;

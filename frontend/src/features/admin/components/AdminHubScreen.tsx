@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import GameBackground from '@/shared/components/GameBackground';
 import GameButton from '@/shared/components/GameButton';
-import { useAuth } from '@/features/auth/contexts/AuthContext';
+import { useAuth } from '@/features/auth/hooks/useAuth';
 import { Users, FileQuestion, Gamepad2, LogOut, Clapperboard, Palette } from 'lucide-react';
 
 interface AdminHubScreenProps {
