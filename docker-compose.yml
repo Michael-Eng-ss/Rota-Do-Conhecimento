@@ -21,12 +21,10 @@ services:
       timeout: 5s
       retries: 5
 
-  backend:
-    build: ./backend
-    container_name: quiz-back
+  auth-service:
+    build: ./services/auth-service
+    container_name: rdc-auth-service
     restart: always
-    ports:
-      - "4000:4000"
     environment:
       DB_HOST: db
       DB_PORT: 5432
@@ -34,17 +32,100 @@ services:
       DB_PASSWORD: ${DB_PASSWORD:-quizgame123}
       DB_NAME: ${DB_NAME:-quizgame}
       JWT_SECRET: ${JWT_SECRET:-changeme}
-      PORT: 4000
+      PORT: 4001
     depends_on:
       db:
         condition: service_healthy
+
+  game-service:
+    build: ./services/game-service
+    container_name: rdc-game-service
+    restart: always
+    environment:
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_USER: ${DB_USER:-quizgame}
+      DB_PASSWORD: ${DB_PASSWORD:-quizgame123}
+      DB_NAME: ${DB_NAME:-quizgame}
+      PORT: 4002
+    depends_on:
+      db:
+        condition: service_healthy
+
+  quiz-service:
+    build: ./services/quiz-service
+    container_name: rdc-quiz-service
+    restart: always
+    environment:
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_USER: ${DB_USER:-quizgame}
+      DB_PASSWORD: ${DB_PASSWORD:-quizgame123}
+      DB_NAME: ${DB_NAME:-quizgame}
+      PORT: 4003
+    depends_on:
+      db:
+        condition: service_healthy
+
+  admin-service:
+    build: ./services/admin-service
+    container_name: rdc-admin-service
+    restart: always
+    environment:
+      AUTH_SERVICE_URL: http://auth-service:4001
+      GAME_SERVICE_URL: http://game-service:4002
+      QUIZ_SERVICE_URL: http://quiz-service:4003
+      INFRA_SERVICE_URL: http://infra-service:4005
+      PORT: 4004
+      # O admin-service precisa do DB_HOST para as consultas de usuários administradores
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_USER: ${DB_USER:-quizgame}
+      DB_PASSWORD: ${DB_PASSWORD:-quizgame123}
+      DB_NAME: ${DB_NAME:-quizgame}
+    depends_on:
+      db:
+        condition: service_healthy
+
+  infra-service:
+    build: ./services/infra-service
+    container_name: rdc-infra-service
+    restart: always
+    environment:
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_USER: ${DB_USER:-quizgame}
+      DB_PASSWORD: ${DB_PASSWORD:-quizgame123}
+      DB_NAME: ${DB_NAME:-quizgame}
+      PORT: 4005
+    depends_on:
+      db:
+        condition: service_healthy
+
+  backend:
+    build: ./services/gateway-service
+    container_name: quiz-back
+    restart: always
+    ports:
+      - "4000:4000"
+    environment:
+      AUTH_SERVICE_URL: http://auth-service:4001
+      GAME_SERVICE_URL: http://game-service:4002
+      QUIZ_SERVICE_URL: http://quiz-service:4003
+      ADMIN_SERVICE_URL: http://admin-service:4004
+      INFRA_SERVICE_URL: http://infra-service:4005
+      PORT: 4000
+    depends_on:
+      - auth-service
+      - game-service
+      - quiz-service
+      - admin-service
+      - infra-service
 
   frontend:
     build:
       context: ./frontend
       args:
-        # Em produção com Docker, deixe VITE_API_URL vazio — o Nginx faz proxy de /api/ para o backend.
-        # Para dev local sem Docker, defina VITE_API_URL=http://localhost:4000 no .env da raiz.
         VITE_API_URL: ${VITE_API_URL:-}
         VITE_SUPABASE_URL: ${VITE_SUPABASE_URL:-}
         VITE_SUPABASE_PUBLISHABLE_KEY: ${VITE_SUPABASE_PUBLISHABLE_KEY:-}
