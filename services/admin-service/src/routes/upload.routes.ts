@@ -2,8 +2,8 @@ import { Router, Request, Response } from 'express';
 import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
-import { asyncHandler, requireAuth, requireAdmin } from '../../middlewares';
-import { AppError } from '../../shared/AppError';
+import { asyncHandler, requireAuth, requireAdmin } from '../middlewares';
+import { AppError } from '../shared/AppError';
 
 // ── Diretório de uploads ───────────────────────────────────────────────────
 const UPLOAD_DIR = path.resolve(process.cwd(), 'uploads');

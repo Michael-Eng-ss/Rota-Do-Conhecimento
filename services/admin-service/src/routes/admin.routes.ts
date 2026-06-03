@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { adminController } from '../../controllers/AdminController';
+import { adminController } from '../controllers/AdminController';
 import {
   asyncHandler,
   requireAuth,
@@ -7,7 +7,7 @@ import {
   requireSuperAdmin,
   requireCampusAdmin,
   requireCampusOwner,
-} from '../../middlewares';
+} from '../middlewares';
 
 const router = Router();
 
